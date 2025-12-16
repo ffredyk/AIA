@@ -9,7 +9,22 @@
     <AssemblyVersion>1.0.7.253</AssemblyVersion>
     <FileVersion>1.0.7.253</FileVersion>
 	<UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Icons\AIA.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Icons\AIA.ico" />
+    <None Remove="Icons\AIA_t.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Icons\AIA.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\AIA_t.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="9.0.0" />

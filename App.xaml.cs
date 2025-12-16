@@ -3,7 +3,8 @@ using System.Data;
 using System.Windows;
 using System.Windows.Forms;
 using System.Drawing;
-using AIWrap;
+using System.Reflection;
+using AIA.Models;
 
 namespace AIA
 {
@@ -14,15 +15,25 @@ namespace AIA
     {
         private NotifyIcon? notifyIcon;
 
-        public static AIController? AIRoot { get; internal set; }
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             // Create the NotifyIcon
             notifyIcon = new NotifyIcon();
-            notifyIcon.Icon = SystemIcons.Application; // You can replace with custom icon
+            
+            // Load custom icon from embedded resource
+            var assembly = Assembly.GetExecutingAssembly();
+            using var stream = assembly.GetManifestResourceStream("AIA.Icons.AIA.ico");
+            if (stream != null)
+            {
+                notifyIcon.Icon = new Icon(stream);
+            }
+            else
+            {
+                notifyIcon.Icon = SystemIcons.Application;
+            }
+            
             notifyIcon.Text = "AIA";
             notifyIcon.Visible = true;
 
@@ -34,8 +45,6 @@ namespace AIA
             contextMenu.Items.Add("Show", null, (s, args) => ShowMainWindow());
             contextMenu.Items.Add("Exit", null, (s, args) => Shutdown());
             notifyIcon.ContextMenuStrip = contextMenu;
-
-            AIRoot = AIController.CreateAzureOpenAI("1erEX4sc6tuvbdMgojpKZe3PW8Cd86XcgaZLpPrgprMucxOghVueJQQJ99BIACfhMk5XJ3w3AAAAACOGsPjn", "https://ffredyk-8044sw-resource.services.ai.azure.com/api/projects/ffredyk-8044sw", "mainagent");
         }
 
         private void NotifyIcon_DoubleClick(object? sender, EventArgs e)
@@ -55,6 +64,9 @@ namespace AIA
 
         protected override void OnExit(ExitEventArgs e)
         {
+            // Save tasks and reminders before exiting
+            OverlayViewModel.Singleton.SaveTasksAndRemindersAsync().GetAwaiter().GetResult();
+            
             notifyIcon?.Dispose();
             base.OnExit(e);
         }

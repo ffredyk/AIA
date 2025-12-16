@@ -55,6 +55,7 @@ namespace AIA
     /// <summary>
     /// Converts a boolean to Visibility with inverse logic.
     /// True = Collapsed, False = Visible.
+    /// Use ConverterParameter="Bool" to return inverse boolean instead of Visibility.
     /// </summary>
     public class InverseBoolToVisibilityConverter : MarkupExtension, IValueConverter
     {
@@ -62,7 +63,17 @@ namespace AIA
         {
             if (value is bool boolValue)
             {
+                // If parameter is "Bool", return inverse boolean
+                if (parameter?.ToString() == "Bool")
+                {
+                    return !boolValue;
+                }
                 return boolValue ? Visibility.Collapsed : Visibility.Visible;
+            }
+            
+            if (parameter?.ToString() == "Bool")
+            {
+                return true;
             }
             return Visibility.Visible;
         }
@@ -73,6 +84,10 @@ namespace AIA
             {
                 return visibility != Visibility.Visible;
             }
+            if (value is bool boolValue)
+            {
+                return !boolValue;
+            }
             return true;
         }
 
@@ -81,12 +96,20 @@ namespace AIA
 
     /// <summary>
     /// Converts null to Visibility. Null = Collapsed, Not null = Visible.
+    /// Use ConverterParameter="Inverse" to invert: Null = Visible, Not null = Collapsed.
     /// </summary>
     public class NullToVisibilityConverter : MarkupExtension, IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value != null ? Visibility.Visible : Visibility.Collapsed;
+            bool isNull = value == null || (value is string str && string.IsNullOrEmpty(str));
+            bool inverse = parameter?.ToString() == "Inverse";
+            
+            if (inverse)
+            {
+                return isNull ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return isNull ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

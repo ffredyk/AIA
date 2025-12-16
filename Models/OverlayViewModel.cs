@@ -7,7 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
+using AIA.Models.AI;
 using AIA.Services;
+using AIA.Services.AI;
 
 namespace AIA.Models
 {
@@ -34,10 +36,99 @@ namespace AIA.Models
         private bool _isAddingNewEntry;
         private string _newEntryTitle = string.Empty;
 
+        // Outlook fields
+        private OutlookEmail? _selectedOutlookEmail;
+        private bool _isLoadingOutlookEmails;
+        private bool _isOutlookAvailable;
+        private string _outlookStatusMessage = string.Empty;
+        private DispatcherTimer? _outlookRefreshTimer;
+
+        // Teams fields
+        private TeamsMeeting? _selectedTeamsMeeting;
+        private TeamsMessage? _selectedTeamsMessage;
+        private bool _isLoadingTeamsData;
+        private bool _isTeamsAvailable;
+        private string _teamsStatusMessage = string.Empty;
+        private DispatcherTimer? _teamsRefreshTimer;
+
+        // AI Orchestration
+        private bool _isAiProcessing;
+        private string _aiStatusMessage = string.Empty;
+        private AIProvider? _selectedAiProvider;
+
         // Screen capture service
         private readonly ScreenCaptureService _screenCaptureService = new();
 
+        // Reminder notification service
+        private readonly ReminderNotificationService _reminderNotificationService = new();
+
+        // AI Orchestration service
+        private AIOrchestrationService? _aiOrchestrationService;
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Event fired when a reminder notification should be displayed
+        /// </summary>
+        public event EventHandler<ReminderNotification>? ReminderNotificationTriggered;
+
+        /// <summary>
+        /// Settings for reminder notifications
+        /// </summary>
+        public ReminderNotificationSettings NotificationSettings => _reminderNotificationService.Settings;
+
+        /// <summary>
+        /// AI Orchestration service instance
+        /// </summary>
+        public AIOrchestrationService AIOrchestration => _aiOrchestrationService ??= new AIOrchestrationService(() => this);
+
+        /// <summary>
+        /// Whether AI is currently processing a request
+        /// </summary>
+        public bool IsAiProcessing
+        {
+            get => _isAiProcessing;
+            set
+            {
+                if (_isAiProcessing != value)
+                {
+                    _isAiProcessing = value;
+                    OnPropertyChanged(nameof(IsAiProcessing));
+                }
+            }
+        }
+
+        /// <summary>
+        /// AI status message for display
+        /// </summary>
+        public string AiStatusMessage
+        {
+            get => _aiStatusMessage;
+            set
+            {
+                if (_aiStatusMessage != value)
+                {
+                    _aiStatusMessage = value;
+                    OnPropertyChanged(nameof(AiStatusMessage));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Currently selected AI provider for manual selection
+        /// </summary>
+        public AIProvider? SelectedAiProvider
+        {
+            get => _selectedAiProvider;
+            set
+            {
+                if (_selectedAiProvider != value)
+                {
+                    _selectedAiProvider = value;
+                    OnPropertyChanged(nameof(SelectedAiProvider));
+                }
+            }
+        }
 
         public ObservableCollection<ChatSession> ActiveChats { get; set; } = new ObservableCollection<ChatSession>()
         {
@@ -85,6 +176,14 @@ namespace AIA.Models
 
         // Current data assets collection
         public ObservableCollection<DataAsset> CurrentDataAssets { get; set; } = new ObservableCollection<DataAsset>();
+
+        // Outlook collections
+        public ObservableCollection<OutlookEmail> FlaggedEmails { get; set; } = new ObservableCollection<OutlookEmail>();
+
+        // Teams collections
+        public ObservableCollection<TeamsMeeting> TodaysMeetings { get; set; } = new ObservableCollection<TeamsMeeting>();
+        public ObservableCollection<TeamsMessage> UnreadMessages { get; set; } = new ObservableCollection<TeamsMessage>();
+        public ObservableCollection<TeamsReminder> TeamsReminders { get; set; } = new ObservableCollection<TeamsReminder>();
 
         public TaskItem? SelectedTask
         {
@@ -256,6 +355,145 @@ namespace AIA.Models
             }
         }
 
+        // Outlook properties
+        public OutlookEmail? SelectedOutlookEmail
+        {
+            get => _selectedOutlookEmail;
+            set
+            {
+                if (_selectedOutlookEmail != value)
+                {
+                    _selectedOutlookEmail = value;
+                    OnPropertyChanged(nameof(SelectedOutlookEmail));
+                    OnPropertyChanged(nameof(HasSelectedOutlookEmail));
+                }
+            }
+        }
+
+        public bool HasSelectedOutlookEmail => SelectedOutlookEmail != null;
+
+        public bool IsLoadingOutlookEmails
+        {
+            get => _isLoadingOutlookEmails;
+            set
+            {
+                if (_isLoadingOutlookEmails != value)
+                {
+                    _isLoadingOutlookEmails = value;
+                    OnPropertyChanged(nameof(IsLoadingOutlookEmails));
+                    OnPropertyChanged(nameof(ShowOutlookEmptyState));
+                }
+            }
+        }
+
+        public bool IsOutlookAvailable
+        {
+            get => _isOutlookAvailable;
+            set
+            {
+                if (_isOutlookAvailable != value)
+                {
+                    _isOutlookAvailable = value;
+                    OnPropertyChanged(nameof(IsOutlookAvailable));
+                    OnPropertyChanged(nameof(ShowOutlookEmptyState));
+                }
+            }
+        }
+
+        public string OutlookStatusMessage
+        {
+            get => _outlookStatusMessage;
+            set
+            {
+                if (_outlookStatusMessage != value)
+                {
+                    _outlookStatusMessage = value;
+                    OnPropertyChanged(nameof(OutlookStatusMessage));
+                }
+            }
+        }
+
+        // Computed property for empty state visibility
+        public bool ShowOutlookEmptyState => IsOutlookAvailable && !IsLoadingOutlookEmails && FlaggedEmails.Count == 0;
+
+        // Teams properties
+        public TeamsMeeting? SelectedTeamsMeeting
+        {
+            get => _selectedTeamsMeeting;
+            set
+            {
+                if (_selectedTeamsMeeting != value)
+                {
+                    _selectedTeamsMeeting = value;
+                    OnPropertyChanged(nameof(SelectedTeamsMeeting));
+                    OnPropertyChanged(nameof(HasSelectedTeamsMeeting));
+                }
+            }
+        }
+
+        public bool HasSelectedTeamsMeeting => SelectedTeamsMeeting != null;
+
+        public TeamsMessage? SelectedTeamsMessage
+        {
+            get => _selectedTeamsMessage;
+            set
+            {
+                if (_selectedTeamsMessage != value)
+                {
+                    _selectedTeamsMessage = value;
+                    OnPropertyChanged(nameof(SelectedTeamsMessage));
+                    OnPropertyChanged(nameof(HasSelectedTeamsMessage));
+                }
+            }
+        }
+
+        public bool HasSelectedTeamsMessage => SelectedTeamsMessage != null;
+
+        public bool IsLoadingTeamsData
+        {
+            get => _isLoadingTeamsData;
+            set
+            {
+                if (_isLoadingTeamsData != value)
+                {
+                    _isLoadingTeamsData = value;
+                    OnPropertyChanged(nameof(IsLoadingTeamsData));
+                    OnPropertyChanged(nameof(ShowTeamsEmptyState));
+                }
+            }
+        }
+
+        public bool IsTeamsAvailable
+        {
+            get => _isTeamsAvailable;
+            set
+            {
+                if (_isTeamsAvailable != value)
+                {
+                    _isTeamsAvailable = value;
+                    OnPropertyChanged(nameof(IsTeamsAvailable));
+                    OnPropertyChanged(nameof(ShowTeamsEmptyState));
+                }
+            }
+        }
+
+        public string TeamsStatusMessage
+        {
+            get => _teamsStatusMessage;
+            set
+            {
+                if (_teamsStatusMessage != value)
+                {
+                    _teamsStatusMessage = value;
+                    OnPropertyChanged(nameof(TeamsStatusMessage));
+                }
+            }
+        }
+
+        public bool ShowTeamsEmptyState => IsTeamsAvailable && !IsLoadingTeamsData && TodaysMeetings.Count == 0;
+
+        public int TotalTeamsNotifications => UnreadMessages.Count + TeamsReminders.Count(r => !r.IsCompleted);
+
         public ChatSession SelectedChatSession
         {
             get => _selectedChatSession;
@@ -295,11 +533,8 @@ namespace AIA.Models
                 SelectedChatSession = ActiveChats[0];
             }
 
-            // Add some sample tasks
-            InitializeSampleTasks();
-
-            // Add some sample reminders
-            InitializeSampleReminders();
+            // Load tasks and reminders from disk (or initialize with samples if first run)
+            _ = LoadTasksAndRemindersAsync();
 
             // Start timer to refresh reminder time displays
             StartReminderRefreshTimer();
@@ -307,8 +542,27 @@ namespace AIA.Models
             // Start window tracking timer
             StartWindowTrackingTimer();
 
+            // Initialize reminder notification service
+            InitializeReminderNotificationService();
+
             // Load data banks
             _ = LoadDataBanksAsync();
+
+            // Initialize Outlook
+            _ = InitializeOutlookAsync();
+
+            // Initialize Teams
+            _ = InitializeTeamsAsync();
+        }
+
+        private void InitializeReminderNotificationService()
+        {
+            _reminderNotificationService.NotificationTriggered += (sender, notification) =>
+            {
+                // Forward the notification event
+                ReminderNotificationTriggered?.Invoke(this, notification);
+            };
+            _reminderNotificationService.Start();
         }
 
         private void StartReminderRefreshTimer()
@@ -322,6 +576,15 @@ namespace AIA.Models
                 foreach (var reminder in Reminders)
                 {
                     reminder.RefreshTimeLeft();
+                }
+                // Also refresh Teams meetings time displays
+                foreach (var meeting in TodaysMeetings)
+                {
+                    meeting.RefreshTimeDisplays();
+                }
+                foreach (var teamsReminder in TeamsReminders)
+                {
+                    teamsReminder.RefreshTimeDisplays();
                 }
             };
             _reminderRefreshTimer.Start();
@@ -378,38 +641,311 @@ namespace AIA.Models
             }
         }
 
-        #region Data Asset Save Methods
+        #region Teams Methods
+
+        private async Task InitializeTeamsAsync()
+        {
+            IsTeamsAvailable = TeamsService.IsTeamsAvailable();
+
+            if (IsTeamsAvailable)
+            {
+                TeamsStatusMessage = "Loading Teams data...";
+                await RefreshTeamsDataAsync();
+                StartTeamsRefreshTimer();
+            }
+            else
+            {
+                TeamsStatusMessage = "Teams/Outlook calendar not available.";
+            }
+        }
+
+        private void StartTeamsRefreshTimer()
+        {
+            _teamsRefreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(5)
+            };
+            _teamsRefreshTimer.Tick += async (s, e) =>
+            {
+                await RefreshTeamsDataAsync();
+            };
+            _teamsRefreshTimer.Start();
+        }
+
+        public async Task RefreshTeamsDataAsync()
+        {
+            if (!IsTeamsAvailable)
+            {
+                TeamsService.ResetAvailabilityCheck();
+                IsTeamsAvailable = TeamsService.IsTeamsAvailable();
+
+                if (!IsTeamsAvailable)
+                {
+                    TeamsStatusMessage = "Teams not available. Click refresh to retry.";
+                    return;
+                }
+            }
+
+            IsLoadingTeamsData = true;
+            TeamsStatusMessage = "Loading Teams data...";
+
+            try
+            {
+                // Load meetings from calendar (uses Graph API if configured, otherwise Outlook)
+                var (meetings, timedOut) = await TeamsService.GetTodaysMeetingsWithTimeoutAsync();
+
+                if (timedOut)
+                {
+                    TeamsStatusMessage = "Timeout loading meetings. Calendar may be busy.";
+                    IsLoadingTeamsData = false;
+                    OnPropertyChanged(nameof(ShowTeamsEmptyState));
+                    return;
+                }
+
+                TodaysMeetings.Clear();
+                foreach (var meeting in meetings)
+                {
+                    TodaysMeetings.Add(meeting);
+                }
+
+                // Load unread messages (uses Graph API if configured, otherwise sample data)
+                UnreadMessages.Clear();
+                var messages = await TeamsService.GetUnreadMessagesAsync();
+                foreach (var message in messages)
+                {
+                    UnreadMessages.Add(message);
+                }
+
+                // Load reminders/tasks (uses Graph API if configured, otherwise sample data)
+                TeamsReminders.Clear();
+                var reminders = await TeamsService.GetTeamsRemindersAsync();
+                foreach (var reminder in reminders)
+                {
+                    TeamsReminders.Add(reminder);
+                }
+
+                var meetingCount = TodaysMeetings.Count;
+                var messageCount = UnreadMessages.Count;
+                var graphStatus = TeamsService.IsGraphApiConfigured ? " (Graph API)" : " (Sample data)";
+                TeamsStatusMessage = $"{meetingCount} meeting(s) today, {messageCount} unread message(s){graphStatus}";
+                OnPropertyChanged(nameof(TotalTeamsNotifications));
+            }
+            catch (Exception ex)
+            {
+                TeamsStatusMessage = $"Error: {ex.Message}";
+            }
+            finally
+            {
+                IsLoadingTeamsData = false;
+                OnPropertyChanged(nameof(ShowTeamsEmptyState));
+            }
+        }
 
         /// <summary>
-        /// Copies a data asset to clipboard
+        /// Opens a Teams chat for the selected message
         /// </summary>
+        public bool OpenTeamsChat(TeamsMessage message)
+        {
+            if (message == null) return false;
+            return TeamsService.OpenTeamsChat(message.ChatId);
+        }
+
+        /// <summary>
+        /// Joins a Teams meeting
+        /// </summary>
+        public bool JoinTeamsMeeting(TeamsMeeting meeting)
+        {
+            if (meeting == null || string.IsNullOrEmpty(meeting.JoinUrl))
+                return false;
+
+            return TeamsService.JoinMeeting(meeting.JoinUrl);
+        }
+
+        /// <summary>
+        /// Opens Microsoft Teams application
+        /// </summary>
+        public bool OpenTeamsApp()
+        {
+            return TeamsService.OpenTeamsApp();
+        }
+
+        /// <summary>
+        /// Marks a Teams message as read
+        /// </summary>
+        public void MarkTeamsMessageAsRead(TeamsMessage message)
+        {
+            if (message == null) return;
+            message.IsRead = true;
+            OnPropertyChanged(nameof(TotalTeamsNotifications));
+        }
+
+        /// <summary>
+        /// Toggles completion of a Teams reminder
+        /// </summary>
+        public void CompleteTeamsReminder(TeamsReminder reminder)
+        {
+            if (reminder == null) return;
+            reminder.IsCompleted = !reminder.IsCompleted;
+            OnPropertyChanged(nameof(TotalTeamsNotifications));
+        }
+
+        #endregion
+
+        #region Outlook Methods
+
+        private async Task InitializeOutlookAsync()
+        {
+            IsOutlookAvailable = OutlookService.IsOutlookAvailable();
+            
+            if (IsOutlookAvailable)
+            {
+                OutlookStatusMessage = "Loading flagged emails...";
+                await RefreshFlaggedEmailsAsync();
+                StartOutlookRefreshTimer();
+            }
+            else
+            {
+                OutlookStatusMessage = "Outlook is not installed or not available.";
+            }
+        }
+
+        private void StartOutlookRefreshTimer()
+        {
+            _outlookRefreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(5)
+            };
+            _outlookRefreshTimer.Tick += async (s, e) =>
+            {
+                await RefreshFlaggedEmailsAsync();
+                foreach (var email in FlaggedEmails)
+                {
+                    email.RefreshTimeDisplays();
+                }
+            };
+            _outlookRefreshTimer.Start();
+        }
+
+        public async Task RefreshFlaggedEmailsAsync()
+        {
+            if (!IsOutlookAvailable)
+            {
+                OutlookService.ResetAvailabilityCheck();
+                IsOutlookAvailable = OutlookService.IsOutlookAvailable();
+                
+                if (!IsOutlookAvailable)
+                {
+                    OutlookStatusMessage = "Outlook is not available. Click refresh to retry.";
+                    return;
+                }
+            }
+
+            IsLoadingOutlookEmails = true;
+            OutlookStatusMessage = "Loading flagged emails...";
+
+            try
+            {
+                var (emails, timedOut) = await OutlookService.GetFlaggedEmailsWithTimeoutAsync();
+                
+                if (timedOut)
+                {
+                    OutlookStatusMessage = "Timeout loading emails. Outlook may be busy.";
+                    IsLoadingOutlookEmails = false;
+                    OnPropertyChanged(nameof(ShowOutlookEmptyState));
+                    return;
+                }
+                
+                FlaggedEmails.Clear();
+                foreach (var email in emails)
+                {
+                    FlaggedEmails.Add(email);
+                }
+
+                if (FlaggedEmails.Count == 0)
+                {
+                    OutlookStatusMessage = "No flagged emails found.";
+                }
+                else
+                {
+                    OutlookStatusMessage = $"{FlaggedEmails.Count} flagged email(s)";
+                }
+            }
+            catch (Exception ex)
+            {
+                OutlookStatusMessage = $"Error: {ex.Message}";
+            }
+            finally
+            {
+                IsLoadingOutlookEmails = false;
+                OnPropertyChanged(nameof(ShowOutlookEmptyState));
+            }
+        }
+
+        public async Task MarkEmailFlagCompleteAsync(OutlookEmail email)
+        {
+            if (email == null) return;
+
+            var success = await OutlookService.MarkFlagCompleteAsync(email.EntryId);
+            if (success)
+            {
+                email.FlagStatus = EmailFlagStatus.Complete;
+                FlaggedEmails.Remove(email);
+                
+                if (SelectedOutlookEmail == email)
+                {
+                    SelectedOutlookEmail = null;
+                }
+
+                OutlookStatusMessage = $"{FlaggedEmails.Count} flagged email(s)";
+            }
+        }
+
+        public async Task ClearEmailFlagAsync(OutlookEmail email)
+        {
+            if (email == null) return;
+
+            var success = await OutlookService.ClearFlagAsync(email.EntryId);
+            if (success)
+            {
+                email.FlagStatus = EmailFlagStatus.NotFlagged;
+                FlaggedEmails.Remove(email);
+                
+                if (SelectedOutlookEmail == email)
+                {
+                    SelectedOutlookEmail = null;
+                }
+
+                OutlookStatusMessage = $"{FlaggedEmails.Count} flagged email(s)";
+            }
+        }
+
+        public async Task OpenEmailInOutlookAsync(OutlookEmail email)
+        {
+            if (email == null) return;
+            await OutlookService.OpenEmailAsync(email.EntryId);
+        }
+
+        #endregion
+
+        #region Data Asset Save Methods
+
         public bool CopyDataAssetToClipboard(DataAsset asset)
         {
             return ScreenCaptureService.CopyToClipboard(asset);
         }
 
-        /// <summary>
-        /// Saves a data asset to the default screenshots folder
-        /// </summary>
         public string? SaveDataAssetToFile(DataAsset asset)
         {
             return ScreenCaptureService.SaveToFile(asset);
         }
 
-        /// <summary>
-        /// Saves a data asset with a file dialog
-        /// </summary>
         public string? SaveDataAssetWithDialog(DataAsset asset)
         {
             return ScreenCaptureService.SaveToFileWithDialog(asset);
         }
 
-        /// <summary>
-        /// Saves a data asset to a data bank category
-        /// </summary>
         public async Task<bool> SaveDataAssetToDataBankAsync(DataAsset asset, DataBankCategory? category = null)
         {
-            // Use selected category if not specified
             var targetCategory = category ?? SelectedCategory;
             
             if (targetCategory == null)
@@ -422,7 +958,6 @@ namespace AIA.Models
             _allEntries.Add(entry);
             targetCategory.EntryCount++;
 
-            // If this is the currently selected category, add to visible entries
             if (targetCategory == SelectedCategory)
             {
                 CurrentCategoryEntries.Add(entry);
@@ -433,6 +968,40 @@ namespace AIA.Models
         }
 
         #endregion
+
+        private async Task LoadTasksAndRemindersAsync()
+        {
+            var tasks = await TaskReminderService.LoadTasksAsync();
+            var reminders = await TaskReminderService.LoadRemindersAsync();
+
+            if (tasks.Count == 0 && reminders.Count == 0)
+            {
+                // First run - initialize with sample data
+                InitializeSampleTasks();
+                InitializeSampleReminders();
+                await SaveTasksAndRemindersAsync();
+            }
+            else
+            {
+                foreach (var task in tasks)
+                {
+                    Tasks.Add(task);
+                }
+                foreach (var reminder in reminders)
+                {
+                    Reminders.Add(reminder);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Saves all tasks and reminders to disk
+        /// </summary>
+        public async Task SaveTasksAndRemindersAsync()
+        {
+            await TaskReminderService.SaveTasksAsync(Tasks);
+            await TaskReminderService.SaveRemindersAsync(Reminders);
+        }
 
         private void InitializeSampleTasks()
         {
@@ -546,6 +1115,8 @@ namespace AIA.Models
             SelectedTask = task;
             NewTaskTitle = string.Empty;
             IsAddingNewTask = false;
+            
+            _ = SaveTasksAndRemindersAsync();
         }
 
         public void AddSubtask(TaskItem parentTask, string title)
@@ -559,6 +1130,8 @@ namespace AIA.Models
                 Priority = TaskPriority.Medium
             };
             parentTask.AddSubtask(subtask);
+            
+            _ = SaveTasksAndRemindersAsync();
         }
 
         public void DeleteTask(TaskItem task)
@@ -581,6 +1154,8 @@ namespace AIA.Models
             {
                 SelectedTask = null;
             }
+            
+            _ = SaveTasksAndRemindersAsync();
         }
 
         public TaskItem? FindTaskById(Guid id)
@@ -610,6 +1185,8 @@ namespace AIA.Models
             SelectedReminder = reminder;
             NewReminderTitle = string.Empty;
             IsAddingNewReminder = false;
+            
+            _ = SaveTasksAndRemindersAsync();
         }
 
         public void DeleteReminder(ReminderItem reminder)
@@ -622,12 +1199,43 @@ namespace AIA.Models
             {
                 SelectedReminder = null;
             }
+            
+            _ = SaveTasksAndRemindersAsync();
         }
 
         public void ToggleReminderComplete(ReminderItem reminder)
         {
             if (reminder == null) return;
             reminder.IsCompleted = !reminder.IsCompleted;
+            
+            _ = SaveTasksAndRemindersAsync();
+        }
+
+        /// <summary>
+        /// Snoozes a reminder by the specified minutes (default 15)
+        /// </summary>
+        public void SnoozeReminder(ReminderItem reminder, int minutes = 15)
+        {
+            if (reminder == null) return;
+
+            // If already overdue, snooze from now
+            var baseTime = reminder.DueDate < DateTime.Now ? DateTime.Now : reminder.DueDate;
+            reminder.DueDate = baseTime.AddMinutes(minutes);
+
+            // Clear notification history so it can notify again
+            _reminderNotificationService.ClearNotificationHistory(reminder.Id);
+
+            reminder.RefreshTimeLeft();
+            
+            _ = SaveTasksAndRemindersAsync();
+        }
+
+        /// <summary>
+        /// Forces a check of all reminders for notifications
+        /// </summary>
+        public void CheckReminderNotifications()
+        {
+            _reminderNotificationService.CheckReminders();
         }
 
         #region Data Bank Methods
@@ -644,13 +1252,11 @@ namespace AIA.Models
 
             _allEntries = metadata.Entries;
 
-            // Update entry counts
             foreach (var category in DataBankCategories)
             {
                 category.EntryCount = _allEntries.Count(e => e.CategoryId == category.Id);
             }
 
-            // Select first category if available
             if (DataBankCategories.Count > 0)
             {
                 SelectedCategory = DataBankCategories[0];

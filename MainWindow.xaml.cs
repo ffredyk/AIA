@@ -5,14 +5,16 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
-using System.Windows.Media.Animation;
 using System.Windows.Interop;
-using AIWrap;
+using System.Linq;
 using AIA.Models;
+using AIA.Models.AI;
+using AIA.Services.AI;
 
 namespace AIA
 {
@@ -22,11 +24,18 @@ namespace AIA
     public partial class MainWindow : Window
     {
         private bool isAnimating = false;
+        private readonly List<ReminderNotificationWindow> _activeNotifications = new();
         
+        // Track conversation history for AI
+        private readonly List<AIMessage> _conversationHistory = new();
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = Models.OverlayViewModel.Singleton;
+
+            // Subscribe to reminder notifications
+            Models.OverlayViewModel.Singleton.ReminderNotificationTriggered += OnReminderNotificationTriggered;
 
             // Handle key events at the Window level
             KeyUp += KeyUpOverlay;
@@ -483,7 +492,7 @@ namespace AIA
         private async Task SendMessageAsync()
         {
             var viewModel = DataContext as Models.OverlayViewModel;
-            if (viewModel == null || viewModel.SelectedChatSession == null || App.AIRoot == null)
+            if (viewModel == null || viewModel.SelectedChatSession == null)
                 return;
 
             var userMessage = MessageInput.Text?.Trim();
@@ -509,42 +518,66 @@ namespace AIA
 
             try
             {
-                var response = await Task.Run(() => 
+                viewModel.IsAiProcessing = true;
+                viewModel.AiStatusMessage = "Processing...";
+
+                // Build conversation history for AI
+                var conversationHistory = new List<AIMessage>();
+                foreach (var msg in viewModel.SelectedChatSession.Messages)
                 {
-                    var aiRootType = App.AIRoot.GetType();
-
-                    var request = App.AIRoot.CreateRequest();
-
-                    var generateMethod = aiRootType.GetMethod("Generate", new[] { typeof(string) });
-                    if (generateMethod != null)
+                    if (msg != assistantMessage) // Don't include the "Thinking..." placeholder
                     {
-                        var result = generateMethod.Invoke(App.AIRoot, new object[] { userMessage });
-                        return result?.ToString() ?? "No response generated.";
+                        conversationHistory.Add(new AIMessage
+                        {
+                            Role = msg.Role,
+                            Content = msg.Content
+                        });
                     }
+                }
 
-                    var chatMethod = aiRootType.GetMethod("Chat", new[] { typeof(string) });
-                    if (chatMethod != null)
-                    {
-                        var result = chatMethod.Invoke(App.AIRoot, new object[] { userMessage });
-                        return result?.ToString() ?? "No response generated.";
-                    }
-
-                    var completeMethod = aiRootType.GetMethod("Complete", new[] { typeof(string) });
-                    if (completeMethod != null)
-                    {
-                        var result = completeMethod.Invoke(App.AIRoot, new object[] { userMessage });
-                        return result?.ToString() ?? "No response generated.";
-                    }
-
-                    return $"AIController type: {aiRootType.FullName}. Available methods: {string.Join(", ", aiRootType.GetMethods().Select(m => m.Name).Distinct())}";
+                // Use AI Orchestration Service
+                var response = await Task.Run(async () => 
+                {
+                    return await viewModel.AIOrchestration.GenerateAsync(
+                        userMessage, 
+                        conversationHistory.Take(conversationHistory.Count - 1).ToList() // Exclude the current message as it's passed separately
+                    );
                 });
 
-                assistantMessage.Content = response;
+                if (response.Success)
+                {
+                    assistantMessage.Content = response.Content;
+                    
+                    if (response.UsedProvider != null)
+                    {
+                        viewModel.AiStatusMessage = $"Response from {response.UsedProvider.Name} ({response.PromptTokens + response.CompletionTokens} tokens)";
+                    }
+                }
+                else
+                {
+                    assistantMessage.Content = $"Error: {response.Error}";
+                    viewModel.AiStatusMessage = "Error occurred";
+                }
             }
             catch (Exception ex)
             {
                 assistantMessage.Content = $"Error: {ex.Message}";
+                viewModel.AiStatusMessage = "Error occurred";
             }
+            finally
+            {
+                viewModel.IsAiProcessing = false;
+            }
+        }
+
+        private void BtnOrchestration(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as Models.OverlayViewModel;
+            if (viewModel == null) return;
+
+            var orchestrationWindow = new OrchestrationWindow(viewModel.AIOrchestration);
+            orchestrationWindow.Owner = this;
+            orchestrationWindow.ShowDialog();
         }
 
         #endregion
@@ -940,5 +973,254 @@ namespace AIA
         }
 
         #endregion
+
+        #region Outlook Events
+
+        private async void BtnRefreshOutlook(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            await viewModel.RefreshFlaggedEmailsAsync();
+        }
+
+        private void OutlookEmailItem_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            if (sender is FrameworkElement element && element.Tag is OutlookEmail email)
+            {
+                viewModel.SelectedOutlookEmail = email;
+            }
+        }
+
+        private async void BtnMarkEmailComplete(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            if (sender is FrameworkElement element && element.Tag is OutlookEmail email)
+            {
+                await viewModel.MarkEmailFlagCompleteAsync(email);
+                ShowToast("Email flag marked as complete");
+            }
+            e.Handled = true;
+        }
+
+        private async void BtnMarkSelectedEmailComplete(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel?.SelectedOutlookEmail == null) return;
+
+            await viewModel.MarkEmailFlagCompleteAsync(viewModel.SelectedOutlookEmail);
+            ShowToast("Email flag marked as complete");
+        }
+
+        private async void BtnClearEmailFlag(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel?.SelectedOutlookEmail == null) return;
+
+            await viewModel.ClearEmailFlagAsync(viewModel.SelectedOutlookEmail);
+            ShowToast("Email flag cleared");
+        }
+
+        private async void BtnOpenInOutlook(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel?.SelectedOutlookEmail == null) return;
+
+            await viewModel.OpenEmailInOutlookAsync(viewModel.SelectedOutlookEmail);
+        }
+
+        #endregion
+
+        #region Teams Events
+
+        private async void BtnRefreshTeams(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            await viewModel.RefreshTeamsDataAsync();
+        }
+
+        private void BtnOpenTeams(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            if (!viewModel.OpenTeamsApp())
+            {
+                System.Windows.MessageBox.Show("Could not open Microsoft Teams.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void TeamsMeetingItem_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            if (sender is FrameworkElement element && element.Tag is TeamsMeeting meeting)
+            {
+                viewModel.SelectedTeamsMeeting = meeting;
+            }
+        }
+
+        private void BtnJoinTeamsMeeting(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            if (sender is FrameworkElement element && element.Tag is TeamsMeeting meeting)
+            {
+                if (viewModel.JoinTeamsMeeting(meeting))
+                {
+                    ShowToast("Opening Teams meeting...");
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Could not join the meeting. No join URL available.", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            e.Handled = true;
+        }
+
+        private void TeamsMessageItem_Click(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            if (sender is FrameworkElement element && element.Tag is TeamsMessage message)
+            {
+                viewModel.SelectedTeamsMessage = message;
+                viewModel.MarkTeamsMessageAsRead(message);
+            }
+        }
+
+        private void BtnCompleteTeamsReminder(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            if (sender is FrameworkElement element && element.Tag is TeamsReminder reminder)
+            {
+                reminder.IsCompleted = !reminder.IsCompleted;
+                viewModel.CompleteTeamsReminder(reminder);
+            }
+            e.Handled = true;
+        }
+
+        #endregion
+
+        private void OnReminderNotificationTriggered(object? sender, ReminderNotification notification)
+        {
+            // Show the notification popup
+            ShowReminderNotification(notification);
+        }
+
+        private void ShowReminderNotification(ReminderNotification notification)
+        {
+            // Create and configure the notification window
+            var notificationWindow = new ReminderNotificationWindow();
+
+            // Handle events
+            notificationWindow.ViewRequested += OnNotificationViewRequested;
+            notificationWindow.CompletionRequested += OnNotificationCompletionRequested;
+            notificationWindow.SnoozeRequested += OnNotificationSnoozeRequested;
+            notificationWindow.Closed += OnNotificationWindowClosed;
+
+            // Position based on existing notifications
+            PositionNotificationWindow(notificationWindow);
+
+            // Track active notifications
+            _activeNotifications.Add(notificationWindow);
+
+            // Show the notification
+            var settings = Models.OverlayViewModel.Singleton.NotificationSettings;
+            notificationWindow.ShowNotification(notification, settings.NotificationDurationSeconds);
+        }
+
+        private void PositionNotificationWindow(ReminderNotificationWindow window)
+        {
+            // Stack notifications vertically with spacing
+            int notificationIndex = _activeNotifications.Count;
+            double verticalOffset = notificationIndex * 130; // Approximate height + spacing
+
+            window.Loaded += (s, e) =>
+            {
+                var screen = System.Windows.Forms.Screen.PrimaryScreen;
+                if (screen == null) return;
+
+                var workArea = screen.WorkingArea;
+                var dpiScale = VisualTreeHelper.GetDpi(window);
+                double scaleFactor = dpiScale.DpiScaleX;
+                double screenTop = workArea.Top / scaleFactor;
+
+                window.Top = screenTop + 20 + verticalOffset;
+            };
+        }
+
+        private void OnNotificationWindowClosed(object? sender, EventArgs e)
+        {
+            if (sender is ReminderNotificationWindow window)
+            {
+                _activeNotifications.Remove(window);
+                RepositionActiveNotifications();
+            }
+        }
+
+        private void RepositionActiveNotifications()
+        {
+            // Reposition remaining notifications after one is closed
+            for (int i = 0; i < _activeNotifications.Count; i++)
+            {
+                var window = _activeNotifications[i];
+                var screen = System.Windows.Forms.Screen.PrimaryScreen;
+                if (screen == null) continue;
+
+                var workArea = screen.WorkingArea;
+                var dpiScale = VisualTreeHelper.GetDpi(window);
+                double scaleFactor = dpiScale.DpiScaleX;
+                double screenTop = workArea.Top / scaleFactor;
+
+                double targetTop = screenTop + 20 + (i * 130);
+
+                // Animate to new position
+                var animation = new DoubleAnimation
+                {
+                    To = targetTop,
+                    Duration = TimeSpan.FromMilliseconds(200),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                };
+                window.BeginAnimation(TopProperty, animation);
+            }
+        }
+
+        private void OnNotificationViewRequested(object? sender, ReminderItem reminder)
+        {
+            // Show the main window and select the reminder
+            var viewModel = Models.OverlayViewModel.Singleton;
+            viewModel.SelectedReminder = reminder;
+
+            // Show the overlay
+            Show();
+            Activate();
+        }
+
+        private void OnNotificationCompletionRequested(object? sender, ReminderItem reminder)
+        {
+            var viewModel = Models.OverlayViewModel.Singleton;
+            viewModel.ToggleReminderComplete(reminder);
+        }
+
+        private void OnNotificationSnoozeRequested(object? sender, ReminderItem reminder)
+        {
+            var viewModel = Models.OverlayViewModel.Singleton;
+            viewModel.SnoozeReminder(reminder);
+        }
     }
 }
