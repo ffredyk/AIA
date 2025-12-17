@@ -75,19 +75,87 @@
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <StackPanel>
                                 <TextBlock Text="Keyboard shortcut to open/close the overlay" Foreground="#999999" FontSize="11" Margin="0,0,0,8"/>
+                                
+                                <!-- Interactive Hotkey Capture -->
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox x:Name="TxtOverlayShortcut" 
-                                             Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"
-                                             Text="Win+Q"/>
-                                    <ui:Button Grid.Column="1" Margin="8,0,0,0" Padding="12,6" Click="BtnApplyShortcut_Click">
-                                        <TextBlock Text="Apply" Foreground="White" FontSize="11"/>
+                                    
+                                    <!-- Hotkey Display Box -->
+                                    <Border x:Name="HotkeyCaptureBorder" 
+                                            Background="#3E3E42" 
+                                            BorderBrush="#555555" 
+                                            BorderThickness="1" 
+                                            CornerRadius="4"
+                                            Padding="12,8"
+                                            Cursor="Hand"
+                                            MouseLeftButtonDown="HotkeyCaptureBorder_MouseDown"
+                                            KeyDown="HotkeyCaptureBorder_KeyDown"
+                                            KeyUp="HotkeyCaptureBorder_KeyUp"
+                                            Focusable="True"
+                                            FocusVisualStyle="{x:Null}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsFocused" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#0078D4"/>
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <TextBlock x:Name="TxtHotkeyDisplay" 
+                                                       Text="Win + Q" 
+                                                       Foreground="White" 
+                                                       FontSize="14"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtHotkeyPlaceholder"
+                                                       Text="Press keys..."
+                                                       Foreground="#666666"
+                                                       FontSize="14"
+                                                       FontStyle="Italic"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="Collapsed"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Clear Button -->
+                                    <ui:Button Grid.Column="1" 
+                                               Margin="8,0,0,0" 
+                                               Padding="10,6" 
+                                               ToolTip="Clear hotkey"
+                                               Click="BtnClearHotkey_Click">
+                                        <ui:SymbolIcon Symbol="Dismiss20" Foreground="White" FontSize="14"/>
+                                    </ui:Button>
+                                    
+                                    <!-- Apply Button -->
+                                    <ui:Button Grid.Column="2" 
+                                               Margin="4,0,0,0" 
+                                               Padding="12,6" 
+                                               Click="BtnApplyShortcut_Click"
+                                               x:Name="BtnApplyHotkey">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Checkmark20" Foreground="White" FontSize="14"/>
+                                            <TextBlock Text="Apply" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                        </StackPanel>
                                     </ui:Button>
                                 </Grid>
-                                <TextBlock x:Name="TxtShortcutStatus" Foreground="#999999" FontSize="10" Margin="0,4,0,0"/>
+                                
+                                <!-- Instructions -->
+                                <TextBlock Text="Click the box above and press your desired key combination" 
+                                           Foreground="#666666" FontSize="10" Margin="0,8,0,0"/>
+                                
+                                <!-- Status Message -->
+                                <TextBlock x:Name="TxtShortcutStatus" 
+                                           Foreground="#999999" 
+                                           FontSize="11" 
+                                           Margin="0,4,0,0"
+                                           TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
                         

@@ -471,6 +471,35 @@ namespace AIA
             BeginAnimation(OpacityProperty, fadeAnimation);
         }
 
+        public new void Show()
+        {
+            base.Show();
+        }
+
+        /// <summary>
+        /// Shows the window with slide-in animation
+        /// </summary>
+        public void ShowWithAnimation()
+        {
+            // Reset opacity and transform before showing to ensure animation plays correctly
+            Opacity = 0;
+            if (RenderTransform is TranslateTransform transform)
+            {
+                transform.Y = -50;
+            }
+            
+            base.Show();
+            Activate();
+        }
+
+        /// <summary>
+        /// Hides the window with slide-out animation
+        /// </summary>
+        public void HideWithAnimation()
+        {
+            AnimateSlideOut(() => Hide());
+        }
+
         private void PreventWindowStateChange(object? sender, EventArgs e)
         {
             if (WindowState != WindowState.Normal && WindowState != WindowState.Minimized)
@@ -497,11 +526,6 @@ namespace AIA
             {
                 SetFullscreenOverlay();
             }
-        }
-
-        public new void Show()
-        {
-            base.Show();
         }
 
         private void KeyUpOverlay(object sender, System.Windows.Input.KeyEventArgs e)

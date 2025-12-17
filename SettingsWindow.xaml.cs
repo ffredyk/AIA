@@ -5,9 +5,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using AIA.Models;
 using AIA.Plugins.Host;
 using AIA.Services;
+
+// Resolve ambiguous references
+using WpfKeyEventArgs = System.Windows.Input.KeyEventArgs;
+using WpfColor = System.Windows.Media.Color;
 
 namespace AIA
 {
@@ -16,6 +21,13 @@ namespace AIA
         private AppSettings _appSettings = new();
         private PluginSettings _pluginSettings = new();
         private readonly PluginManager? _pluginManager;
+
+        // Hotkey capture state
+        private bool _isCapturingHotkey;
+        private ModifierKeys _capturedModifiers = ModifierKeys.None;
+        private Key _capturedKey = Key.None;
+        private ModifierKeys _pendingModifiers = ModifierKeys.Windows;
+        private Key _pendingKey = Key.Q;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -54,10 +66,15 @@ namespace AIA
         {
             // General tab
             ChkRunOnStartup.IsChecked = _appSettings.RunOnStartup;
-            TxtOverlayShortcut.Text = _appSettings.OverlayShortcut;
             ChkMinimizeToTray.IsChecked = _appSettings.MinimizeToTrayOnClose;
             ChkCheckUpdates.IsChecked = _appSettings.CheckForUpdatesOnStartup;
             ChkAutoInstallUpdates.IsChecked = _appSettings.AutoInstallUpdates;
+
+            // Parse and display the current hotkey
+            var (modifiers, key) = HotkeyService.ParseHotkeyString(_appSettings.OverlayShortcut);
+            _pendingModifiers = modifiers;
+            _pendingKey = key;
+            UpdateHotkeyDisplay();
 
             // Plugin tab
             ChkEnablePlugins.IsChecked = _pluginSettings.EnablePlugins;
@@ -123,6 +140,134 @@ namespace AIA
             BackupsList.ItemsSource = backups;
         }
 
+        #region Hotkey Capture
+
+        private void UpdateHotkeyDisplay()
+        {
+            if (_pendingKey == Key.None && _pendingModifiers == ModifierKeys.None)
+            {
+                TxtHotkeyDisplay.Visibility = Visibility.Collapsed;
+                TxtHotkeyPlaceholder.Text = "No hotkey set";
+                TxtHotkeyPlaceholder.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                var displayText = HotkeyService.FormatHotkey(_pendingModifiers, _pendingKey);
+                TxtHotkeyDisplay.Text = displayText;
+                TxtHotkeyDisplay.Visibility = Visibility.Visible;
+                TxtHotkeyPlaceholder.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void HotkeyCaptureBorder_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // Start capturing hotkey
+            _isCapturingHotkey = true;
+            _capturedModifiers = ModifierKeys.None;
+            _capturedKey = Key.None;
+
+            TxtHotkeyDisplay.Visibility = Visibility.Collapsed;
+            TxtHotkeyPlaceholder.Text = "Press keys...";
+            TxtHotkeyPlaceholder.Visibility = Visibility.Visible;
+            
+            HotkeyCaptureBorder.Focus();
+            TxtShortcutStatus.Text = "Press your desired key combination (e.g., Win+Q, Ctrl+Shift+A)";
+            TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(153, 153, 153));
+        }
+
+        private void HotkeyCaptureBorder_KeyDown(object sender, WpfKeyEventArgs e)
+        {
+            if (!_isCapturingHotkey)
+            {
+                // If not capturing, start capturing on any key
+                _isCapturingHotkey = true;
+                _capturedModifiers = ModifierKeys.None;
+                _capturedKey = Key.None;
+            }
+
+            e.Handled = true;
+
+            // Get the actual key pressed (handle system key for Alt)
+            var key = e.Key == Key.System ? e.SystemKey : e.Key;
+
+            // Update modifiers
+            _capturedModifiers = HotkeyService.GetModifiersFromKeyboard();
+
+            // If it's a modifier key, just show current modifiers
+            if (HotkeyService.IsModifierKey(key))
+            {
+                // Show modifiers being held
+                if (_capturedModifiers != ModifierKeys.None)
+                {
+                    TxtHotkeyDisplay.Text = HotkeyService.FormatHotkey(_capturedModifiers, Key.None) + " + ...";
+                    TxtHotkeyDisplay.Visibility = Visibility.Visible;
+                    TxtHotkeyPlaceholder.Visibility = Visibility.Collapsed;
+                }
+                return;
+            }
+
+            // Non-modifier key pressed - complete the capture
+            _capturedKey = key;
+            
+            // Finalize the hotkey
+            _pendingModifiers = _capturedModifiers;
+            _pendingKey = _capturedKey;
+            _isCapturingHotkey = false;
+
+            UpdateHotkeyDisplay();
+            
+            // Test if the hotkey can be registered
+            var hotkeyService = App.Current.HotkeyService;
+            if (hotkeyService != null && hotkeyService.TestHotkey(_pendingModifiers, _pendingKey))
+            {
+                TxtShortcutStatus.Text = "Hotkey is valid. Click Apply to save.";
+                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(30, 183, 95));
+            }
+            else
+            {
+                TxtShortcutStatus.Text = "This hotkey may conflict with another application.";
+                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 165, 0));
+            }
+        }
+
+        private void HotkeyCaptureBorder_KeyUp(object sender, WpfKeyEventArgs e)
+        {
+            if (!_isCapturingHotkey)
+                return;
+
+            e.Handled = true;
+
+            // Update current modifiers
+            _capturedModifiers = HotkeyService.GetModifiersFromKeyboard();
+
+            // If all keys are released and we have a valid key, complete capture
+            if (_capturedKey != Key.None)
+            {
+                _isCapturingHotkey = false;
+                UpdateHotkeyDisplay();
+            }
+            else if (_capturedModifiers == ModifierKeys.None)
+            {
+                // All modifiers released without pressing a non-modifier key
+                TxtHotkeyDisplay.Visibility = Visibility.Collapsed;
+                TxtHotkeyPlaceholder.Text = "Press keys...";
+                TxtHotkeyPlaceholder.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void BtnClearHotkey_Click(object sender, RoutedEventArgs e)
+        {
+            _pendingModifiers = ModifierKeys.None;
+            _pendingKey = Key.None;
+            _isCapturingHotkey = false;
+            
+            UpdateHotkeyDisplay();
+            TxtShortcutStatus.Text = "Hotkey cleared. Click Apply to save.";
+            TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(153, 153, 153));
+        }
+
+        #endregion
+
         #region Event Handlers
 
         private void ChkRunOnStartup_Changed(object sender, RoutedEventArgs e)
@@ -145,29 +290,32 @@ namespace AIA
 
         private void BtnApplyShortcut_Click(object sender, RoutedEventArgs e)
         {
-            var shortcut = TxtOverlayShortcut.Text.Trim();
-            
-            if (string.IsNullOrEmpty(shortcut))
+            if (_pendingKey == Key.None)
             {
-                TxtShortcutStatus.Text = "Please enter a shortcut";
-                TxtShortcutStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 102, 102));
+                TxtShortcutStatus.Text = "Please set a valid hotkey first";
+                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 102, 102));
                 return;
             }
 
-            // Parse and validate the shortcut
-            var (modifiers, virtualKey) = AppSettingsService.ParseShortcut(shortcut);
+            // Format the hotkey string for storage
+            var hotkeyString = HotkeyService.FormatHotkey(_pendingModifiers, _pendingKey);
             
-            if (virtualKey == 0)
+            // Try to apply the hotkey immediately
+            var success = App.Current.UpdateHotkey(hotkeyString);
+            
+            if (success)
             {
-                TxtShortcutStatus.Text = "Invalid shortcut format. Use format like Win+Q, Ctrl+Shift+A";
-                TxtShortcutStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 102, 102));
-                return;
+                _appSettings.OverlayShortcut = hotkeyString;
+                TxtShortcutStatus.Text = $"Hotkey applied successfully: {hotkeyString}";
+                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(30, 183, 95));
+                StatusText.Text = "Hotkey updated successfully";
             }
-
-            _appSettings.OverlayShortcut = shortcut;
-            TxtShortcutStatus.Text = $"Shortcut will be applied after restart";
-            TxtShortcutStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 183, 95));
-            StatusText.Text = "Shortcut updated - restart required to apply";
+            else
+            {
+                TxtShortcutStatus.Text = "Failed to register hotkey. It may be in use by another application.";
+                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 102, 102));
+                StatusText.Text = "Failed to register hotkey";
+            }
         }
 
         private void BtnCheckForUpdates_Click(object sender, RoutedEventArgs e)
@@ -268,8 +416,7 @@ namespace AIA
 
         private async void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            // Collect settings from UI
-            _appSettings.OverlayShortcut = TxtOverlayShortcut.Text.Trim();
+            // Collect settings from UI - hotkey is already stored in _appSettings when applied
             _appSettings.MinimizeToTrayOnClose = ChkMinimizeToTray.IsChecked ?? true;
             _appSettings.CheckForUpdatesOnStartup = ChkCheckUpdates.IsChecked ?? true;
             _appSettings.AutoInstallUpdates = ChkAutoInstallUpdates.IsChecked ?? false;

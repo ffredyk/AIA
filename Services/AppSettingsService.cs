@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -188,102 +187,26 @@ namespace AIA.Services
 
         #region Hotkey Management
 
-        // Windows API imports for global hotkey
-        [DllImport("user32.dll")]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
-
-        [DllImport("user32.dll")]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-        private const int HOTKEY_ID = 9000;
-
-        // Modifier keys
-        private const uint MOD_NONE = 0x0000;
-        private const uint MOD_ALT = 0x0001;
-        private const uint MOD_CONTROL = 0x0002;
-        private const uint MOD_SHIFT = 0x0004;
-        private const uint MOD_WIN = 0x0008;
-        private const uint MOD_NOREPEAT = 0x4000;
-
         /// <summary>
-        /// Parses a shortcut string like "Win+Q" into modifiers and key
+        /// Parses a shortcut string like "Win+Q" into modifiers and key.
+        /// This is kept for backwards compatibility - use HotkeyService for new code.
         /// </summary>
+        [Obsolete("Use HotkeyService.ParseHotkeyString instead")]
         public static (uint modifiers, uint virtualKey) ParseShortcut(string shortcut)
         {
-            uint modifiers = MOD_NOREPEAT;
-            uint virtualKey = 0;
-
-            if (string.IsNullOrWhiteSpace(shortcut))
-                return (0, 0);
-
-            var parts = shortcut.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-            foreach (var part in parts)
-            {
-                var upperPart = part.ToUpperInvariant();
-
-                switch (upperPart)
-                {
-                    case "WIN":
-                    case "WINDOWS":
-                        modifiers |= MOD_WIN;
-                        break;
-                    case "CTRL":
-                    case "CONTROL":
-                        modifiers |= MOD_CONTROL;
-                        break;
-                    case "ALT":
-                        modifiers |= MOD_ALT;
-                        break;
-                    case "SHIFT":
-                        modifiers |= MOD_SHIFT;
-                        break;
-                    default:
-                        // Try to parse as a key
-                        if (Enum.TryParse<Key>(part, true, out var key))
-                        {
-                            virtualKey = (uint)KeyInterop.VirtualKeyFromKey(key);
-                        }
-                        else if (part.Length == 1)
-                        {
-                            // Single character key
-                            virtualKey = (uint)char.ToUpperInvariant(part[0]);
-                        }
-                        break;
-                }
-            }
-
+            // Convert to the new format and back for compatibility
+            var (modifierKeys, key) = HotkeyService.ParseHotkeyString(shortcut);
+            
+            uint modifiers = 0x4000; // MOD_NOREPEAT
+            if (modifierKeys.HasFlag(ModifierKeys.Windows)) modifiers |= 0x0008;
+            if (modifierKeys.HasFlag(ModifierKeys.Control)) modifiers |= 0x0002;
+            if (modifierKeys.HasFlag(ModifierKeys.Alt)) modifiers |= 0x0001;
+            if (modifierKeys.HasFlag(ModifierKeys.Shift)) modifiers |= 0x0004;
+            
+            uint virtualKey = key != Key.None ? (uint)KeyInterop.VirtualKeyFromKey(key) : 0;
+            
             return (modifiers, virtualKey);
         }
-
-        /// <summary>
-        /// Registers a global hotkey
-        /// </summary>
-        public static bool RegisterGlobalHotkey(IntPtr windowHandle, string shortcut)
-        {
-            var (modifiers, virtualKey) = ParseShortcut(shortcut);
-
-            if (virtualKey == 0)
-                return false;
-
-            // Unregister any existing hotkey first
-            UnregisterHotKey(windowHandle, HOTKEY_ID);
-
-            return RegisterHotKey(windowHandle, HOTKEY_ID, modifiers, virtualKey);
-        }
-
-        /// <summary>
-        /// Unregisters the global hotkey
-        /// </summary>
-        public static bool UnregisterGlobalHotkey(IntPtr windowHandle)
-        {
-            return UnregisterHotKey(windowHandle, HOTKEY_ID);
-        }
-
-        /// <summary>
-        /// Gets the hotkey ID used for registration
-        /// </summary>
-        public static int GetHotkeyId() => HOTKEY_ID;
 
         #endregion
 
