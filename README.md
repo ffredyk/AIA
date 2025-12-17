@@ -1,4 +1,4 @@
-# AIA - AI-Powered Personal Productivity Assistant
+﻿# AIA - AI-Powered Personal Productivity Assistant
 
 <p align="center">
   <img src="Icons/AIA_t.png" alt="AIA Logo" width="128" height="128" />
@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> �
-  <a href="#installation">Installation</a> �
-  <a href="#usage">Usage</a> �
-  <a href="#ai-integration">AI Integration</a> �
-  <a href="#plugin-system">Plugin System</a> �
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#ai-integration">AI Integration</a> •
+  <a href="#plugin-system">Plugin System</a> •
   <a href="#development">Development</a>
 </p>
 
@@ -25,7 +25,7 @@
 
 ## Features
 
-### ?? Task Management
+### 📋 Task Management
 - **Hierarchical Tasks**: Create tasks with unlimited subtask nesting
 - **Multiple Statuses**: Not Started, In Progress, On Hold, Completed, Cancelled
 - **Priority Levels**: Low, Medium, High, Critical with visual indicators
@@ -33,7 +33,7 @@
 - **Progress Tracking**: Visual progress indicators for tasks with subtasks
 - **Notes & Descriptions**: Rich text fields for detailed task documentation
 
-### ? Smart Reminders
+### ⏰ Smart Reminders
 - **Flexible Scheduling**: Set reminders for any date and time
 - **Severity Levels**: Low, Medium, High, Urgent with color-coded indicators
 - **Desktop Notifications**: Native Windows toast notifications with customizable duration
@@ -41,7 +41,7 @@
 - **Overdue Tracking**: Visual indicators and time-since-overdue display
 - **Sound Alerts**: Optional audio notifications for critical reminders
 
-### ??? Data Banks
+### 🗂️ Data Banks
 - **Organized Categories**: Create custom categories with color coding
 - **Multiple Entry Types**:
   - Text entries
@@ -55,7 +55,7 @@
 - **Preview Support**: Built-in preview for images and text content
 - **Secure Storage**: Local file-based storage with organized folder structure
 
-### ?? Screen Capture & Data Assets
+### 📸 Screen Capture & Data Assets
 - **Full Screen Capture**: Capture entire desktop
 - **Active Window Capture**: Intelligent window tracking and capture
 - **Recent Windows**: Automatically tracks last 3 active windows
@@ -65,7 +65,7 @@
   - Save directly to Data Bank
 - **Thumbnail Generation**: Automatic thumbnail creation for previews
 
-### ?? AI Chat Integration
+### 💬 AI Chat Integration
 - **Multi-Provider Support**:
   - OpenAI (GPT-4o, GPT-4, GPT-3.5 Turbo)
   - Azure OpenAI
@@ -77,7 +77,7 @@
 - **Conversation History**: Persistent chat sessions with rename/delete support
 - **Streaming Responses**: Real-time response streaming for better UX
 
-### ?? AI Tool Functions
+### 🔧 AI Tool Functions
 The AI assistant can perform actions on your behalf:
 - `get_tasks` - Retrieve and filter tasks
 - `get_reminders` - Query upcoming reminders
@@ -87,7 +87,7 @@ The AI assistant can perform actions on your behalf:
 - `create_databank_entry` - Add content to data banks
 - `get_app_summary` - Overview of all productivity data
 
-### ??? Modern UI/UX
+### 🖥️ Modern UI/UX
 - **Fullscreen Overlay**: Quick-access overlay with smooth animations
 - **System Tray Integration**: Runs in background with tray icon
 - **Dark Theme**: Modern dark theme using WPF-UI library
@@ -95,7 +95,7 @@ The AI assistant can perform actions on your behalf:
 - **Keyboard Shortcuts**: Global hotkey support (customizable, default: Win+Q)
 - **Responsive Layout**: Adaptive layout for different screen sizes
 
-### ?? Plugin System
+### 🔌 Plugin System
 - **Modular Architecture**: Extend functionality through plugins
 - **Plugin SDK**: Comprehensive SDK for building plugins
 - **Permission System**: Granular permissions for plugin security
@@ -147,20 +147,20 @@ On first run, AIA creates the following directory structure:
 
 ```
 [App Directory]/
-??? ai-config/           # AI provider configurations
-?   ??? providers.json   # API keys and provider settings
-?   ??? settings.json    # AI behavior settings
-??? databanks/           # Data bank storage
-?   ??? files/           # Imported files
-?   ??? metadata.json    # Categories and entries
-??? screenshots/         # Saved screen captures
-??? backups/             # Application backups
-??? tasks.json           # Task data
-??? reminders.json       # Reminder data
-??? chats.json           # Chat history
-??? Plugins/             # Plugin assemblies
-    ??? Outlook/
-    ??? Teams/
+├── ai-config/           # AI provider configurations
+│   ├── providers.json   # API keys and provider settings
+│   └── settings.json    # AI behavior settings
+├── databanks/           # Data bank storage
+│   ├── files/           # Imported files
+│   └── metadata.json    # Categories and entries
+├── screenshots/         # Saved screen captures
+├── backups/             # Application backups
+├── tasks.json           # Task data
+├── reminders.json       # Reminder data
+├── chats.json           # Chat history
+└── Plugins/             # Plugin assemblies
+    ├── Outlook/
+    └── Teams/
 ```
 
 ---
@@ -184,7 +184,7 @@ On first run, AIA creates the following directory structure:
 
 ### Managing Tasks
 
-1. Click the **?** button or press `Ctrl+N` to add a new task
+1. Click the **➕** button or press `Ctrl+N` to add a new task
 2. Click on a task to view/edit details
 3. Use the status dropdown to track progress
 4. Add subtasks by clicking "Add Subtask" in the task details
@@ -211,7 +211,7 @@ On first run, AIA creates the following directory structure:
 ### AI Chat
 
 1. Navigate to the **Chat** tab
-2. Configure an AI provider in **Settings ? Orchestration**
+2. Configure an AI provider in **Settings → Orchestration**
 3. Type your message and press Enter or click Send
 4. The AI can:
    - Answer questions about your tasks/reminders
@@ -225,7 +225,7 @@ On first run, AIA creates the following directory structure:
 
 ### Configuring AI Providers
 
-1. Click the ?? **Orchestration** button in the toolbar
+1. Click the ⚙️ **Orchestration** button in the toolbar
 2. Click **Add Provider**
 3. Select your provider type and enter:
    - **OpenAI**: API Key
@@ -267,14 +267,14 @@ AIA uses a modular plugin system with full isolation:
 
 ```
 Plugin Architecture
-??? AIA.Plugins.SDK      # Core SDK assembly
-?   ??? IPlugin          # Main plugin interface
-?   ??? PluginBase       # Base implementation
-?   ??? IPluginContext   # Runtime context
-?   ??? Services/        # Host services interfaces
-??? Plugins/
-    ??? Outlook/         # Microsoft Outlook integration
-    ??? Teams/           # Microsoft Teams integration
+├── AIA.Plugins.SDK      # Core SDK assembly
+│   ├── IPlugin          # Main plugin interface
+│   ├── PluginBase       # Base implementation
+│   ├── IPluginContext   # Runtime context
+│   └── Services/        # Host services interfaces
+└── Plugins/
+    ├── Outlook/         # Microsoft Outlook integration
+    └── Teams/           # Microsoft Teams integration
 ```
 
 ### Plugin Permissions
@@ -414,52 +414,52 @@ await Context.Settings.SaveAsync();
 
 ```
 AIA/
-??? AIA.csproj                    # Main application project
-??? App.xaml(.cs)                 # Application entry point
-??? MainWindow.xaml(.cs)          # Main overlay window
-??? Models/
-?   ??? OverlayViewModel.cs       # Main view model
-?   ??? TaskItem.cs               # Task model
-?   ??? ReminderItem.cs           # Reminder model
-?   ??? ChatSession.cs            # Chat session model
-?   ??? DataAsset.cs              # Screen capture model
-?   ??? DataBankEntry.cs          # Data bank entry model
-?   ??? AI/
-?       ??? AIProvider.cs         # AI provider configuration
-?       ??? AIModels.cs           # AI request/response models
-??? Services/
-?   ??? AppSettingsService.cs     # Settings management
-?   ??? ChatSessionService.cs     # Chat persistence
-?   ??? DataBankService.cs        # Data bank operations
-?   ??? ScreenCaptureService.cs   # Screenshot functionality
-?   ??? TaskReminderService.cs    # Task/reminder persistence
-?   ??? AI/
-?       ??? AIOrchestrationService.cs  # AI coordination
-?       ??? AIProviderClients.cs       # Provider implementations
-?       ??? AIToolsService.cs          # AI tool definitions
-??? Views/
-?   ??? ChatPanelView.xaml        # Chat interface
-?   ??? TasksTabView.xaml         # Tasks tab
-?   ??? RemindersTabView.xaml     # Reminders tab
-?   ??? DataBanksTabView.xaml     # Data banks tab
-?   ??? DataAssetsView.xaml       # Screen captures
-?   ??? ToolbarView.xaml          # Toolbar
-??? Plugins/
-?   ??? SDK/                      # Plugin SDK project
-?   ?   ??? IPlugin.cs
-?   ?   ??? PluginBase.cs
-?   ?   ??? IPluginContext.cs
-?   ?   ??? Services/
-?   ??? Host/                     # Plugin host implementation
-?   ?   ??? PluginManager.cs
-?   ?   ??? PluginLoader.cs
-?   ?   ??? Services/
-?   ??? Outlook/                  # Outlook plugin project
-?   ??? Teams/                    # Teams plugin project
-??? Resources/
-?   ??? SharedStyles.xaml         # Common styles
-?   ??? PluginTemplates.xaml      # Plugin UI templates
-??? Icons/                        # Application icons
+├── AIA.csproj                    # Main application project
+├── App.xaml(.cs)                 # Application entry point
+├── MainWindow.xaml(.cs)          # Main overlay window
+├── Models/
+│   ├── OverlayViewModel.cs       # Main view model
+│   ├── TaskItem.cs               # Task model
+│   ├── ReminderItem.cs           # Reminder model
+│   ├── ChatSession.cs            # Chat session model
+│   ├── DataAsset.cs              # Screen capture model
+│   ├── DataBankEntry.cs          # Data bank entry model
+│   └── AI/
+│       ├── AIProvider.cs         # AI provider configuration
+│       └── AIModels.cs           # AI request/response models
+├── Services/
+│   ├── AppSettingsService.cs     # Settings management
+│   ├── ChatSessionService.cs     # Chat persistence
+│   ├── DataBankService.cs        # Data bank operations
+│   ├── ScreenCaptureService.cs   # Screenshot functionality
+│   ├── TaskReminderService.cs    # Task/reminder persistence
+│   └── AI/
+│       ├── AIOrchestrationService.cs  # AI coordination
+│       ├── AIProviderClients.cs       # Provider implementations
+│       └── AIToolsService.cs          # AI tool definitions
+├── Views/
+│   ├── ChatPanelView.xaml        # Chat interface
+│   ├── TasksTabView.xaml         # Tasks tab
+│   ├── RemindersTabView.xaml     # Reminders tab
+│   ├── DataBanksTabView.xaml     # Data banks tab
+│   ├── DataAssetsView.xaml       # Screen captures
+│   └── ToolbarView.xaml          # Toolbar
+├── Plugins/
+│   ├── SDK/                      # Plugin SDK project
+│   │   ├── IPlugin.cs
+│   │   ├── PluginBase.cs
+│   │   ├── IPluginContext.cs
+│   │   └── Services/
+│   ├── Host/                     # Plugin host implementation
+│   │   ├── PluginManager.cs
+│   │   ├── PluginLoader.cs
+│   │   └── Services/
+│   ├── Outlook/                  # Outlook plugin project
+│   └── Teams/                    # Teams plugin project
+├── Resources/
+│   ├── SharedStyles.xaml         # Common styles
+│   └── PluginTemplates.xaml      # Plugin UI templates
+└── Icons/                        # Application icons
 ```
 
 ### Building
@@ -516,8 +516,8 @@ All data is stored locally in the application directory:
 
 ### Backup & Restore
 
-- **Auto Backup**: Configure automatic backups in Settings ? Data
-- **Manual Backup**: Click "Backup Now" in Settings ? Data
+- **Auto Backup**: Configure automatic backups in Settings → Data
+- **Manual Backup**: Click "Backup Now" in Settings → Data
 - **Backup Location**: `[App Directory]/backups/`
 - **Backup Format**: Timestamped ZIP files
 
@@ -611,5 +611,5 @@ This project is open source. See the [LICENSE](LICENSE) file for details.
 ---
 
 <p align="center">
-  Made with ?? for productivity enthusiasts
+  Made with ❤️ for productivity enthusiasts
 </p>
