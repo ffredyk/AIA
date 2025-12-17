@@ -49,15 +49,21 @@
             </ui:Button>
             
             <!-- Chat Selector -->
-            <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="10,0,0,0">
-                <ui:SymbolIcon Margin="5,0,5,0" Symbol="Chat12" Foreground="White"/>
-                <ComboBox Height="32" 
+            <Grid Grid.Column="4" Margin="10,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ui:SymbolIcon Grid.Column="0" Margin="5,0,5,0" Symbol="Chat12" Foreground="White"/>
+                <ComboBox Grid.Column="1" Height="32" 
+                          FontSize="12"
                           ItemsSource="{Binding ActiveChats}" 
                           SelectedItem="{Binding SelectedChatSession, Mode=TwoWay}"
                           BorderBrush="#7FFFFFFF"
                           Foreground="White"
                           Background="#33FFFFFF"
                           MinWidth="120"
+						  Padding="5"
                           DisplayMemberPath="ChatTitle">
                     <ComboBox.Resources>
                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#2D2D30"/>
@@ -69,11 +75,20 @@
                         <Style TargetType="ComboBoxItem">
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="Background" Value="#2D2D30"/>
-                            <Setter Property="Padding" Value="8,5"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="Padding" Value="8,6"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter Property="Background" Value="#0078D4"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#0078D4"/>
+                                </Trigger>
+                            </Style.Triggers>
                         </Style>
                     </ComboBox.ItemContainerStyle>
                 </ComboBox>
-            </StackPanel>
+            </Grid>
         </Grid>
         
         <!-- Rename Chat Popup -->
