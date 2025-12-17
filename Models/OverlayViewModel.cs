@@ -709,6 +709,8 @@ namespace AIA.Models
 
         #endregion
 
+        #region Tasks and Reminders
+
         private async Task LoadTasksAndRemindersAsync()
         {
             var tasks = await TaskReminderService.LoadTasksAsync();
@@ -977,6 +979,8 @@ namespace AIA.Models
         {
             _reminderNotificationService.CheckReminders();
         }
+
+        #endregion
 
         #region Data Bank Methods
 

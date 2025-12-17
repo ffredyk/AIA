@@ -98,37 +98,88 @@ namespace AIA.Plugins.Host
         public IReadOnlyList<PluginInfo> DiscoverPlugins()
         {
             var plugins = new List<PluginInfo>();
+            var discoveredPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             _logger.Info($"Discovering plugins in: {_pluginsDirectory}");
 
-            // Look for plugin DLLs in subdirectories
+            // Look for plugin DLLs directly in the plugins folder
+            DiscoverPluginsInDirectory(_pluginsDirectory, plugins, discoveredPaths);
+
+            // Look for plugin DLLs in immediate subdirectories (e.g., Plugins/MyPlugin/)
             foreach (var pluginDir in Directory.GetDirectories(_pluginsDirectory))
             {
-                var dirName = Path.GetFileName(pluginDir);
-                var pluginDll = Path.Combine(pluginDir, $"{dirName}.dll");
+                DiscoverPluginsInDirectory(pluginDir, plugins, discoveredPaths);
 
-                if (File.Exists(pluginDll))
+                // Also look in nested subdirectories (e.g., Plugins/Category/MyPlugin/)
+                foreach (var nestedDir in Directory.GetDirectories(pluginDir))
                 {
-                    var info = DiscoverPlugin(pluginDll);
-                    if (info != null)
-                    {
-                        plugins.Add(info);
-                    }
-                }
-            }
-
-            // Also look for DLLs directly in the plugins folder
-            foreach (var dllPath in Directory.GetFiles(_pluginsDirectory, "*.dll"))
-            {
-                var info = DiscoverPlugin(dllPath);
-                if (info != null)
-                {
-                    plugins.Add(info);
+                    DiscoverPluginsInDirectory(nestedDir, plugins, discoveredPaths);
                 }
             }
 
             _logger.Info($"Discovered {plugins.Count} plugin(s)");
             return plugins;
+        }
+
+        /// <summary>
+        /// Discovers plugins in a specific directory
+        /// </summary>
+        private void DiscoverPluginsInDirectory(string directory, List<PluginInfo> plugins, HashSet<string> discoveredPaths)
+        {
+            // Look for any DLL that contains a plugin
+            foreach (var dllPath in Directory.GetFiles(directory, "*.dll"))
+            {
+                // Skip if already discovered (prevent duplicates)
+                if (discoveredPaths.Contains(dllPath))
+                    continue;
+
+                // Skip common non-plugin DLLs
+                var fileName = Path.GetFileName(dllPath);
+                if (IsSystemAssembly(fileName))
+                    continue;
+
+                var info = DiscoverPlugin(dllPath);
+                if (info != null)
+                {
+                    discoveredPaths.Add(dllPath);
+                    plugins.Add(info);
+                    _logger.Debug($"Found plugin: {info.Name} at {dllPath}");
+                }
+            }
+
+            // Also check for a DLL matching the directory name (convention-based)
+            var dirName = Path.GetFileName(directory);
+            var conventionDll = Path.Combine(directory, $"{dirName}.dll");
+            if (File.Exists(conventionDll) && !discoveredPaths.Contains(conventionDll))
+            {
+                var info = DiscoverPlugin(conventionDll);
+                if (info != null)
+                {
+                    discoveredPaths.Add(conventionDll);
+                    plugins.Add(info);
+                    _logger.Debug($"Found plugin (convention): {info.Name} at {conventionDll}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if an assembly is a system/framework assembly that shouldn't be scanned
+        /// </summary>
+        private static bool IsSystemAssembly(string fileName)
+        {
+            // Skip common system assemblies and dependencies
+            var lowerName = fileName.ToLowerInvariant();
+            return lowerName.StartsWith("system.") ||
+                   lowerName.StartsWith("microsoft.") ||
+                   lowerName.StartsWith("netstandard") ||
+                   lowerName.StartsWith("windowsbase") ||
+                   lowerName.StartsWith("presentationcore") ||
+                   lowerName.StartsWith("presentationframework") ||
+                   lowerName.StartsWith("wpf.") ||
+                   lowerName == "mscorlib.dll" ||
+                   lowerName.Contains(".resources.") ||
+                   // Skip SDK assemblies
+                   lowerName.Contains("plugins.sdk");
         }
 
         private PluginInfo? DiscoverPlugin(string assemblyPath)

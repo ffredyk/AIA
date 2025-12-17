@@ -40,7 +40,29 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="AIA\Models\" />
     <Folder Include="Converters\" />
+  </ItemGroup>
+
+  <!-- Reference the SDK project for plugin host functionality -->
+  <ItemGroup>
+    <ProjectReference Include="Plugins\SDK\AIA.Plugins.SDK.csproj" />
+  </ItemGroup>
+
+  <!-- Exclude all plugin subfolders from compilation - they are now separate projects -->
+  <ItemGroup>
+    <Compile Remove="Plugins\Outlook\**" />
+    <Compile Remove="Plugins\Teams\**" />
+    <Compile Remove="Plugins\SDK\**" />
+    <None Remove="Plugins\Outlook\**" />
+    <None Remove="Plugins\Teams\**" />
+    <None Remove="Plugins\SDK\**" />
+    <EmbeddedResource Remove="Plugins\Outlook\**" />
+    <EmbeddedResource Remove="Plugins\Teams\**" />
+    <EmbeddedResource Remove="Plugins\SDK\**" />
+    <Page Remove="Plugins\Outlook\**" />
+    <Page Remove="Plugins\Teams\**" />
+    <Page Remove="Plugins\SDK\**" />
   </ItemGroup>
 
 </Project>

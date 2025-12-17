@@ -24,8 +24,8 @@
     </Window.RenderTransform>
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#CC000000"/>
-            <GradientStop Color="#5E000000" Offset="1"/>
+            <GradientStop Color="#EE000000"/>
+            <GradientStop Color="#AA000000" Offset="1"/>
         </LinearGradientBrush>
     </Window.Background>
     <Window.TaskbarItemInfo>

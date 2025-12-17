@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using AIA.Plugins.SDK;
 
@@ -110,6 +111,7 @@ namespace AIA.Plugins.Outlook
         private bool _isAvailable;
         private string _statusMessage = string.Empty;
         private OutlookEmailViewModel? _selectedEmail;
+        private DataTemplate? _cachedTemplate;
 
         public ObservableCollection<OutlookEmailViewModel> FlaggedEmails { get; } = new();
 
@@ -266,8 +268,129 @@ namespace AIA.Plugins.Outlook
 
         public override DataTemplate GetDataTemplate()
         {
-            // Return the data template for this view model
-            return (DataTemplate)WpfApplication.Current.FindResource("OutlookTabTemplate");
+            // Return cached template or create a simple placeholder
+            // The actual UI will be provided by the host application
+            if (_cachedTemplate == null)
+            {
+                _cachedTemplate = CreateDataTemplate();
+            }
+            return _cachedTemplate;
+        }
+
+        private DataTemplate CreateDataTemplate()
+        {
+            // Create a functional data template programmatically
+            var template = new DataTemplate();
+            
+            // Main grid
+            var mainGrid = new FrameworkElementFactory(typeof(Grid));
+            mainGrid.SetValue(Grid.MarginProperty, new Thickness(8));
+            
+            // Create a stack panel for content
+            var mainPanel = new FrameworkElementFactory(typeof(StackPanel));
+            
+            // Status message
+            var statusText = new FrameworkElementFactory(typeof(TextBlock));
+            statusText.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("StatusMessage"));
+            statusText.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.Gray);
+            statusText.SetValue(TextBlock.FontSizeProperty, 12.0);
+            statusText.SetValue(TextBlock.MarginProperty, new Thickness(0, 0, 0, 8));
+            mainPanel.AppendChild(statusText);
+            
+            // Emails header
+            var emailsHeader = new FrameworkElementFactory(typeof(TextBlock));
+            emailsHeader.SetValue(TextBlock.TextProperty, "FLAGGED EMAILS");
+            emailsHeader.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
+            emailsHeader.SetValue(TextBlock.FontWeightProperty, FontWeights.SemiBold);
+            emailsHeader.SetValue(TextBlock.FontSizeProperty, 11.0);
+            emailsHeader.SetValue(TextBlock.MarginProperty, new Thickness(0, 8, 0, 4));
+            mainPanel.AppendChild(emailsHeader);
+            
+            // Emails list
+            var emailsItems = new FrameworkElementFactory(typeof(ItemsControl));
+            emailsItems.SetBinding(ItemsControl.ItemsSourceProperty, new System.Windows.Data.Binding("FlaggedEmails"));
+            
+            // Email item template
+            var emailItemTemplate = new DataTemplate();
+            var emailBorder = new FrameworkElementFactory(typeof(Border));
+            emailBorder.SetValue(Border.BackgroundProperty, new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(25, 255, 68, 68)));
+            emailBorder.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+            emailBorder.SetValue(Border.MarginProperty, new Thickness(0, 2, 0, 2));
+            emailBorder.SetValue(Border.PaddingProperty, new Thickness(10, 8, 10, 8));
+            
+            var emailGrid = new FrameworkElementFactory(typeof(Grid));
+            
+            // Two columns - content and actions
+            var contentCol = new FrameworkElementFactory(typeof(ColumnDefinition));
+            contentCol.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+            var actionCol = new FrameworkElementFactory(typeof(ColumnDefinition));
+            actionCol.SetValue(ColumnDefinition.WidthProperty, GridLength.Auto);
+            
+            var emailStack = new FrameworkElementFactory(typeof(StackPanel));
+            emailStack.SetValue(Grid.ColumnProperty, 0);
+            
+            // Subject
+            var emailSubject = new FrameworkElementFactory(typeof(TextBlock));
+            emailSubject.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Subject"));
+            emailSubject.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
+            emailSubject.SetValue(TextBlock.FontSizeProperty, 13.0);
+            emailSubject.SetValue(TextBlock.FontWeightProperty, FontWeights.SemiBold);
+            emailSubject.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis);
+            emailStack.AppendChild(emailSubject);
+            
+            // Sender
+            var emailSender = new FrameworkElementFactory(typeof(TextBlock));
+            emailSender.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("SenderName"));
+            emailSender.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.LightGray);
+            emailSender.SetValue(TextBlock.FontSizeProperty, 11.0);
+            emailStack.AppendChild(emailSender);
+            
+            // Preview
+            var emailPreview = new FrameworkElementFactory(typeof(TextBlock));
+            emailPreview.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("BodyPreview"));
+            emailPreview.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.Gray);
+            emailPreview.SetValue(TextBlock.FontSizeProperty, 11.0);
+            emailPreview.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis);
+            emailPreview.SetValue(TextBlock.MaxHeightProperty, 32.0);
+            emailStack.AppendChild(emailPreview);
+            
+            // Date and flag status
+            var emailMeta = new FrameworkElementFactory(typeof(StackPanel));
+            emailMeta.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+            emailMeta.SetValue(StackPanel.MarginProperty, new Thickness(0, 4, 0, 0));
+            
+            var emailDate = new FrameworkElementFactory(typeof(TextBlock));
+            emailDate.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("ReceivedDateText"));
+            emailDate.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.Gray);
+            emailDate.SetValue(TextBlock.FontSizeProperty, 10.0);
+            emailMeta.AppendChild(emailDate);
+            
+            var emailFlagDue = new FrameworkElementFactory(typeof(TextBlock));
+            emailFlagDue.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("FlagDueDateText"));
+            emailFlagDue.SetValue(TextBlock.ForegroundProperty, new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 68, 68)));
+            emailFlagDue.SetValue(TextBlock.FontSizeProperty, 10.0);
+            emailFlagDue.SetValue(TextBlock.MarginProperty, new Thickness(12, 0, 0, 0));
+            emailMeta.AppendChild(emailFlagDue);
+            
+            emailStack.AppendChild(emailMeta);
+            emailGrid.AppendChild(emailStack);
+            
+            emailBorder.AppendChild(emailGrid);
+            emailItemTemplate.VisualTree = emailBorder;
+            emailsItems.SetValue(ItemsControl.ItemTemplateProperty, emailItemTemplate);
+            
+            mainPanel.AppendChild(emailsItems);
+            
+            // Wrap in ScrollViewer
+            var scrollViewer = new FrameworkElementFactory(typeof(ScrollViewer));
+            scrollViewer.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
+            scrollViewer.AppendChild(mainPanel);
+            
+            mainGrid.AppendChild(scrollViewer);
+            
+            template.VisualTree = mainGrid;
+            
+            return template;
         }
 
         public override void Refresh()

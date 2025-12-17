@@ -179,7 +179,7 @@ namespace AIA
                 
                 tabItem.Header = headerPanel;
 
-                // Set content using the view model's data template
+                // Set content using the plugin's data template
                 if (tab.ViewModel != null)
                 {
                     var contentPresenter = new ContentPresenter

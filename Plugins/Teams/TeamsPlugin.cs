@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using AIA.Plugins.SDK;
 
@@ -124,6 +125,7 @@ namespace AIA.Plugins.Teams
         private string _statusMessage = string.Empty;
         private TeamsMeetingViewModel? _selectedMeeting;
         private TeamsMessageViewModel? _selectedMessage;
+        private DataTemplate? _cachedTemplate;
 
         public ObservableCollection<TeamsMeetingViewModel> TodaysMeetings { get; } = new();
         public ObservableCollection<TeamsMessageViewModel> UnreadMessages { get; } = new();
@@ -315,7 +317,164 @@ namespace AIA.Plugins.Teams
 
         public override DataTemplate GetDataTemplate()
         {
-            return (DataTemplate)WpfApplication.Current.FindResource("TeamsTabTemplate");
+            // Return cached template or create a simple placeholder
+            if (_cachedTemplate == null)
+            {
+                _cachedTemplate = CreateDataTemplate();
+            }
+            return _cachedTemplate;
+        }
+
+        private DataTemplate CreateDataTemplate()
+        {
+            // Create a functional data template programmatically
+            var template = new DataTemplate();
+            
+            // Main grid
+            var mainGrid = new FrameworkElementFactory(typeof(Grid));
+            mainGrid.SetValue(Grid.MarginProperty, new Thickness(8));
+            
+            // Two columns for list and details
+            var col1 = new FrameworkElementFactory(typeof(ColumnDefinition));
+            col1.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+            var col2 = new FrameworkElementFactory(typeof(ColumnDefinition));
+            col2.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+            
+            // Create a stack panel for the left side content
+            var leftPanel = new FrameworkElementFactory(typeof(StackPanel));
+            leftPanel.SetValue(Grid.ColumnProperty, 0);
+            leftPanel.SetValue(StackPanel.MarginProperty, new Thickness(0, 0, 8, 0));
+            
+            // Status message
+            var statusText = new FrameworkElementFactory(typeof(TextBlock));
+            statusText.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("StatusMessage"));
+            statusText.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.Gray);
+            statusText.SetValue(TextBlock.FontSizeProperty, 12.0);
+            statusText.SetValue(TextBlock.MarginProperty, new Thickness(0, 0, 0, 8));
+            leftPanel.AppendChild(statusText);
+            
+            // Meetings header
+            var meetingsHeader = new FrameworkElementFactory(typeof(TextBlock));
+            meetingsHeader.SetValue(TextBlock.TextProperty, "TODAY'S MEETINGS");
+            meetingsHeader.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
+            meetingsHeader.SetValue(TextBlock.FontWeightProperty, FontWeights.SemiBold);
+            meetingsHeader.SetValue(TextBlock.FontSizeProperty, 11.0);
+            meetingsHeader.SetValue(TextBlock.MarginProperty, new Thickness(0, 8, 0, 4));
+            leftPanel.AppendChild(meetingsHeader);
+            
+            // Meetings list
+            var meetingsItems = new FrameworkElementFactory(typeof(ItemsControl));
+            meetingsItems.SetBinding(ItemsControl.ItemsSourceProperty, new System.Windows.Data.Binding("TodaysMeetings"));
+            
+            // Meeting item template
+            var meetingItemTemplate = new DataTemplate();
+            var meetingBorder = new FrameworkElementFactory(typeof(Border));
+            meetingBorder.SetValue(Border.BackgroundProperty, new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(25, 91, 95, 199)));
+            meetingBorder.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+            meetingBorder.SetValue(Border.MarginProperty, new Thickness(0, 2, 0, 2));
+            meetingBorder.SetValue(Border.PaddingProperty, new Thickness(8, 6, 8, 6));
+            
+            var meetingStack = new FrameworkElementFactory(typeof(StackPanel));
+            
+            var meetingSubject = new FrameworkElementFactory(typeof(TextBlock));
+            meetingSubject.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Subject"));
+            meetingSubject.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
+            meetingSubject.SetValue(TextBlock.FontSizeProperty, 13.0);
+            meetingSubject.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis);
+            meetingStack.AppendChild(meetingSubject);
+            
+            var meetingTime = new FrameworkElementFactory(typeof(TextBlock));
+            meetingTime.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("TimeRange"));
+            meetingTime.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.LightGray);
+            meetingTime.SetValue(TextBlock.FontSizeProperty, 11.0);
+            meetingStack.AppendChild(meetingTime);
+            
+            var meetingStatus = new FrameworkElementFactory(typeof(TextBlock));
+            meetingStatus.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("TimeUntilStart"));
+            meetingStatus.SetValue(TextBlock.ForegroundProperty, new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(91, 95, 199)));
+            meetingStatus.SetValue(TextBlock.FontSizeProperty, 10.0);
+            meetingStack.AppendChild(meetingStatus);
+            
+            meetingBorder.AppendChild(meetingStack);
+            meetingItemTemplate.VisualTree = meetingBorder;
+            meetingsItems.SetValue(ItemsControl.ItemTemplateProperty, meetingItemTemplate);
+            leftPanel.AppendChild(meetingsItems);
+            
+            // Messages header
+            var messagesHeader = new FrameworkElementFactory(typeof(TextBlock));
+            messagesHeader.SetValue(TextBlock.TextProperty, "UNREAD MESSAGES");
+            messagesHeader.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
+            messagesHeader.SetValue(TextBlock.FontWeightProperty, FontWeights.SemiBold);
+            messagesHeader.SetValue(TextBlock.FontSizeProperty, 11.0);
+            messagesHeader.SetValue(TextBlock.MarginProperty, new Thickness(0, 16, 0, 4));
+            leftPanel.AppendChild(messagesHeader);
+            
+            // Messages list
+            var messagesItems = new FrameworkElementFactory(typeof(ItemsControl));
+            messagesItems.SetBinding(ItemsControl.ItemsSourceProperty, new System.Windows.Data.Binding("UnreadMessages"));
+            
+            // Message item template
+            var messageItemTemplate = new DataTemplate();
+            var messageBorder = new FrameworkElementFactory(typeof(Border));
+            messageBorder.SetValue(Border.BackgroundProperty, new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(20, 255, 255, 255)));
+            messageBorder.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+            messageBorder.SetValue(Border.MarginProperty, new Thickness(0, 2, 0, 2));
+            messageBorder.SetValue(Border.PaddingProperty, new Thickness(8, 6, 8, 6));
+            
+            var messageStack = new FrameworkElementFactory(typeof(StackPanel));
+            
+            var messageSender = new FrameworkElementFactory(typeof(TextBlock));
+            messageSender.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("SenderName"));
+            messageSender.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
+            messageSender.SetValue(TextBlock.FontSizeProperty, 12.0);
+            messageSender.SetValue(TextBlock.FontWeightProperty, FontWeights.SemiBold);
+            messageStack.AppendChild(messageSender);
+            
+            var messagePreview = new FrameworkElementFactory(typeof(TextBlock));
+            messagePreview.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("ContentPreview"));
+            messagePreview.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.LightGray);
+            messagePreview.SetValue(TextBlock.FontSizeProperty, 11.0);
+            messagePreview.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis);
+            messageStack.AppendChild(messagePreview);
+            
+            var messageDate = new FrameworkElementFactory(typeof(TextBlock));
+            messageDate.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("ReceivedDateText"));
+            messageDate.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.Gray);
+            messageDate.SetValue(TextBlock.FontSizeProperty, 10.0);
+            messageStack.AppendChild(messageDate);
+            
+            messageBorder.AppendChild(messageStack);
+            messageItemTemplate.VisualTree = messageBorder;
+            messagesItems.SetValue(ItemsControl.ItemTemplateProperty, messageItemTemplate);
+            leftPanel.AppendChild(messagesItems);
+            
+            // Wrap left panel in ScrollViewer
+            var scrollViewer = new FrameworkElementFactory(typeof(ScrollViewer));
+            scrollViewer.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
+            scrollViewer.SetValue(Grid.ColumnProperty, 0);
+            scrollViewer.AppendChild(leftPanel);
+            
+            mainGrid.AppendChild(scrollViewer);
+            
+            // Right panel for details (placeholder)
+            var rightPanel = new FrameworkElementFactory(typeof(Border));
+            rightPanel.SetValue(Grid.ColumnProperty, 1);
+            rightPanel.SetValue(Border.BackgroundProperty, new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(15, 255, 255, 255)));
+            rightPanel.SetValue(Border.CornerRadiusProperty, new CornerRadius(8));
+            rightPanel.SetValue(Border.MarginProperty, new Thickness(8, 0, 0, 0));
+            
+            var rightText = new FrameworkElementFactory(typeof(TextBlock));
+            rightText.SetValue(TextBlock.TextProperty, "Select a meeting or message to view details");
+            rightText.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.Gray);
+            rightText.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            rightText.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
+            rightPanel.AppendChild(rightText);
+            
+            mainGrid.AppendChild(rightPanel);
+            
+            template.VisualTree = mainGrid;
+            
+            return template;
         }
 
         public override void Refresh()

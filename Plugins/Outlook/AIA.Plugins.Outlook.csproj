@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.22000.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>AIA.Plugins.Outlook</RootNamespace>
+    <AssemblyName>AIA.Plugins.Outlook</AssemblyName>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>1.0.0</Version>
+    <Description>Outlook integration plugin for AIA</Description>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SDK\AIA.Plugins.SDK.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI" Version="4.0.3">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\OutlookTemplates.xaml" />
+  </ItemGroup>
+
+  <!-- Copy plugin to main app's Plugins folder after build -->
+  <Target Name="CopyPluginToOutput" AfterTargets="Build">
+    <PropertyGroup>
+      <PluginOutputDir>$(SolutionDir)bin\$(Configuration)\$(TargetFramework)\Plugins\Outlook\</PluginOutputDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(PluginOutputDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginOutputDir)" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).deps.json" DestinationFolder="$(PluginOutputDir)" Condition="Exists('$(TargetDir)$(TargetName).deps.json')" />
+  </Target>
+
+</Project>
