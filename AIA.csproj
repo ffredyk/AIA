@@ -14,16 +14,18 @@
 
   <ItemGroup>
     <None Remove="Icons\AIA.ico" />
+    <None Remove="Icons\AIA_s.ico" />
+    <None Remove="Icons\AIA_sg.ico" />
+    <None Remove="Icons\AIA_sr.ico" />
     <None Remove="Icons\AIA_t.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Icons\AIA.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Icons\AIA_t.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <EmbeddedResource Include="Icons\AIA.ico" />
+    <EmbeddedResource Include="Icons\AIA_s.ico" />
+    <EmbeddedResource Include="Icons\AIA_sg.ico" />
+    <EmbeddedResource Include="Icons\AIA_sr.ico" />
+    <Resource Include="Icons\AIA_t.png" />
   </ItemGroup>
 
   <ItemGroup>

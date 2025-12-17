@@ -24,7 +24,7 @@ namespace AIA
             
             // Load custom icon from embedded resource
             var assembly = Assembly.GetExecutingAssembly();
-            using var stream = assembly.GetManifestResourceStream("AIA.Icons.AIA.ico");
+            using var stream = assembly.GetManifestResourceStream("AIA.Icons.AIA_s.ico");
             if (stream != null)
             {
                 notifyIcon.Icon = new Icon(stream);
