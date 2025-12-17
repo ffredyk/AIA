@@ -42,7 +42,7 @@
         <!-- Center Toolbar -->
         <Grid HorizontalAlignment="Center" Grid.Column="1">
             <StackPanel Orientation="Horizontal" Margin="10">
-                <ui:Button>
+                <ui:Button Click="BtnSettings">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Settings20" Foreground="White"/>
                         <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Settings"/>

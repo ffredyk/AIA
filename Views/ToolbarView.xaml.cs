@@ -21,6 +21,11 @@ namespace AIA.Views
         public event EventHandler? NewReminderClicked;
 
         /// <summary>
+        /// Event raised when Settings button is clicked
+        /// </summary>
+        public event EventHandler? SettingsClicked;
+
+        /// <summary>
         /// Event raised when Orchestration button is clicked
         /// </summary>
         public event EventHandler? OrchestrationClicked;
@@ -43,6 +48,11 @@ namespace AIA.Views
         private void BtnNewReminder(object sender, RoutedEventArgs e)
         {
             NewReminderClicked?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void BtnSettings(object sender, RoutedEventArgs e)
+        {
+            SettingsClicked?.Invoke(this, EventArgs.Empty);
         }
 
         private void BtnOrchestration(object sender, RoutedEventArgs e)

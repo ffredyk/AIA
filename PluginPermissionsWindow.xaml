@@ -1,0 +1,149 @@
+<Window x:Class="AIA.PluginPermissionsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        mc:Ignorable="d"
+        Title="Plugin Permissions" 
+        Height="400" Width="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#1E1E1E">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2D2D30" BorderBrush="#3E3E42" BorderThickness="0,0,0,1" Padding="16,12">
+            <StackPanel>
+                <TextBlock x:Name="TxtPluginName" Text="Plugin Name" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                <TextBlock Text="Configure what this plugin can access" Foreground="#999999" FontSize="11"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Permissions List -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="16">
+            <StackPanel>
+                
+                <TextBlock Text="Permissions" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                
+                <!-- UI Access -->
+                <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="AppGeneric20" Foreground="#0078D4" FontSize="18" Margin="0,0,12,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="User Interface" Foreground="White" FontWeight="SemiBold"/>
+                            <TextBlock Text="Add tabs, toolbar buttons, and UI elements" 
+                                       Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <CheckBox x:Name="ChkUIAccess" Grid.Column="2" IsChecked="True"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Notification Access -->
+                <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="Alert20" Foreground="#FFA500" FontSize="18" Margin="0,0,12,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Notifications" Foreground="White" FontWeight="SemiBold"/>
+                            <TextBlock Text="Show toast notifications to the user" 
+                                       Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <CheckBox x:Name="ChkNotificationAccess" Grid.Column="2" IsChecked="True"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Network Access -->
+                <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="Globe20" Foreground="#1EB75F" FontSize="18" Margin="0,0,12,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Network Access" Foreground="White" FontWeight="SemiBold"/>
+                            <TextBlock Text="Make network requests to external services" 
+                                       Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <CheckBox x:Name="ChkNetworkAccess" Grid.Column="2"/>
+                    </Grid>
+                </Border>
+                
+                <!-- File System Access -->
+                <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="Folder20" Foreground="#FF6B6B" FontSize="18" Margin="0,0,12,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="File System Access" Foreground="White" FontWeight="SemiBold"/>
+                            <TextBlock Text="Read and write files on your computer" 
+                                       Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                            <Border Background="#33FF4444" Padding="4,2" CornerRadius="3" Margin="0,4,0,0" HorizontalAlignment="Left">
+                                <TextBlock Text="? Sensitive Permission" Foreground="#FF6B6B" FontSize="9"/>
+                            </Border>
+                        </StackPanel>
+                        <CheckBox x:Name="ChkFileSystemAccess" Grid.Column="2"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Requested Permissions Info -->
+                <Border Padding="12" CornerRadius="6" Background="#33FFA500" Margin="0,16,0,0" 
+                        x:Name="RequestedPermissionsPanel" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="Requested Permissions" Foreground="#FFA500" FontWeight="SemiBold" FontSize="12"/>
+                        <TextBlock x:Name="TxtRequestedPermissions" Foreground="#CCCCCC" FontSize="11" 
+                                   TextWrapping="Wrap" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+                
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#2D2D30" BorderBrush="#3E3E42" BorderThickness="0,1,0,0" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <ui:Button Padding="12,6" Click="BtnResetDefaults_Click">
+                    <TextBlock Text="Reset to Defaults" Foreground="#999999" FontSize="11"/>
+                </ui:Button>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <ui:Button Padding="16,8" Margin="0,0,8,0" Click="BtnSave_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Checkmark16" Foreground="White" FontSize="14"/>
+                            <TextBlock Text="Save" Foreground="White" FontWeight="SemiBold" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                    <ui:Button Padding="16,8" Click="BtnCancel_Click">
+                        <TextBlock Text="Cancel" Foreground="White"/>
+                    </ui:Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

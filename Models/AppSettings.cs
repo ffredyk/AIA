@@ -1,0 +1,238 @@
+using System;
+using System.ComponentModel;
+using System.Text.Json.Serialization;
+
+namespace AIA.Models
+{
+    /// <summary>
+    /// Application-wide settings
+    /// </summary>
+    public class AppSettings : INotifyPropertyChanged
+    {
+        private bool _runOnStartup = false;
+        private string _overlayShortcut = "Win+Q";
+        private bool _minimizeToTrayOnClose = true;
+        private bool _showInTaskbar = false;
+        private bool _checkForUpdatesOnStartup = true;
+        private bool _autoInstallUpdates = false;
+        private string _dataStoragePath = string.Empty;
+        private bool _enableAutoBackup = false;
+        private int _autoBackupIntervalHours = 24;
+        private int _maxBackupCount = 5;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Whether to start the application when Windows starts
+        /// </summary>
+        public bool RunOnStartup
+        {
+            get => _runOnStartup;
+            set { _runOnStartup = value; OnPropertyChanged(nameof(RunOnStartup)); }
+        }
+
+        /// <summary>
+        /// Keyboard shortcut to open the overlay (e.g., "Win+Q", "Ctrl+Shift+A")
+        /// </summary>
+        public string OverlayShortcut
+        {
+            get => _overlayShortcut;
+            set { _overlayShortcut = value; OnPropertyChanged(nameof(OverlayShortcut)); }
+        }
+
+        /// <summary>
+        /// Whether to minimize to system tray instead of closing
+        /// </summary>
+        public bool MinimizeToTrayOnClose
+        {
+            get => _minimizeToTrayOnClose;
+            set { _minimizeToTrayOnClose = value; OnPropertyChanged(nameof(MinimizeToTrayOnClose)); }
+        }
+
+        /// <summary>
+        /// Whether to show the app in the taskbar
+        /// </summary>
+        public bool ShowInTaskbar
+        {
+            get => _showInTaskbar;
+            set { _showInTaskbar = value; OnPropertyChanged(nameof(ShowInTaskbar)); }
+        }
+
+        /// <summary>
+        /// Whether to check for updates on startup
+        /// </summary>
+        public bool CheckForUpdatesOnStartup
+        {
+            get => _checkForUpdatesOnStartup;
+            set { _checkForUpdatesOnStartup = value; OnPropertyChanged(nameof(CheckForUpdatesOnStartup)); }
+        }
+
+        /// <summary>
+        /// Whether to automatically install updates
+        /// </summary>
+        public bool AutoInstallUpdates
+        {
+            get => _autoInstallUpdates;
+            set { _autoInstallUpdates = value; OnPropertyChanged(nameof(AutoInstallUpdates)); }
+        }
+
+        /// <summary>
+        /// Custom data storage path (empty = default location)
+        /// </summary>
+        public string DataStoragePath
+        {
+            get => _dataStoragePath;
+            set { _dataStoragePath = value; OnPropertyChanged(nameof(DataStoragePath)); }
+        }
+
+        /// <summary>
+        /// Whether to enable automatic backups
+        /// </summary>
+        public bool EnableAutoBackup
+        {
+            get => _enableAutoBackup;
+            set { _enableAutoBackup = value; OnPropertyChanged(nameof(EnableAutoBackup)); }
+        }
+
+        /// <summary>
+        /// Interval between automatic backups in hours
+        /// </summary>
+        public int AutoBackupIntervalHours
+        {
+            get => _autoBackupIntervalHours;
+            set { _autoBackupIntervalHours = value; OnPropertyChanged(nameof(AutoBackupIntervalHours)); }
+        }
+
+        /// <summary>
+        /// Maximum number of backups to keep
+        /// </summary>
+        public int MaxBackupCount
+        {
+            get => _maxBackupCount;
+            set { _maxBackupCount = value; OnPropertyChanged(nameof(MaxBackupCount)); }
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    /// <summary>
+    /// Plugin-specific settings
+    /// </summary>
+    public class PluginSettings : INotifyPropertyChanged
+    {
+        private bool _enablePlugins = true;
+        private bool _checkForPluginUpdates = true;
+        private bool _autoUpdatePlugins = false;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Whether the plugin system is enabled
+        /// </summary>
+        public bool EnablePlugins
+        {
+            get => _enablePlugins;
+            set { _enablePlugins = value; OnPropertyChanged(nameof(EnablePlugins)); }
+        }
+
+        /// <summary>
+        /// Whether to check for plugin updates
+        /// </summary>
+        public bool CheckForPluginUpdates
+        {
+            get => _checkForPluginUpdates;
+            set { _checkForPluginUpdates = value; OnPropertyChanged(nameof(CheckForPluginUpdates)); }
+        }
+
+        /// <summary>
+        /// Whether to automatically update plugins
+        /// </summary>
+        public bool AutoUpdatePlugins
+        {
+            get => _autoUpdatePlugins;
+            set { _autoUpdatePlugins = value; OnPropertyChanged(nameof(AutoUpdatePlugins)); }
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    /// <summary>
+    /// Settings for an individual plugin
+    /// </summary>
+    public class PluginInstanceSettings : INotifyPropertyChanged
+    {
+        private string _pluginId = string.Empty;
+        private bool _isEnabled = true;
+        private bool _hasFileSystemAccess = false;
+        private bool _hasNetworkAccess = false;
+        private bool _hasNotificationAccess = true;
+        private bool _hasUIAccess = true;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// The plugin's unique identifier
+        /// </summary>
+        public string PluginId
+        {
+            get => _pluginId;
+            set { _pluginId = value; OnPropertyChanged(nameof(PluginId)); }
+        }
+
+        /// <summary>
+        /// Whether this plugin is enabled
+        /// </summary>
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            set { _isEnabled = value; OnPropertyChanged(nameof(IsEnabled)); }
+        }
+
+        /// <summary>
+        /// Whether the plugin has file system access
+        /// </summary>
+        public bool HasFileSystemAccess
+        {
+            get => _hasFileSystemAccess;
+            set { _hasFileSystemAccess = value; OnPropertyChanged(nameof(HasFileSystemAccess)); }
+        }
+
+        /// <summary>
+        /// Whether the plugin has network access
+        /// </summary>
+        public bool HasNetworkAccess
+        {
+            get => _hasNetworkAccess;
+            set { _hasNetworkAccess = value; OnPropertyChanged(nameof(HasNetworkAccess)); }
+        }
+
+        /// <summary>
+        /// Whether the plugin can show notifications
+        /// </summary>
+        public bool HasNotificationAccess
+        {
+            get => _hasNotificationAccess;
+            set { _hasNotificationAccess = value; OnPropertyChanged(nameof(HasNotificationAccess)); }
+        }
+
+        /// <summary>
+        /// Whether the plugin can add UI elements
+        /// </summary>
+        public bool HasUIAccess
+        {
+            get => _hasUIAccess;
+            set { _hasUIAccess = value; OnPropertyChanged(nameof(HasUIAccess)); }
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}

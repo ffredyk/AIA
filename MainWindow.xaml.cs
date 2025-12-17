@@ -53,6 +53,7 @@ namespace AIA
             // Wire up toolbar events
             Toolbar.NewTaskClicked += OnNewTaskClicked;
             Toolbar.NewReminderClicked += OnNewReminderClicked;
+            Toolbar.SettingsClicked += OnSettingsClicked;
             Toolbar.OrchestrationClicked += OnOrchestrationClicked;
             Toolbar.ShutdownClicked += OnShutdownClicked;
             Toolbar.CloseClicked += OnCloseClicked;
@@ -282,6 +283,13 @@ namespace AIA
 
             viewModel.IsAddingNewReminder = true;
             RemindersTab.FocusNewReminderInput();
+        }
+
+        private void OnSettingsClicked(object? sender, EventArgs e)
+        {
+            var settingsWindow = new SettingsWindow(App.Current.PluginManager);
+            settingsWindow.Owner = this;
+            settingsWindow.ShowDialog();
         }
 
         private void OnOrchestrationClicked(object? sender, EventArgs e)
