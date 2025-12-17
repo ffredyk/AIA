@@ -56,6 +56,10 @@ namespace AIA.Models
         private string _aiStatusMessage = string.Empty;
         private AIProvider? _selectedAiProvider;
 
+        // Chat management fields
+        private bool _isRenamingChat;
+        private string _renameChatTitle = string.Empty;
+
         // Screen capture service
         private readonly ScreenCaptureService _screenCaptureService = new();
 
@@ -65,7 +69,7 @@ namespace AIA.Models
         // AI Orchestration service
         private AIOrchestrationService? _aiOrchestrationService;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Event fired when a reminder notification should be displayed
@@ -130,40 +134,7 @@ namespace AIA.Models
             }
         }
 
-        public ObservableCollection<ChatSession> ActiveChats { get; set; } = new ObservableCollection<ChatSession>()
-        {
-            new ChatSession() 
-            { 
-                ChatTitle = "Chat 1", 
-                ChatSummary = "Summary of Chat 1",
-                Messages = 
-                {
-                    new ChatMessage { Role = "user", Content = "Hello! Can you help me with this task?" },
-                    new ChatMessage { Role = "assistant", Content = "Of course! I'd be happy to help you. What do you need assistance with?" },
-                    new ChatMessage { Role = "user", Content = "I need to implement a new feature in my application." },
-                    new ChatMessage { Role = "assistant", Content = "That sounds great! Can you provide more details about the feature you want to implement? What should it do and what are the requirements?" }
-                }
-            },
-            new ChatSession() 
-            { 
-                ChatTitle = "Chat 2", 
-                ChatSummary = "Summary of Chat 2",
-                Messages =
-                {
-                    new ChatMessage { Role = "user", Content = "What's the weather like?" },
-                    new ChatMessage { Role = "assistant", Content = "I don't have access to real-time weather data, but I can help you with coding questions!" }
-                }
-            },
-            new ChatSession() 
-            { 
-                ChatTitle = "Chat 3", 
-                ChatSummary = "Summary of Chat 3",
-                Messages =
-                {
-                    new ChatMessage { Role = "assistant", Content = "Welcome to a new chat session! How can I assist you today?" }
-                }
-            },
-        };
+        public ObservableCollection<ChatSession> ActiveChats { get; set; } = new ObservableCollection<ChatSession>();
 
         public ObservableCollection<TaskItem> Tasks { get; set; } = new ObservableCollection<TaskItem>();
 
@@ -503,9 +474,12 @@ namespace AIA.Models
                 {
                     _selectedChatSession = value;
                     OnPropertyChanged(nameof(SelectedChatSession));
+                    OnPropertyChanged(nameof(HasSelectedChatSession));
                 }
             }
         }
+
+        public bool HasSelectedChatSession => SelectedChatSession != null;
 
         public string MessageInput
         {
@@ -520,6 +494,33 @@ namespace AIA.Models
             }
         }
 
+        // Chat management properties
+        public bool IsRenamingChat
+        {
+            get => _isRenamingChat;
+            set
+            {
+                if (_isRenamingChat != value)
+                {
+                    _isRenamingChat = value;
+                    OnPropertyChanged(nameof(IsRenamingChat));
+                }
+            }
+        }
+
+        public string RenameChatTitle
+        {
+            get => _renameChatTitle;
+            set
+            {
+                if (_renameChatTitle != value)
+                {
+                    _renameChatTitle = value;
+                    OnPropertyChanged(nameof(RenameChatTitle));
+                }
+            }
+        }
+
         public Array TaskStatusValues => Enum.GetValues(typeof(TaskStatus));
         public Array TaskPriorityValues => Enum.GetValues(typeof(TaskPriority));
         public Array ReminderSeverityValues => Enum.GetValues(typeof(ReminderSeverity));
@@ -527,11 +528,8 @@ namespace AIA.Models
 
         public OverlayViewModel()
         {
-            // Set the first chat as selected by default
-            if (ActiveChats.Count > 0)
-            {
-                SelectedChatSession = ActiveChats[0];
-            }
+            // Load chat sessions from disk (or create empty one if first run)
+            _ = LoadChatsAsync();
 
             // Load tasks and reminders from disk (or initialize with samples if first run)
             _ = LoadTasksAndRemindersAsync();
@@ -640,6 +638,169 @@ namespace AIA.Models
                 CurrentDataAssets.Add(asset);
             }
         }
+
+        #region Chat Session Management
+
+        private async Task LoadChatsAsync()
+        {
+            var chats = await ChatSessionService.LoadChatsAsync();
+
+            ActiveChats.Clear();
+            foreach (var chat in chats)
+            {
+                ActiveChats.Add(chat);
+            }
+
+            // If no chats exist, create an empty one
+            if (ActiveChats.Count == 0)
+            {
+                CreateNewChatSession();
+            }
+            else
+            {
+                SelectedChatSession = ActiveChats[0];
+            }
+        }
+
+        /// <summary>
+        /// Saves all chat sessions to disk
+        /// </summary>
+        public async Task SaveChatsAsync()
+        {
+            await ChatSessionService.SaveChatsAsync(ActiveChats);
+        }
+
+        /// <summary>
+        /// Creates a new chat session and selects it
+        /// </summary>
+        public ChatSession CreateNewChatSession(string? title = null)
+        {
+            var chatNumber = ActiveChats.Count + 1;
+            var chatSession = new ChatSession
+            {
+                ChatTitle = title ?? $"Chat {chatNumber}",
+                ChatSummary = "New conversation"
+            };
+
+            ActiveChats.Add(chatSession);
+            SelectedChatSession = chatSession;
+
+            _ = SaveChatsAsync();
+
+            return chatSession;
+        }
+
+        /// <summary>
+        /// Deletes the specified chat session
+        /// </summary>
+        public void DeleteChatSession(ChatSession chatSession)
+        {
+            if (chatSession == null) return;
+
+            var index = ActiveChats.IndexOf(chatSession);
+            ActiveChats.Remove(chatSession);
+
+            // Select another chat if the deleted one was selected
+            if (SelectedChatSession == chatSession || SelectedChatSession == null)
+            {
+                if (ActiveChats.Count > 0)
+                {
+                    // Select the previous chat, or the first one if we deleted the first
+                    var newIndex = Math.Max(0, index - 1);
+                    SelectedChatSession = ActiveChats[Math.Min(newIndex, ActiveChats.Count - 1)];
+                }
+                else
+                {
+                    // No chats left, create a new one
+                    CreateNewChatSession();
+                    return; // CreateNewChatSession already saves
+                }
+            }
+
+            _ = SaveChatsAsync();
+        }
+
+        /// <summary>
+        /// Deletes the currently selected chat session
+        /// </summary>
+        public void DeleteSelectedChatSession()
+        {
+            if (SelectedChatSession != null)
+            {
+                DeleteChatSession(SelectedChatSession);
+            }
+        }
+
+        /// <summary>
+        /// Renames the specified chat session
+        /// </summary>
+        public void RenameChatSession(ChatSession chatSession, string newTitle)
+        {
+            if (chatSession == null || string.IsNullOrWhiteSpace(newTitle)) return;
+            
+            chatSession.ChatTitle = newTitle.Trim();
+            chatSession.IsRenaming = false;
+        }
+
+        /// <summary>
+        /// Starts renaming the currently selected chat session
+        /// </summary>
+        public void StartRenamingSelectedChat()
+        {
+            if (SelectedChatSession == null) return;
+            
+            RenameChatTitle = SelectedChatSession.ChatTitle;
+            IsRenamingChat = true;
+        }
+
+        /// <summary>
+        /// Confirms the rename operation for the selected chat
+        /// </summary>
+        public void ConfirmRenameChatSession()
+        {
+            if (SelectedChatSession != null && !string.IsNullOrWhiteSpace(RenameChatTitle))
+            {
+                SelectedChatSession.ChatTitle = RenameChatTitle.Trim();
+            }
+            IsRenamingChat = false;
+            RenameChatTitle = string.Empty;
+
+            _ = SaveChatsAsync();
+        }
+
+        /// <summary>
+        /// Cancels the rename operation
+        /// </summary>
+        public void CancelRenameChatSession()
+        {
+            IsRenamingChat = false;
+            RenameChatTitle = string.Empty;
+        }
+
+        /// <summary>
+        /// Clears all messages in the specified chat session
+        /// </summary>
+        public void ClearChatSession(ChatSession chatSession)
+        {
+            if (chatSession == null) return;
+
+            chatSession.Messages.Clear();
+
+            _ = SaveChatsAsync();
+        }
+
+        /// <summary>
+        /// Clears all messages in the currently selected chat session
+        /// </summary>
+        public void ClearSelectedChatSession()
+        {
+            if (SelectedChatSession != null)
+            {
+                ClearChatSession(SelectedChatSession);
+            }
+        }
+
+        #endregion
 
         #region Teams Methods
 

@@ -21,6 +21,88 @@ namespace AIA.Views
         /// </summary>
         public event EventHandler<string>? MessageSent;
 
+        #region Chat Management Event Handlers
+
+        private void BtnNewChat_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.CreateNewChatSession();
+        }
+
+        private void BtnDeleteChat_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel?.SelectedChatSession == null) return;
+
+            // Show confirmation
+            var result = System.Windows.MessageBox.Show(
+                $"Are you sure you want to delete '{ViewModel.SelectedChatSession.ChatTitle}'?",
+                "Delete Chat",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                ViewModel.DeleteSelectedChatSession();
+            }
+        }
+
+        private void BtnRenameChat_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel?.SelectedChatSession == null) return;
+            
+            ViewModel.StartRenamingSelectedChat();
+            
+            // Focus the rename textbox
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                RenameChatTextBox.Focus();
+                RenameChatTextBox.SelectAll();
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private void BtnClearChat_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel?.SelectedChatSession == null) return;
+
+            var result = System.Windows.MessageBox.Show(
+                "Are you sure you want to clear all messages in this chat?",
+                "Clear Chat",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                ViewModel.ClearSelectedChatSession();
+            }
+        }
+
+        private void BtnConfirmRename_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ConfirmRenameChatSession();
+        }
+
+        private void BtnCancelRename_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.CancelRenameChatSession();
+        }
+
+        private void RenameChatTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+                ViewModel?.ConfirmRenameChatSession();
+            }
+            else if (e.Key == Key.Escape)
+            {
+                e.Handled = true;
+                ViewModel?.CancelRenameChatSession();
+            }
+        }
+
+        #endregion
+
+        #region Message Sending
+
         private void BtnSendMessage(object sender, RoutedEventArgs e)
         {
             _ = SendMessageAsync();
@@ -57,7 +139,7 @@ namespace AIA.Views
             var assistantMessage = new ChatMessage
             {
                 Role = "assistant",
-                Content = "Thinking..."
+                Content = ""
             };
             ViewModel.SelectedChatSession.Messages.Add(assistantMessage);
 
@@ -67,7 +149,7 @@ namespace AIA.Views
             try
             {
                 ViewModel.IsAiProcessing = true;
-                ViewModel.AiStatusMessage = "Processing...";
+                ViewModel.AiStatusMessage = "Streaming response...";
 
                 // Build conversation history for AI
                 var conversationHistory = new List<AIMessage>();
@@ -83,25 +165,49 @@ namespace AIA.Views
                     }
                 }
 
-                // Use AI Orchestration Service - run on UI thread since tools may modify UI-bound collections
-                var response = await ViewModel.AIOrchestration.GenerateAsync(
-                    userMessage,
-                    conversationHistory.Take(conversationHistory.Count - 1).ToList()
-                );
-
-                if (response.Success)
+                // Check if tool use is enabled - if so, use non-streaming for tool support
+                if (ViewModel.AIOrchestration.Settings.EnableToolUse)
                 {
-                    assistantMessage.Content = response.Content;
+                    // Use non-streaming for tool support
+                    assistantMessage.Content = "Thinking...";
 
-                    if (response.UsedProvider != null)
+                    var response = await ViewModel.AIOrchestration.GenerateAsync(
+                        userMessage,
+                        conversationHistory.Take(conversationHistory.Count - 1).ToList()
+                    );
+
+                    if (response.Success)
                     {
-                        ViewModel.AiStatusMessage = $"Response from {response.UsedProvider.Name} ({response.PromptTokens + response.CompletionTokens} tokens)";
+                        assistantMessage.Content = response.Content;
+
+                        if (response.UsedProvider != null)
+                        {
+                            ViewModel.AiStatusMessage = $"Response from {response.UsedProvider.Name} ({response.PromptTokens + response.CompletionTokens} tokens)";
+                        }
+                    }
+                    else
+                    {
+                        assistantMessage.Content = $"Error: {response.Error}";
+                        ViewModel.AiStatusMessage = "Error occurred";
                     }
                 }
                 else
                 {
-                    assistantMessage.Content = $"Error: {response.Error}";
-                    ViewModel.AiStatusMessage = "Error occurred";
+                    // Use streaming for faster feedback
+                    var contentBuilder = new System.Text.StringBuilder();
+
+                    await foreach (var chunk in ViewModel.AIOrchestration.GenerateStreamAsync(
+                        userMessage,
+                        conversationHistory.Take(conversationHistory.Count - 1).ToList()))
+                    {
+                        contentBuilder.Append(chunk);
+                        assistantMessage.Content = contentBuilder.ToString();
+
+                        // Scroll to bottom as content updates
+                        ChatScrollViewer.ScrollToEnd();
+                    }
+
+                    ViewModel.AiStatusMessage = "Response complete";
                 }
 
                 MessageSent?.Invoke(this, userMessage);
@@ -115,7 +221,12 @@ namespace AIA.Views
             {
                 ViewModel.IsAiProcessing = false;
                 ChatScrollViewer.ScrollToEnd();
+
+                // Save chat session after message exchange
+                _ = ViewModel.SaveChatsAsync();
             }
         }
+
+        #endregion
     }
 }

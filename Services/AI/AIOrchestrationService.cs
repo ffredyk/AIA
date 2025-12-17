@@ -241,6 +241,55 @@ namespace AIA.Services.AI
         #region AI Generation
 
         /// <summary>
+        /// Generate a streaming response from the AI (text only, no tool use)
+        /// </summary>
+        public async IAsyncEnumerable<string> GenerateStreamAsync(string userMessage, List<AIMessage>? conversationHistory = null, AIProvider? specificProvider = null)
+        {
+            var provider = specificProvider ?? GetBestProvider(userMessage);
+            if (provider == null)
+            {
+                yield return "Error: No AI providers configured. Please configure at least one provider in Orchestration settings.";
+                yield break;
+            }
+
+            if (!_clients.TryGetValue(provider.ProviderType, out var client))
+            {
+                yield return $"Error: No client available for provider type: {provider.ProviderType}";
+                yield break;
+            }
+
+            if (!client.ValidateConfiguration(provider))
+            {
+                yield return $"Error: Provider '{provider.Name}' is not properly configured.";
+                yield break;
+            }
+
+            // Build the request
+            var request = new AIRequest
+            {
+                Temperature = Settings.DefaultTemperature,
+                MaxTokens = Settings.DefaultMaxTokens,
+                SystemPrompt = BuildSystemPrompt(),
+                StreamResponse = true
+            };
+
+            // Add conversation history
+            if (conversationHistory != null)
+            {
+                request.Messages.AddRange(conversationHistory);
+            }
+
+            // Add user message
+            request.Messages.Add(new AIMessage { Role = "user", Content = userMessage });
+
+            // Stream the response
+            await foreach (var chunk in client.GenerateStreamAsync(provider, request))
+            {
+                yield return chunk;
+            }
+        }
+
+        /// <summary>
         /// Generate a response from the AI with optional tool use
         /// </summary>
         public async Task<AIResponse> GenerateAsync(string userMessage, List<AIMessage>? conversationHistory = null, AIProvider? specificProvider = null)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -17,6 +18,7 @@ namespace AIA.Services.AI
     {
         AIProviderType ProviderType { get; }
         Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request);
+        IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request);
         bool ValidateConfiguration(AIProvider provider);
     }
 
@@ -38,6 +40,96 @@ namespace AIA.Services.AI
         public bool ValidateConfiguration(AIProvider provider)
         {
             return !string.IsNullOrEmpty(provider.ApiKey) && !string.IsNullOrEmpty(provider.ModelId);
+        }
+
+        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request)
+        {
+            var messages = new List<object>();
+
+            if (!string.IsNullOrEmpty(request.SystemPrompt))
+            {
+                messages.Add(new { role = "system", content = request.SystemPrompt });
+            }
+
+            foreach (var msg in request.Messages)
+            {
+                if (msg.ToolCallId != null)
+                {
+                    messages.Add(new { role = "tool", tool_call_id = msg.ToolCallId, content = msg.Content });
+                }
+                else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
+                {
+                    var toolCalls = new List<object>();
+                    foreach (var tc in msg.ToolCalls)
+                    {
+                        toolCalls.Add(new
+                        {
+                            id = tc.Id,
+                            type = "function",
+                            function = new { name = tc.Name, arguments = JsonSerializer.Serialize(tc.Arguments) }
+                        });
+                    }
+                    messages.Add(new { role = msg.Role, content = msg.Content, tool_calls = toolCalls });
+                }
+                else
+                {
+                    messages.Add(new { role = msg.Role, content = msg.Content });
+                }
+            }
+
+            var requestBody = new Dictionary<string, object>
+            {
+                ["model"] = provider.ModelId,
+                ["messages"] = messages,
+                ["temperature"] = request.Temperature,
+                ["max_tokens"] = request.MaxTokens,
+                ["stream"] = true
+            };
+
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/chat/completions");
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", provider.ApiKey);
+            httpRequest.Content = content;
+
+            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                yield return $"[Error: {response.StatusCode} - {errorContent}]";
+                yield break;
+            }
+
+            using var stream = await response.Content.ReadAsStreamAsync();
+            using var reader = new StreamReader(stream);
+
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (string.IsNullOrEmpty(line)) continue;
+                if (!line.StartsWith("data: ")) continue;
+
+                var data = line.Substring(6);
+                if (data == "[DONE]") break;
+
+                OpenAIStreamResponse? chunk;
+                try
+                {
+                    chunk = JsonSerializer.Deserialize<OpenAIStreamResponse>(data);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                var delta = chunk?.Choices?.FirstOrDefault()?.Delta?.Content;
+                if (!string.IsNullOrEmpty(delta))
+                {
+                    yield return delta;
+                }
+            }
         }
 
         public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request)
@@ -192,6 +284,30 @@ namespace AIA.Services.AI
         }
 
         #region OpenAI Response Models
+        private class OpenAIStreamResponse
+        {
+            [JsonPropertyName("choices")]
+            public List<OpenAIStreamChoice>? Choices { get; set; }
+        }
+
+        private class OpenAIStreamChoice
+        {
+            [JsonPropertyName("delta")]
+            public OpenAIStreamDelta? Delta { get; set; }
+
+            [JsonPropertyName("finish_reason")]
+            public string? FinishReason { get; set; }
+        }
+
+        private class OpenAIStreamDelta
+        {
+            [JsonPropertyName("content")]
+            public string? Content { get; set; }
+
+            [JsonPropertyName("role")]
+            public string? Role { get; set; }
+        }
+
         private class OpenAIResponse
         {
             [JsonPropertyName("choices")]
@@ -273,6 +389,98 @@ namespace AIA.Services.AI
             return !string.IsNullOrEmpty(provider.ApiKey) 
                 && !string.IsNullOrEmpty(provider.Endpoint)
                 && !string.IsNullOrEmpty(provider.DeploymentName);
+        }
+
+        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request)
+        {
+            var messages = new List<object>();
+
+            if (!string.IsNullOrEmpty(request.SystemPrompt))
+            {
+                messages.Add(new { role = "system", content = request.SystemPrompt });
+            }
+
+            foreach (var msg in request.Messages)
+            {
+                if (msg.ToolCallId != null)
+                {
+                    messages.Add(new { role = "tool", tool_call_id = msg.ToolCallId, content = msg.Content });
+                }
+                else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
+                {
+                    var toolCalls = new List<object>();
+                    foreach (var tc in msg.ToolCalls)
+                    {
+                        toolCalls.Add(new
+                        {
+                            id = tc.Id,
+                            type = "function",
+                            function = new { name = tc.Name, arguments = JsonSerializer.Serialize(tc.Arguments) }
+                        });
+                    }
+                    messages.Add(new { role = msg.Role, content = msg.Content, tool_calls = toolCalls });
+                }
+                else
+                {
+                    messages.Add(new { role = msg.Role, content = msg.Content });
+                }
+            }
+
+            var requestBody = new Dictionary<string, object>
+            {
+                ["messages"] = messages,
+                ["temperature"] = request.Temperature,
+                ["max_completion_tokens"] = request.MaxTokens,
+                ["stream"] = true
+            };
+
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var endpoint = provider.Endpoint.TrimEnd('/');
+            var apiUrl = $"{endpoint}/openai/deployments/{provider.DeploymentName}/chat/completions?api-version=2024-02-15-preview";
+
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+            httpRequest.Headers.Add("api-key", provider.ApiKey);
+            httpRequest.Content = content;
+
+            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                yield return $"[Error: {response.StatusCode} - {errorContent}]";
+                yield break;
+            }
+
+            using var stream = await response.Content.ReadAsStreamAsync();
+            using var reader = new StreamReader(stream);
+
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (string.IsNullOrEmpty(line)) continue;
+                if (!line.StartsWith("data: ")) continue;
+
+                var data = line.Substring(6);
+                if (data == "[DONE]") break;
+
+                AzureStreamResponse? chunk;
+                try
+                {
+                    chunk = JsonSerializer.Deserialize<AzureStreamResponse>(data);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                var delta = chunk?.Choices?.FirstOrDefault()?.Delta?.Content;
+                if (!string.IsNullOrEmpty(delta))
+                {
+                    yield return delta;
+                }
+            }
         }
 
         public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request)
@@ -431,6 +639,30 @@ namespace AIA.Services.AI
         }
 
         #region Azure OpenAI Response Models
+        private class AzureStreamResponse
+        {
+            [JsonPropertyName("choices")]
+            public List<AzureStreamChoice>? Choices { get; set; }
+        }
+
+        private class AzureStreamChoice
+        {
+            [JsonPropertyName("delta")]
+            public AzureStreamDelta? Delta { get; set; }
+
+            [JsonPropertyName("finish_reason")]
+            public string? FinishReason { get; set; }
+        }
+
+        private class AzureStreamDelta
+        {
+            [JsonPropertyName("content")]
+            public string? Content { get; set; }
+
+            [JsonPropertyName("role")]
+            public string? Role { get; set; }
+        }
+
         private class AzureOpenAIResponse
         {
             [JsonPropertyName("choices")]
@@ -511,6 +743,95 @@ namespace AIA.Services.AI
         public bool ValidateConfiguration(AIProvider provider)
         {
             return !string.IsNullOrEmpty(provider.ApiKey) && !string.IsNullOrEmpty(provider.ModelId);
+        }
+
+        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request)
+        {
+            var contents = new List<object>();
+
+            object? systemInstruction = null;
+            if (!string.IsNullOrEmpty(request.SystemPrompt))
+            {
+                systemInstruction = new { parts = new[] { new { text = request.SystemPrompt } } };
+            }
+
+            foreach (var msg in request.Messages)
+            {
+                var role = msg.Role == "assistant" ? "model" : "user";
+
+                if (msg.ToolCallId != null)
+                {
+                    contents.Add(new
+                    {
+                        role = "function",
+                        parts = new[] { new { functionResponse = new { name = msg.Name, response = new { result = msg.Content } } } }
+                    });
+                }
+                else
+                {
+                    contents.Add(new { role, parts = new[] { new { text = msg.Content } } });
+                }
+            }
+
+            var requestBody = new Dictionary<string, object>
+            {
+                ["contents"] = contents,
+                ["generationConfig"] = new
+                {
+                    temperature = request.Temperature,
+                    maxOutputTokens = request.MaxTokens
+                }
+            };
+
+            if (systemInstruction != null)
+            {
+                requestBody["systemInstruction"] = systemInstruction;
+            }
+
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var apiUrl = $"{BaseUrl}/models/{provider.ModelId}:streamGenerateContent?key={provider.ApiKey}&alt=sse";
+
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+            httpRequest.Content = content;
+
+            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                yield return $"[Error: {response.StatusCode} - {errorContent}]";
+                yield break;
+            }
+
+            using var stream = await response.Content.ReadAsStreamAsync();
+            using var reader = new StreamReader(stream);
+
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (string.IsNullOrEmpty(line)) continue;
+                if (!line.StartsWith("data: ")) continue;
+
+                var data = line.Substring(6);
+
+                GeminiStreamResponse? chunk;
+                try
+                {
+                    chunk = JsonSerializer.Deserialize<GeminiStreamResponse>(data);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                var text = chunk?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+                if (!string.IsNullOrEmpty(text))
+                {
+                    yield return text;
+                }
+            }
         }
 
         public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request)
@@ -684,6 +1005,30 @@ namespace AIA.Services.AI
         }
 
         #region Gemini Response Models
+        private class GeminiStreamResponse
+        {
+            [JsonPropertyName("candidates")]
+            public List<GeminiStreamCandidate>? Candidates { get; set; }
+        }
+
+        private class GeminiStreamCandidate
+        {
+            [JsonPropertyName("content")]
+            public GeminiStreamContent? Content { get; set; }
+        }
+
+        private class GeminiStreamContent
+        {
+            [JsonPropertyName("parts")]
+            public List<GeminiStreamPart>? Parts { get; set; }
+        }
+
+        private class GeminiStreamPart
+        {
+            [JsonPropertyName("text")]
+            public string? Text { get; set; }
+        }
+
         private class GeminiResponse
         {
             [JsonPropertyName("candidates")]
@@ -746,6 +1091,109 @@ namespace AIA.Services.AI
         public bool ValidateConfiguration(AIProvider provider)
         {
             return !string.IsNullOrEmpty(provider.ApiKey) && !string.IsNullOrEmpty(provider.ModelId);
+        }
+
+        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request)
+        {
+            var messages = new List<object>();
+
+            foreach (var msg in request.Messages)
+            {
+                if (msg.ToolCallId != null)
+                {
+                    messages.Add(new
+                    {
+                        role = "user",
+                        content = new[]
+                        {
+                            new
+                            {
+                                type = "tool_result",
+                                tool_use_id = msg.ToolCallId,
+                                content = msg.Content
+                            }
+                        }
+                    });
+                }
+                else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
+                {
+                    var contentBlocks = new List<object>();
+                    if (!string.IsNullOrEmpty(msg.Content))
+                    {
+                        contentBlocks.Add(new { type = "text", text = msg.Content });
+                    }
+                    foreach (var tc in msg.ToolCalls)
+                    {
+                        contentBlocks.Add(new { type = "tool_use", id = tc.Id, name = tc.Name, input = tc.Arguments });
+                    }
+                    messages.Add(new { role = "assistant", content = contentBlocks });
+                }
+                else
+                {
+                    messages.Add(new { role = msg.Role, content = msg.Content });
+                }
+            }
+
+            var requestBody = new Dictionary<string, object>
+            {
+                ["model"] = provider.ModelId,
+                ["messages"] = messages,
+                ["max_tokens"] = request.MaxTokens,
+                ["stream"] = true
+            };
+
+            if (!string.IsNullOrEmpty(request.SystemPrompt))
+            {
+                requestBody["system"] = request.SystemPrompt;
+            }
+
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/messages");
+            httpRequest.Headers.Add("x-api-key", provider.ApiKey);
+            httpRequest.Headers.Add("anthropic-version", "2023-06-01");
+            httpRequest.Content = content;
+
+            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                yield return $"[Error: {response.StatusCode} - {errorContent}]";
+                yield break;
+            }
+
+            using var stream = await response.Content.ReadAsStreamAsync();
+            using var reader = new StreamReader(stream);
+
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (string.IsNullOrEmpty(line)) continue;
+                if (!line.StartsWith("data: ")) continue;
+
+                var data = line.Substring(6);
+
+                AnthropicStreamEvent? evt;
+                try
+                {
+                    evt = JsonSerializer.Deserialize<AnthropicStreamEvent>(data);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (evt?.Type == "content_block_delta" && evt.Delta?.Type == "text_delta")
+                {
+                    var text = evt.Delta.Text;
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        yield return text;
+                    }
+                }
+            }
         }
 
         public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request)
@@ -931,6 +1379,24 @@ namespace AIA.Services.AI
         }
 
         #region Anthropic Response Models
+        private class AnthropicStreamEvent
+        {
+            [JsonPropertyName("type")]
+            public string? Type { get; set; }
+
+            [JsonPropertyName("delta")]
+            public AnthropicDelta? Delta { get; set; }
+        }
+
+        private class AnthropicDelta
+        {
+            [JsonPropertyName("type")]
+            public string? Type { get; set; }
+
+            [JsonPropertyName("text")]
+            public string? Text { get; set; }
+        }
+
         private class AnthropicResponse
         {
             [JsonPropertyName("content")]
