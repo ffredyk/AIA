@@ -1,0 +1,96 @@
+<UserControl x:Class="AIA.Views.ToolbarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:AIA.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="1920">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Toolbar -->
+        <Grid>
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <ui:Button Click="BtnNewTask">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="ClipboardTaskAdd20" Foreground="White"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="New task"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Margin="5,0,0,0" Click="BtnNewReminder">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Lightbulb16" Foreground="White"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="New reminder"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Margin="5,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="ClipboardDataBar20" Foreground="White"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="New data"/>
+                    </StackPanel>
+                </ui:Button>
+                <Separator Width="1" Margin="10,0" Background="White"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Center Toolbar -->
+        <Grid HorizontalAlignment="Center" Grid.Column="1">
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <ui:Button>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Settings20" Foreground="White"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Settings"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Margin="5,0,0,0" Click="BtnOrchestration">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Bot20" Foreground="White"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Orchestration"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Margin="5,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="ArrowRepeatAll20" Foreground="White"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Automation"/>
+                    </StackPanel>
+                </ui:Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Right Toolbar -->
+        <Grid HorizontalAlignment="Right" Grid.Column="2">
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <ui:Button Click="BtnShutdown">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Power20" Foreground="White"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="App Shutdown"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Margin="5,0,0,0" IsEnabled="False">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Remote20" Foreground="Gray"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="Gray" FontWeight="SemiBold" Text="Server"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Margin="5,0,0,0" IsEnabled="False">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="PeopleTeam20" Foreground="Gray"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="Gray" FontWeight="SemiBold" Text="Team"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Margin="5,0,0,0" Click="BtnClose">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="ArrowExit20" Foreground="White"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Close overlay"/>
+                    </StackPanel>
+                </ui:Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,444 @@
+<UserControl x:Class="AIA.Views.DataBanksTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:AIA.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" MinWidth="150"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="250"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="300"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Categories Panel -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Categories Header -->
+            <Grid Margin="8,8,8,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Categories" Foreground="White" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                <ui:Button Grid.Column="1" Padding="4" Background="Transparent" Click="BtnAddCategory">
+                    <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="12"/>
+                </ui:Button>
+            </Grid>
+            
+            <!-- Add New Category Input -->
+            <Border Grid.Row="1" Margin="8,0,8,4" Padding="6" CornerRadius="6" Background="#19FFFFFF" 
+                    Visibility="{Binding IsAddingNewCategory, Converter={StaticResource BoolToVis}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="NewCategoryNameInput" 
+                             Text="{Binding NewCategoryName, UpdateSourceTrigger=PropertyChanged}"
+                             Background="Transparent" Foreground="White" BorderThickness="0"
+                             Padding="4" FontSize="12" 
+                             KeyDown="NewCategoryNameInput_KeyDown"/>
+                    <ui:Button Grid.Column="1" Margin="2,0" Padding="4" Click="BtnConfirmNewCategory">
+                        <ui:SymbolIcon Symbol="Checkmark12" Foreground="#1EB75F" FontSize="10"/>
+                    </ui:Button>
+                    <ui:Button Grid.Column="2" Padding="4" Click="BtnCancelNewCategory">
+                        <ui:SymbolIcon Symbol="Dismiss12" Foreground="#FF6666" FontSize="10"/>
+                    </ui:Button>
+                </Grid>
+            </Border>
+            
+            <!-- Categories List -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="8,0,8,8">
+                <ItemsControl ItemsSource="{Binding DataBankCategories}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,2" CornerRadius="6" Cursor="Hand"
+                                    MouseLeftButtonUp="CategoryItem_Click" Tag="{Binding}">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#0CFFFFFF"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#19FFFFFF"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid Margin="8,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <!-- Color Indicator -->
+                                    <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="{Binding Color}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    
+                                    <!-- Category Name -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" Foreground="White" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding EntryCountText}" Foreground="#999999" FontSize="10"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Delete Button -->
+                                    <ui:Button Grid.Column="2" Padding="2" Background="Transparent" 
+                                               Click="BtnDeleteCategory" Tag="{Binding}" Visibility="Collapsed"
+                                               x:Name="DeleteCategoryBtn">
+                                        <ui:SymbolIcon Symbol="Delete12" Foreground="#FF6666" FontSize="10"/>
+                                    </ui:Button>
+                                </Grid>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True">
+                                    <Setter TargetName="DeleteCategoryBtn" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+        
+        <!-- Splitter 1 -->
+        <GridSplitter Grid.Column="1" Width="4" Background="#33FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+        
+        <!-- Entries Panel -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Entries Header -->
+            <Grid Margin="8,8,8,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Entries" Foreground="White" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                <ui:Button Grid.Column="1" Padding="4" Margin="0,0,4,0" Background="Transparent" Click="BtnImportFile"
+                           IsEnabled="{Binding HasSelectedCategory}">
+                    <ui:SymbolIcon Symbol="DocumentArrowUp20" Foreground="White" FontSize="14"/>
+                </ui:Button>
+                <ui:Button Grid.Column="2" Padding="4" Background="Transparent" Click="BtnAddEntry"
+                           IsEnabled="{Binding HasSelectedCategory}">
+                    <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="12"/>
+                </ui:Button>
+            </Grid>
+            
+            <!-- Add New Entry Input -->
+            <Border Grid.Row="1" Margin="8,0,8,4" Padding="6" CornerRadius="6" Background="#19FFFFFF" 
+                    Visibility="{Binding IsAddingNewEntry, Converter={StaticResource BoolToVis}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="NewEntryTitleInput" 
+                             Text="{Binding NewEntryTitle, UpdateSourceTrigger=PropertyChanged}"
+                             Background="Transparent" Foreground="White" BorderThickness="0"
+                             Padding="4" FontSize="12" 
+                             KeyDown="NewEntryTitleInput_KeyDown"/>
+                    <ui:Button Grid.Column="1" Margin="2,0" Padding="4" Click="BtnConfirmNewEntry">
+                        <ui:SymbolIcon Symbol="Checkmark12" Foreground="#1EB75F" FontSize="10"/>
+                    </ui:Button>
+                    <ui:Button Grid.Column="2" Padding="4" Click="BtnCancelNewEntry">
+                        <ui:SymbolIcon Symbol="Dismiss12" Foreground="#FF6666" FontSize="10"/>
+                    </ui:Button>
+                </Grid>
+            </Border>
+            
+            <!-- No Category Selected -->
+            <StackPanel Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding HasSelectedCategory, Converter={StaticResource InverseBoolToVis}}">
+                <ui:SymbolIcon Symbol="FolderOpen20" FontSize="32" Foreground="#666666"/>
+                <TextBlock Text="Select a category" Foreground="#666666" Margin="0,8,0,0" FontSize="12"/>
+            </StackPanel>
+            
+            <!-- Entries List -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="8,0,8,8"
+                          Visibility="{Binding HasSelectedCategory, Converter={StaticResource BoolToVis}}">
+                <ItemsControl ItemsSource="{Binding CurrentCategoryEntries}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,4" CornerRadius="8" BorderBrush="#33FFFFFF" BorderThickness="1"
+                                    MouseLeftButtonUp="DataEntryItem_Click" Tag="{Binding}" Cursor="Hand">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#0CFFFFFF"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#19FFFFFF"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid Margin="10,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <!-- Entry Type Icon -->
+                                    <Border Width="28" Height="28" CornerRadius="4" Background="#19FFFFFF" Margin="0,0,10,0">
+                                        <ui:SymbolIcon Foreground="White" FontSize="14">
+                                            <ui:SymbolIcon.Style>
+                                                <Style TargetType="ui:SymbolIcon">
+                                                    <Setter Property="Symbol" Value="Document20"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding EntryType}" Value="Text">
+                                                            <Setter Property="Symbol" Value="Document20"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding EntryType}" Value="TextFile">
+                                                            <Setter Property="Symbol" Value="DocumentText20"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding EntryType}" Value="Pdf">
+                                                            <Setter Property="Symbol" Value="DocumentPdf20"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding EntryType}" Value="Email">
+                                                            <Setter Property="Symbol" Value="Mail20"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding EntryType}" Value="Image">
+                                                            <Setter Property="Symbol" Value="Image20"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding EntryType}" Value="Custom">
+                                                            <Setter Property="Symbol" Value="DocumentBulletList20"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ui:SymbolIcon.Style>
+                                        </ui:SymbolIcon>
+                                    </Border>
+                                    
+                                    <!-- Entry Info -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="White" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding ContentPreview}" Foreground="#999999" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Entry Type Badge -->
+                                    <Border Grid.Column="2" Padding="6,2" CornerRadius="4" Background="#19FFFFFF" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding EntryType}" FontSize="10" Foreground="#CCCCCC"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+        
+        <!-- Splitter 2 -->
+        <GridSplitter Grid.Column="3" Width="4" Background="#33FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+        
+        <!-- Entry Details Panel -->
+        <Border Grid.Column="4" Margin="8" CornerRadius="8" Background="#0CFFFFFF" BorderBrush="#33FFFFFF" BorderThickness="1">
+            <Grid>
+                <!-- No Entry Selected -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Visibility="{Binding HasSelectedDataEntry, Converter={StaticResource InverseBoolToVis}}">
+                    <ui:SymbolIcon Symbol="DocumentText20" FontSize="48" Foreground="#666666"/>
+                    <TextBlock Text="Select an entry to view details" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                </StackPanel>
+                
+                <!-- Entry Details -->
+                <ScrollViewer Visibility="{Binding HasSelectedDataEntry, Converter={StaticResource BoolToVis}}"
+                              VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel DataContext="{Binding SelectedDataEntry}">
+                        <!-- Entry Title -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent" Foreground="White" BorderThickness="0"
+                                     FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"
+                                     LostFocus="DataEntryField_LostFocus"/>
+                            <ui:Button Grid.Column="1" Padding="6" Margin="0,0,4,0" Background="Transparent" 
+                                       Click="BtnOpenFile" Tag="{Binding}"
+                                       Visibility="{Binding FilePath, Converter={StaticResource NullToVis}}"
+                                       ToolTip="Open file in default application">
+                                <ui:SymbolIcon Symbol="Open16" Foreground="#0078D4"/>
+                            </ui:Button>
+                            <ui:Button Grid.Column="2" Padding="6" Background="Transparent" Click="BtnDeleteEntry">
+                                <ui:SymbolIcon Symbol="Delete16" Foreground="#FF6666"/>
+                            </ui:Button>
+                        </Grid>
+                        
+                        <!-- File Preview Section -->
+                        <Border Margin="0,0,0,16" CornerRadius="8" Background="#0C000000" 
+                                Visibility="{Binding FilePath, Converter={StaticResource NullToVis}}">
+                            <Grid>
+                                <!-- Image Preview -->
+                                <Border Visibility="{Binding IsImageEntry, Converter={StaticResource BoolToVis}}"
+                                        CornerRadius="8" MaxHeight="250">
+                                    <Grid>
+                                        <Image Source="{Binding PreviewImage}" 
+                                               Stretch="UniformToFill" 
+                                               MaxHeight="250"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                        <!-- Image not loaded placeholder -->
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                    Visibility="{Binding PreviewImage, Converter={StaticResource NullToVis}, ConverterParameter=Inverse}">
+                                            <ui:SymbolIcon Symbol="Image20" FontSize="32" Foreground="#666666"/>
+                                            <TextBlock Text="Image preview unavailable" Foreground="#666666" FontSize="11" Margin="0,8,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            
+                                <!-- PDF Preview Placeholder -->
+                                <Border Visibility="{Binding IsPdfEntry, Converter={StaticResource BoolToVis}}"
+                                        Padding="20" CornerRadius="8">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Border Width="80" Height="100" Background="#33FF4444" CornerRadius="4"
+                                                HorizontalAlignment="Center">
+                                            <Grid>
+                                                <ui:SymbolIcon Symbol="DocumentPdf20" FontSize="40" Foreground="#FF4444" 
+                                                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock Text="{Binding OriginalFileName}" Foreground="White" FontSize="12" 
+                                                   Margin="0,12,0,4" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding FileSizeText}" Foreground="#999999" FontSize="11"
+                                                   HorizontalAlignment="Center"/>
+                                        <ui:Button Margin="0,12,0,0" Padding="12,6" Background="#330078D4" 
+                                                   Click="BtnOpenFile" Tag="{Binding}" HorizontalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:SymbolIcon Symbol="Open16" Foreground="White" FontSize="12"/>
+                                                <TextBlock Text="Open PDF" Foreground="White" FontSize="12" Margin="6,0,0,0"/>
+                                            </StackPanel>
+                                        </ui:Button>
+                                    </StackPanel>
+                                </Border>
+                            
+                                <!-- Text File Preview Header -->
+                                <Border Visibility="{Binding IsTextBasedEntry, Converter={StaticResource BoolToVis}}"
+                                        Padding="12,8" CornerRadius="8,8,0,0" Background="#19FFFFFF">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ui:SymbolIcon Symbol="DocumentText20" Foreground="White" FontSize="16"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding OriginalFileName}" Foreground="White" 
+                                                   FontSize="12" Margin="8,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding FileSizeText}" Foreground="#999999" FontSize="11"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- Entry Type and File Info -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,8,0">
+                                <TextBlock Text="Type" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <ComboBox SelectedItem="{Binding EntryType, Mode=TwoWay}"
+                                          ItemsSource="{Binding Source={StaticResource DataEntryTypeValues}}"
+                                          Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
+                                          SelectionChanged="DataEntryType_Changed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0"
+                                        Visibility="{Binding FilePath, Converter={StaticResource NullToVis}}">
+                                <TextBlock Text="File Size" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{Binding FileSizeText}" Foreground="White" FontSize="13" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <!-- Original File Name -->
+                        <StackPanel Margin="0,0,0,16" Visibility="{Binding OriginalFileName, Converter={StaticResource NullToVis}}">
+                            <TextBlock Text="Original File" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding OriginalFileName}" Foreground="White" FontSize="12"/>
+                        </StackPanel>
+                        
+                        <!-- Tags -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="Tags (comma separated)" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
+                                     Padding="8" FontSize="12"
+                                     LostFocus="DataEntryField_LostFocus"/>
+                        </StackPanel>
+                        
+                        <!-- Content / Text Preview -->
+                        <StackPanel Margin="0,0,0,16">
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Content" Foreground="#999999" FontSize="11"/>
+                                <TextBlock Grid.Column="1" Foreground="#666666" FontSize="10"
+                                           Visibility="{Binding IsImageEntry, Converter={StaticResource BoolToVis}}">
+                                    <Run Text="Image metadata"/>
+                                </TextBlock>
+                            </Grid>
+                            <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
+                                     TextWrapping="Wrap" AcceptsReturn="True" MinHeight="120" MaxHeight="250"
+                                     Padding="8" FontSize="12" VerticalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas"
+                                     LostFocus="DataEntryField_LostFocus">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsImageEntry}" Value="True">
+                                                <Setter Property="IsReadOnly" Value="True"/>
+                                                <Setter Property="Background" Value="#0CFFFFFF"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsPdfEntry}" Value="True">
+                                                <Setter Property="IsReadOnly" Value="True"/>
+                                                <Setter Property="Background" Value="#0CFFFFFF"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </StackPanel>
+                        
+                        <!-- Metadata -->
+                        <Border BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock Foreground="#666666" FontSize="10">
+                                    <Run Text="Created: "/>
+                                    <Run Text="{Binding CreatedDate, StringFormat='MMM dd, yyyy HH:mm'}"/>
+                                </TextBlock>
+                                <TextBlock Foreground="#666666" FontSize="10" Margin="0,4,0,0">
+                                    <Run Text="Modified: "/>
+                                    <Run Text="{Binding ModifiedDate, StringFormat='MMM dd, yyyy HH:mm'}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

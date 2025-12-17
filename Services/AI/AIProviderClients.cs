@@ -316,7 +316,7 @@ namespace AIA.Services.AI
                 {
                     ["messages"] = messages,
                     ["temperature"] = request.Temperature,
-                    ["max_tokens"] = request.MaxTokens
+                    ["max_completion_tokens"] = request.MaxTokens
                 };
 
                 if (request.Tools != null && request.Tools.Count > 0)

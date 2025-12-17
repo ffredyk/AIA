@@ -376,7 +376,11 @@ namespace AIA.Services.AI
             if (TryGetArg<string>(args, "due_date", out var dueDate) && DateTime.TryParse(dueDate, out var dueDateValue))
                 task.DueDate = dueDateValue;
 
-            vm.Tasks.Add(task);
+            // Dispatch to UI thread for collection modification
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                vm.Tasks.Add(task);
+            });
             _ = vm.SaveTasksAndRemindersAsync();
 
             return JsonSerializer.Serialize(new { success = true, taskId = task.Id.ToString(), message = $"Task '{title}' created successfully" });
@@ -396,13 +400,21 @@ namespace AIA.Services.AI
                 return JsonSerializer.Serialize(new { error = "Valid status is required" });
             }
 
-            var task = vm.Tasks.FirstOrDefault(t => t.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+            TaskItem? task = null;
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                task = vm.Tasks.FirstOrDefault(t => t.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+            });
+            
             if (task == null)
             {
                 return JsonSerializer.Serialize(new { error = "Task not found" });
             }
 
-            task.Status = statusEnum;
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                task.Status = statusEnum;
+            });
             _ = vm.SaveTasksAndRemindersAsync();
 
             return JsonSerializer.Serialize(new { success = true, message = $"Task '{task.Title}' status updated to {statusEnum}" });
@@ -460,7 +472,11 @@ namespace AIA.Services.AI
             if (TryGetArg<string>(args, "severity", out var severity) && Enum.TryParse<ReminderSeverity>(severity, out var severityEnum))
                 reminder.Severity = severityEnum;
 
-            vm.Reminders.Add(reminder);
+            // Dispatch to UI thread for collection modification
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                vm.Reminders.Add(reminder);
+            });
             _ = vm.SaveTasksAndRemindersAsync();
 
             return JsonSerializer.Serialize(new { success = true, reminderId = reminder.Id.ToString(), message = $"Reminder '{title}' created for {dueDateTime:g}" });
@@ -475,7 +491,12 @@ namespace AIA.Services.AI
                 return JsonSerializer.Serialize(new { error = "Title is required" });
             }
 
-            var reminder = vm.Reminders.FirstOrDefault(r => r.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+            ReminderItem? reminder = null;
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                reminder = vm.Reminders.FirstOrDefault(r => r.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+            });
+
             if (reminder == null)
             {
                 return JsonSerializer.Serialize(new { error = "Reminder not found" });
@@ -487,7 +508,10 @@ namespace AIA.Services.AI
                 minutes = mins;
             }
 
-            vm.SnoozeReminder(reminder, minutes);
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                vm.SnoozeReminder(reminder, minutes);
+            });
 
             return JsonSerializer.Serialize(new { success = true, message = $"Reminder '{reminder.Title}' snoozed by {minutes} minutes. New due time: {reminder.DueDate:g}" });
         }
@@ -618,14 +642,16 @@ namespace AIA.Services.AI
                 return JsonSerializer.Serialize(new { error = "content is required" });
             }
 
-            var category = vm.DataBankCategories.FirstOrDefault(c => c.Name.Contains(categoryName, StringComparison.OrdinalIgnoreCase));
+            DataBankCategory? category = null;
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                category = vm.DataBankCategories.FirstOrDefault(c => c.Name.Contains(categoryName, StringComparison.OrdinalIgnoreCase));
+            });
+
             if (category == null)
             {
                 return JsonSerializer.Serialize(new { error = "Category not found" });
             }
-
-            var previousCategory = vm.SelectedCategory;
-            vm.SelectedCategory = category;
 
             var entry = new DataBankEntry
             {
@@ -640,11 +666,16 @@ namespace AIA.Services.AI
                 entry.Tags = tags;
             }
 
-            vm.CurrentCategoryEntries.Add(entry);
-            category.EntryCount++;
+            // Dispatch to UI thread for collection modification
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                var previousCategory = vm.SelectedCategory;
+                vm.SelectedCategory = category;
+                vm.CurrentCategoryEntries.Add(entry);
+                category.EntryCount++;
+                vm.SelectedCategory = previousCategory;
+            });
             _ = vm.SaveDataBanksAsync();
-
-            vm.SelectedCategory = previousCategory;
 
             return JsonSerializer.Serialize(new { success = true, entryId = entry.Id.ToString(), message = $"Entry '{title}' created in category '{category.Name}'" });
         }

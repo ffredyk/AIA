@@ -1,0 +1,298 @@
+<UserControl x:Class="AIA.Views.OutlookTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:AIA.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="900">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="300"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="400"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Flagged Emails List Panel -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Header with Refresh -->
+            <Grid Margin="8,8,8,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Flagged Emails" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
+                    <TextBlock Text="{Binding OutlookStatusMessage}" Foreground="#999999" FontSize="11" Margin="0,2,0,0"/>
+                </StackPanel>
+                <ui:Button Grid.Column="1" Padding="6,4" Background="Transparent" Click="BtnRefreshOutlook">
+                    <ui:Button.Style>
+                        <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLoadingOutlookEmails}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ui:Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="ArrowSync12" Foreground="White" FontSize="12"/>
+                        <TextBlock Margin="4,0,0,0" Text="Refresh" Foreground="White" FontSize="11"/>
+                    </StackPanel>
+                </ui:Button>
+            </Grid>
+            
+            <!-- Loading Indicator -->
+            <Border Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Visibility="{Binding IsLoadingOutlookEmails, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <ui:SymbolIcon Symbol="ArrowSync20" FontSize="32" Foreground="#666666"/>
+                    <TextBlock Text="Loading emails..." Foreground="#666666" FontSize="12" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Outlook Not Available -->
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding IsOutlookAvailable, Converter={StaticResource InverseBoolToVis}}">
+                <ui:SymbolIcon Symbol="MailDismiss20" FontSize="48" Foreground="#666666"/>
+                <TextBlock Text="Outlook not available" Foreground="#666666" FontSize="14" Margin="0,12,0,0" HorizontalAlignment="Center"/>
+                <TextBlock Text="Make sure Microsoft Outlook is installed" Foreground="#555555" FontSize="11" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+            
+            <!-- Emails List -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="8,0,8,8"
+                          Visibility="{Binding IsOutlookAvailable, Converter={StaticResource BoolToVis}}">
+                <ItemsControl x:Name="OutlookEmailsListControl" ItemsSource="{Binding FlaggedEmails}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,4" CornerRadius="8" BorderBrush="#33FFFFFF" BorderThickness="1"
+                                    MouseLeftButtonUp="OutlookEmailItem_Click" Tag="{Binding}" Cursor="Hand">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#0CFFFFFF"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#19FFFFFF"/>
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding IsRead}" Value="False">
+                                                <Setter Property="Background" Value="#19003C82"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid Margin="10,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <!-- Flag Icon -->
+                                    <ui:SymbolIcon Symbol="Flag16" Foreground="#FF4444" FontSize="16" 
+                                                   VerticalAlignment="Top" Margin="0,4,10,0"/>
+                                    
+                                    <!-- Email Info -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock FontWeight="SemiBold" Foreground="White" FontSize="13" TextTrimming="CharacterEllipsis">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{Binding Subject}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsRead}" Value="False">
+                                                            <Setter Property="FontWeight" Value="Bold"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding SenderName}" Foreground="#CCCCCC" FontSize="12" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding BodyPreview}" Foreground="#888888" FontSize="11" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Time Info -->
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Top" Margin="8,0" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding ReceivedDateText}" Foreground="#999999" FontSize="10" HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{Binding FlagDueDateText}" FontSize="10" Margin="0,4,0,0" HorizontalAlignment="Right">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#999999"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                                            <Setter Property="Foreground" Value="#FF6666"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    
+                                    <!-- Complete Button -->
+                                    <ui:Button Grid.Column="3" Padding="4" Background="Transparent" 
+                                               Click="BtnMarkEmailComplete" Tag="{Binding}" ToolTip="Mark as complete">
+                                        <ui:SymbolIcon Symbol="CheckmarkCircle12" Foreground="#1EB75F" FontSize="14"/>
+                                    </ui:Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            
+            <!-- Empty State -->
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding FlaggedEmails.Count, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLoadingOutlookEmails}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsOutlookAvailable}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <ui:SymbolIcon Symbol="FlagOff20" FontSize="32" Foreground="#666666"/>
+                <TextBlock Text="No flagged emails" Foreground="#666666" FontSize="12" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Grid>
+    
+        <!-- Splitter -->
+        <GridSplitter Grid.Column="1" Width="4" Background="#33FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+        
+        <!-- Email Details Panel -->
+        <Border Grid.Column="2" Margin="8" CornerRadius="8" Background="#0CFFFFFF" BorderBrush="#33FFFFFF" BorderThickness="1">
+            <Grid>
+                <!-- No Email Selected -->
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Visibility="{Binding HasSelectedOutlookEmail, Converter={StaticResource InverseBoolToVis}}">
+                    <ui:SymbolIcon Symbol="Mail20" FontSize="48" Foreground="#666666"/>
+                    <TextBlock Text="Select an email to view details" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                </StackPanel>
+                
+                <!-- Email Details -->
+                <Grid Visibility="{Binding HasSelectedOutlookEmail, Converter={StaticResource BoolToVis}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Email Header -->
+                    <Border Grid.Row="0" BorderBrush="#33FFFFFF" BorderThickness="0,0,0,1" Padding="16,12">
+                        <StackPanel DataContext="{Binding SelectedOutlookEmail}">
+                            <!-- Subject -->
+                            <TextBlock Text="{Binding Subject}" FontSize="18" FontWeight="SemiBold" Foreground="White" TextWrapping="Wrap"/>
+                            
+                            <!-- Sender Info -->
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Sender Avatar -->
+                                <Border Width="40" Height="40" CornerRadius="20" Background="#330078D4" Margin="0,0,12,0">
+                                    <TextBlock Text="{Binding SenderInitials}" Foreground="White" FontWeight="SemiBold" 
+                                               FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                
+                                <!-- Sender Details -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SenderName}" Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                                    <TextBlock Text="{Binding SenderEmail}" Foreground="#999999" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                
+                                <!-- Date -->
+                                <TextBlock Grid.Column="2" Text="{Binding ReceivedDate, StringFormat='MMM dd, yyyy HH:mm'}" 
+                                           Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
+                            </Grid>
+                            
+                            <!-- Flag Info -->
+                            <Border Margin="0,12,0,0" Padding="10,8" CornerRadius="6">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#33FF4444"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                                <Setter Property="Background" Value="#55FF4444"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <ui:SymbolIcon Symbol="Flag16" Foreground="#FF4444" FontSize="14" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding FlagDueDateText}" Foreground="White" FontSize="12" 
+                                               Margin="8,0" VerticalAlignment="Center"/>
+                                    
+                                    <!-- Importance Badge -->
+                                    <Border Grid.Column="2" Padding="6,2" CornerRadius="4" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#33808080"/>
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Importance}" Value="High">
+                                                        <Setter Property="Background" Value="#33FFA500"/>
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Importance}" FontSize="10" Foreground="White"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Email Body -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="16">
+                        <TextBlock Text="{Binding SelectedOutlookEmail.Body}" Foreground="#DDDDDD" FontSize="13" 
+                                   TextWrapping="Wrap" LineHeight="20"/>
+                    </ScrollViewer>
+                    
+                    <!-- Action Buttons -->
+                    <Border Grid.Row="2" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="12,8">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <ui:Button Margin="0,0,8,0" Padding="12,6" Click="BtnOpenInOutlook">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="Open16" Foreground="White" FontSize="12"/>
+                                    <TextBlock Text="Open in Outlook" Foreground="White" FontSize="12" Margin="6,0,0,0"/>
+                                </StackPanel>
+                            </ui:Button>
+                            <ui:Button Margin="0,0,8,0" Padding="12,6" Background="#330078D4" Click="BtnClearEmailFlag">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="FlagOff16" Foreground="White" FontSize="12"/>
+                                    <TextBlock Text="Clear Flag" Foreground="White" FontSize="12" Margin="6,0,0,0"/>
+                                </StackPanel>
+                            </ui:Button>
+                            <ui:Button Padding="12,6" Background="#331EB75F" Click="BtnMarkSelectedEmailComplete">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="Checkmark12" Foreground="#1EB75F" FontSize="12"/>
+                                    <TextBlock Text="Mark Complete" Foreground="#1EB75F" FontSize="12" Margin="6,0,0,0"/>
+                                </StackPanel>
+                            </ui:Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
