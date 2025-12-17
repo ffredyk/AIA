@@ -15,6 +15,15 @@ using System.Linq;
 using AIA.Models;
 using AIA.Models.AI;
 using AIA.Services.AI;
+using AIA.Plugins.Host.Services;
+using AIA.Plugins.SDK;
+
+// Alias to resolve ambiguous references
+using WpfColor = System.Windows.Media.Color;
+using WpfBrushes = System.Windows.Media.Brushes;
+using WpfTabControl = System.Windows.Controls.TabControl;
+using WpfOrientation = System.Windows.Controls.Orientation;
+using WpfColorConverter = System.Windows.Media.ColorConverter;
 
 namespace AIA
 {
@@ -40,8 +49,6 @@ namespace AIA
             ChatPanel.DataContext = Models.OverlayViewModel.Singleton;
             DataAssets.DataContext = Models.OverlayViewModel.Singleton;
             DataBanksTab.DataContext = Models.OverlayViewModel.Singleton;
-            OutlookTab.DataContext = Models.OverlayViewModel.Singleton;
-            TeamsTab.DataContext = Models.OverlayViewModel.Singleton;
 
             // Wire up toolbar events
             Toolbar.NewTaskClicked += OnNewTaskClicked;
@@ -52,11 +59,21 @@ namespace AIA
 
             // Wire up toast events from all child views
             DataAssets.ToastRequested += OnToastRequested;
-            OutlookTab.ToastRequested += OnToastRequested;
-            TeamsTab.ToastRequested += OnToastRequested;
 
             // Subscribe to reminder notifications
             Models.OverlayViewModel.Singleton.ReminderNotificationTriggered += OnReminderNotificationTriggered;
+
+            // Subscribe to plugin UI events when service is available
+            var viewModel = Models.OverlayViewModel.Singleton;
+            if (viewModel.PluginUIService != null)
+            {
+                WireUpPluginUIEvents(viewModel.PluginUIService);
+            }
+            else
+            {
+                // Wait for plugin service to be set
+                viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            }
 
             // Handle key events at the Window level
             KeyUp += KeyUpOverlay;
@@ -69,6 +86,182 @@ namespace AIA
             
             // Handle when window becomes visible
             IsVisibleChanged += MainWindow_IsVisibleChanged;
+        }
+
+        private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(OverlayViewModel.PluginUIService))
+            {
+                var viewModel = Models.OverlayViewModel.Singleton;
+                if (viewModel.PluginUIService != null)
+                {
+                    WireUpPluginUIEvents(viewModel.PluginUIService);
+                }
+            }
+        }
+
+        private void WireUpPluginUIEvents(HostPluginUIService pluginUIService)
+        {
+            pluginUIService.ToastRequested += OnPluginToastRequested;
+            
+            // Bind plugin tabs to the TabControl
+            pluginUIService.Tabs.CollectionChanged += OnPluginTabsChanged;
+            
+            // Add existing tabs
+            foreach (var tab in pluginUIService.Tabs)
+            {
+                AddPluginTab(tab);
+            }
+            
+            // Bind plugin toolbar buttons
+            pluginUIService.ToolbarButtons.CollectionChanged += OnPluginToolbarButtonsChanged;
+        }
+
+        private void OnPluginTabsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (PluginTabDefinition tab in e.NewItems)
+                {
+                    AddPluginTab(tab);
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (PluginTabDefinition tab in e.OldItems)
+                {
+                    RemovePluginTab(tab);
+                }
+            }
+        }
+
+        private void AddPluginTab(PluginTabDefinition tab)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var tabItem = new TabItem
+                {
+                    Tag = tab.TabId
+                };
+
+                // Create header with icon and badge
+                var headerPanel = new StackPanel { Orientation = WpfOrientation.Horizontal };
+                
+                var icon = new Wpf.Ui.Controls.SymbolIcon
+                {
+                    Symbol = GetSymbolFromName(tab.IconSymbol),
+                    Margin = new Thickness(0, 0, 6, 0)
+                };
+                headerPanel.Children.Add(icon);
+                
+                var titleText = new TextBlock { Text = tab.Title };
+                headerPanel.Children.Add(titleText);
+                
+                // Badge for notifications
+                if (tab.BadgeCount > 0)
+                {
+                    var badge = new Border
+                    {
+                        Margin = new Thickness(6, 0, 0, 0),
+                        Padding = new Thickness(4, 1, 4, 1),
+                        CornerRadius = new CornerRadius(8),
+                        Background = new SolidColorBrush((WpfColor)WpfColorConverter.ConvertFromString(tab.BadgeColor))
+                    };
+                    badge.Child = new TextBlock
+                    {
+                        Text = tab.BadgeCount.ToString(),
+                        FontSize = 10,
+                        Foreground = WpfBrushes.White
+                    };
+                    headerPanel.Children.Add(badge);
+                }
+                
+                tabItem.Header = headerPanel;
+
+                // Set content using the view model's data template
+                if (tab.ViewModel != null)
+                {
+                    var contentPresenter = new ContentPresenter
+                    {
+                        Content = tab.ViewModel,
+                        ContentTemplate = tab.ViewModel.GetDataTemplate()
+                    };
+                    tabItem.Content = contentPresenter;
+                }
+
+                // Find the right position to insert based on Order
+                var mainTabControl = FindMainTabControl();
+                if (mainTabControl != null)
+                {
+                    var insertIndex = mainTabControl.Items.Count;
+                    for (int i = 0; i < mainTabControl.Items.Count; i++)
+                    {
+                        if (mainTabControl.Items[i] is TabItem existingTab && existingTab.Tag is string tagId)
+                        {
+                            // Check if this is a plugin tab with higher order
+                            var existingPluginTab = Models.OverlayViewModel.Singleton.PluginTabs?
+                                .FirstOrDefault(t => t.TabId == tagId);
+                            if (existingPluginTab != null && existingPluginTab.Order > tab.Order)
+                            {
+                                insertIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    mainTabControl.Items.Insert(insertIndex, tabItem);
+                }
+            });
+        }
+
+        private void RemovePluginTab(PluginTabDefinition tab)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var mainTabControl = FindMainTabControl();
+                if (mainTabControl != null)
+                {
+                    var tabToRemove = mainTabControl.Items.Cast<TabItem>()
+                        .FirstOrDefault(t => t.Tag as string == tab.TabId);
+                    if (tabToRemove != null)
+                    {
+                        mainTabControl.Items.Remove(tabToRemove);
+                    }
+                }
+            });
+        }
+
+        private WpfTabControl? FindMainTabControl()
+        {
+            // Find the main TabControl by name
+            return MainTabControl;
+        }
+
+        private static Wpf.Ui.Controls.SymbolRegular GetSymbolFromName(string symbolName)
+        {
+            if (Enum.TryParse<Wpf.Ui.Controls.SymbolRegular>(symbolName, out var symbol))
+            {
+                return symbol;
+            }
+            return Wpf.Ui.Controls.SymbolRegular.Document20;
+        }
+
+        private void OnPluginToolbarButtonsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            // Toolbar buttons are handled by the ToolbarView through binding
+            // This is a placeholder for any additional handling needed
+        }
+
+        private void OnPluginToastRequested(object? sender, ToastEventArgs e)
+        {
+            var color = e.Type switch
+            {
+                ToastType.Success => WpfColor.FromArgb(220, 30, 183, 95),
+                ToastType.Warning => WpfColor.FromArgb(220, 255, 165, 0),
+                ToastType.Error => WpfColor.FromArgb(220, 255, 68, 68),
+                _ => WpfColor.FromArgb(220, 0, 120, 212)
+            };
+            ShowToast(e.Message, color);
         }
 
         #region Toolbar Events
@@ -120,11 +313,13 @@ namespace AIA
             ShowToast(message);
         }
 
-        private void ShowToast(string message)
+        private void ShowToast(string message, WpfColor? backgroundColor = null)
         {
+            var bgColor = backgroundColor ?? WpfColor.FromArgb(220, 30, 183, 95);
+            
             var toast = new Border
             {
-                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(220, 30, 183, 95)),
+                Background = new SolidColorBrush(bgColor),
                 CornerRadius = new CornerRadius(8),
                 Padding = new Thickness(16, 10, 16, 10),
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
@@ -133,7 +328,7 @@ namespace AIA
                 Child = new TextBlock
                 {
                     Text = message,
-                    Foreground = System.Windows.Media.Brushes.White,
+                    Foreground = WpfBrushes.White,
                     FontWeight = FontWeights.SemiBold,
                     FontSize = 13
                 }

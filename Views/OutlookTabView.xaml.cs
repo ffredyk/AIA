@@ -1,72 +1,29 @@
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using AIA.Models;
-
 namespace AIA.Views
 {
-    public partial class OutlookTabView
+    /// <summary>
+    /// Outlook tab view - now handled by the Outlook plugin
+    /// This UserControl is kept for backward compatibility but 
+    /// all functionality is provided by the plugin system.
+    /// </summary>
+    public partial class OutlookTabView : System.Windows.Controls.UserControl
     {
         public OutlookTabView()
         {
             InitializeComponent();
         }
 
-        private OverlayViewModel? ViewModel => DataContext as OverlayViewModel;
-
         /// <summary>
         /// Event raised when a toast notification should be shown
         /// </summary>
-        public event EventHandler<string>? ToastRequested;
+        public event System.EventHandler<string>? ToastRequested;
 
-        private async void BtnRefreshOutlook(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel == null) return;
-            await ViewModel.RefreshFlaggedEmailsAsync();
-        }
-
-        private void OutlookEmailItem_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (ViewModel == null) return;
-
-            if (sender is FrameworkElement element && element.Tag is OutlookEmail email)
-            {
-                ViewModel.SelectedOutlookEmail = email;
-            }
-        }
-
-        private async void BtnMarkEmailComplete(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel == null) return;
-
-            if (sender is FrameworkElement element && element.Tag is OutlookEmail email)
-            {
-                await ViewModel.MarkEmailFlagCompleteAsync(email);
-                ToastRequested?.Invoke(this, "Email flag marked as complete");
-            }
-            e.Handled = true;
-        }
-
-        private async void BtnMarkSelectedEmailComplete(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel?.SelectedOutlookEmail == null) return;
-
-            await ViewModel.MarkEmailFlagCompleteAsync(ViewModel.SelectedOutlookEmail);
-            ToastRequested?.Invoke(this, "Email flag marked as complete");
-        }
-
-        private async void BtnClearEmailFlag(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel?.SelectedOutlookEmail == null) return;
-
-            await ViewModel.ClearEmailFlagAsync(ViewModel.SelectedOutlookEmail);
-            ToastRequested?.Invoke(this, "Email flag cleared");
-        }
-
-        private async void BtnOpenInOutlook(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel?.SelectedOutlookEmail == null) return;
-            await ViewModel.OpenEmailInOutlookAsync(ViewModel.SelectedOutlookEmail);
-        }
+        // Stub methods to satisfy XAML event handlers - these are no longer functional
+        // as Outlook integration is now handled by the plugin system
+        private void BtnRefreshOutlook(object sender, System.Windows.RoutedEventArgs e) { }
+        private void OutlookEmailItem_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) { }
+        private void BtnMarkEmailComplete(object sender, System.Windows.RoutedEventArgs e) { }
+        private void BtnMarkSelectedEmailComplete(object sender, System.Windows.RoutedEventArgs e) { }
+        private void BtnClearEmailFlag(object sender, System.Windows.RoutedEventArgs e) { }
+        private void BtnOpenInOutlook(object sender, System.Windows.RoutedEventArgs e) { }
     }
 }

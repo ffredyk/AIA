@@ -3,8 +3,10 @@ using System.Data;
 using System.Windows;
 using System.Windows.Forms;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using AIA.Models;
+using AIA.Plugins.Host;
 
 namespace AIA
 {
@@ -14,8 +16,19 @@ namespace AIA
     public partial class App : System.Windows.Application
     {
         private NotifyIcon? notifyIcon;
+        private PluginManager? _pluginManager;
 
-        protected override void OnStartup(StartupEventArgs e)
+        /// <summary>
+        /// Gets the plugin manager instance
+        /// </summary>
+        public PluginManager? PluginManager => _pluginManager;
+
+        /// <summary>
+        /// Gets the current App instance
+        /// </summary>
+        public static new App Current => (App)System.Windows.Application.Current;
+
+        protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
@@ -45,6 +58,45 @@ namespace AIA
             contextMenu.Items.Add("Show", null, (s, args) => ShowMainWindow());
             contextMenu.Items.Add("Exit", null, (s, args) => Shutdown());
             notifyIcon.ContextMenuStrip = contextMenu;
+
+            // Initialize plugin system
+            await InitializePluginsAsync();
+        }
+
+        private async Task InitializePluginsAsync()
+        {
+            try
+            {
+                // Determine plugins directory
+                var appDir = AppDomain.CurrentDomain.BaseDirectory;
+                var pluginsDir = Path.Combine(appDir, "Plugins");
+
+                // Create host services
+                var hostServices = new PluginHostServices(() => OverlayViewModel.Singleton);
+
+                // Set up OverlayViewModel to use plugin UI service
+                OverlayViewModel.Singleton.SetPluginUIService(hostServices.UIService);
+
+                // Create plugin manager
+                _pluginManager = new PluginManager(pluginsDir, hostServices);
+
+                // Subscribe to plugin events
+                _pluginManager.PluginLoaded += (s, args) =>
+                    System.Diagnostics.Debug.WriteLine($"Plugin loaded: {args.Plugin.Name}");
+                _pluginManager.PluginError += (s, args) =>
+                    System.Diagnostics.Debug.WriteLine($"Plugin error: {args.Plugin.Name} - {args.Message}");
+
+                // Load, initialize, and start all plugins
+                await _pluginManager.LoadAllPluginsAsync();
+                await _pluginManager.InitializeAllPluginsAsync();
+                await _pluginManager.StartAllPluginsAsync();
+
+                System.Diagnostics.Debug.WriteLine($"Plugin system initialized with {_pluginManager.Plugins.Count} plugin(s)");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to initialize plugins: {ex.Message}");
+            }
         }
 
         private void NotifyIcon_DoubleClick(object? sender, EventArgs e)
@@ -62,10 +114,17 @@ namespace AIA
             }
         }
 
-        protected override void OnExit(ExitEventArgs e)
+        protected override async void OnExit(ExitEventArgs e)
         {
+            // Shutdown plugin system
+            if (_pluginManager != null)
+            {
+                await _pluginManager.ShutdownAsync();
+                _pluginManager.Dispose();
+            }
+
             // Save tasks and reminders before exiting
-            OverlayViewModel.Singleton.SaveTasksAndRemindersAsync().GetAwaiter().GetResult();
+            await OverlayViewModel.Singleton.SaveTasksAndRemindersAsync();
             
             notifyIcon?.Dispose();
             base.OnExit(e);

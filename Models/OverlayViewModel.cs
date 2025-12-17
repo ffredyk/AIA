@@ -10,6 +10,8 @@ using System.Windows.Threading;
 using AIA.Models.AI;
 using AIA.Services;
 using AIA.Services.AI;
+using AIA.Plugins.Host.Services;
+using AIA.Plugins.SDK;
 
 namespace AIA.Models
 {
@@ -36,21 +38,6 @@ namespace AIA.Models
         private bool _isAddingNewEntry;
         private string _newEntryTitle = string.Empty;
 
-        // Outlook fields
-        private OutlookEmail? _selectedOutlookEmail;
-        private bool _isLoadingOutlookEmails;
-        private bool _isOutlookAvailable;
-        private string _outlookStatusMessage = string.Empty;
-        private DispatcherTimer? _outlookRefreshTimer;
-
-        // Teams fields
-        private TeamsMeeting? _selectedTeamsMeeting;
-        private TeamsMessage? _selectedTeamsMessage;
-        private bool _isLoadingTeamsData;
-        private bool _isTeamsAvailable;
-        private string _teamsStatusMessage = string.Empty;
-        private DispatcherTimer? _teamsRefreshTimer;
-
         // AI Orchestration
         private bool _isAiProcessing;
         private string _aiStatusMessage = string.Empty;
@@ -69,6 +56,9 @@ namespace AIA.Models
         // AI Orchestration service
         private AIOrchestrationService? _aiOrchestrationService;
 
+        // Plugin UI service
+        private HostPluginUIService? _pluginUIService;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
@@ -85,6 +75,21 @@ namespace AIA.Models
         /// AI Orchestration service instance
         /// </summary>
         public AIOrchestrationService AIOrchestration => _aiOrchestrationService ??= new AIOrchestrationService(() => this);
+
+        /// <summary>
+        /// Plugin UI service for accessing plugin tabs and toolbar buttons
+        /// </summary>
+        public HostPluginUIService? PluginUIService => _pluginUIService;
+
+        /// <summary>
+        /// Collection of plugin tabs for UI binding
+        /// </summary>
+        public ObservableCollection<PluginTabDefinition>? PluginTabs => _pluginUIService?.Tabs;
+
+        /// <summary>
+        /// Collection of plugin toolbar buttons for UI binding
+        /// </summary>
+        public ObservableCollection<PluginToolbarButton>? PluginToolbarButtons => _pluginUIService?.ToolbarButtons;
 
         /// <summary>
         /// Whether AI is currently processing a request
@@ -148,14 +153,7 @@ namespace AIA.Models
         // Current data assets collection
         public ObservableCollection<DataAsset> CurrentDataAssets { get; set; } = new ObservableCollection<DataAsset>();
 
-        // Outlook collections
-        public ObservableCollection<OutlookEmail> FlaggedEmails { get; set; } = new ObservableCollection<OutlookEmail>();
-
-        // Teams collections
-        public ObservableCollection<TeamsMeeting> TodaysMeetings { get; set; } = new ObservableCollection<TeamsMeeting>();
-        public ObservableCollection<TeamsMessage> UnreadMessages { get; set; } = new ObservableCollection<TeamsMessage>();
-        public ObservableCollection<TeamsReminder> TeamsReminders { get; set; } = new ObservableCollection<TeamsReminder>();
-
+        // ...existing task properties...
         public TaskItem? SelectedTask
         {
             get => _selectedTask;
@@ -326,145 +324,6 @@ namespace AIA.Models
             }
         }
 
-        // Outlook properties
-        public OutlookEmail? SelectedOutlookEmail
-        {
-            get => _selectedOutlookEmail;
-            set
-            {
-                if (_selectedOutlookEmail != value)
-                {
-                    _selectedOutlookEmail = value;
-                    OnPropertyChanged(nameof(SelectedOutlookEmail));
-                    OnPropertyChanged(nameof(HasSelectedOutlookEmail));
-                }
-            }
-        }
-
-        public bool HasSelectedOutlookEmail => SelectedOutlookEmail != null;
-
-        public bool IsLoadingOutlookEmails
-        {
-            get => _isLoadingOutlookEmails;
-            set
-            {
-                if (_isLoadingOutlookEmails != value)
-                {
-                    _isLoadingOutlookEmails = value;
-                    OnPropertyChanged(nameof(IsLoadingOutlookEmails));
-                    OnPropertyChanged(nameof(ShowOutlookEmptyState));
-                }
-            }
-        }
-
-        public bool IsOutlookAvailable
-        {
-            get => _isOutlookAvailable;
-            set
-            {
-                if (_isOutlookAvailable != value)
-                {
-                    _isOutlookAvailable = value;
-                    OnPropertyChanged(nameof(IsOutlookAvailable));
-                    OnPropertyChanged(nameof(ShowOutlookEmptyState));
-                }
-            }
-        }
-
-        public string OutlookStatusMessage
-        {
-            get => _outlookStatusMessage;
-            set
-            {
-                if (_outlookStatusMessage != value)
-                {
-                    _outlookStatusMessage = value;
-                    OnPropertyChanged(nameof(OutlookStatusMessage));
-                }
-            }
-        }
-
-        // Computed property for empty state visibility
-        public bool ShowOutlookEmptyState => IsOutlookAvailable && !IsLoadingOutlookEmails && FlaggedEmails.Count == 0;
-
-        // Teams properties
-        public TeamsMeeting? SelectedTeamsMeeting
-        {
-            get => _selectedTeamsMeeting;
-            set
-            {
-                if (_selectedTeamsMeeting != value)
-                {
-                    _selectedTeamsMeeting = value;
-                    OnPropertyChanged(nameof(SelectedTeamsMeeting));
-                    OnPropertyChanged(nameof(HasSelectedTeamsMeeting));
-                }
-            }
-        }
-
-        public bool HasSelectedTeamsMeeting => SelectedTeamsMeeting != null;
-
-        public TeamsMessage? SelectedTeamsMessage
-        {
-            get => _selectedTeamsMessage;
-            set
-            {
-                if (_selectedTeamsMessage != value)
-                {
-                    _selectedTeamsMessage = value;
-                    OnPropertyChanged(nameof(SelectedTeamsMessage));
-                    OnPropertyChanged(nameof(HasSelectedTeamsMessage));
-                }
-            }
-        }
-
-        public bool HasSelectedTeamsMessage => SelectedTeamsMessage != null;
-
-        public bool IsLoadingTeamsData
-        {
-            get => _isLoadingTeamsData;
-            set
-            {
-                if (_isLoadingTeamsData != value)
-                {
-                    _isLoadingTeamsData = value;
-                    OnPropertyChanged(nameof(IsLoadingTeamsData));
-                    OnPropertyChanged(nameof(ShowTeamsEmptyState));
-                }
-            }
-        }
-
-        public bool IsTeamsAvailable
-        {
-            get => _isTeamsAvailable;
-            set
-            {
-                if (_isTeamsAvailable != value)
-                {
-                    _isTeamsAvailable = value;
-                    OnPropertyChanged(nameof(IsTeamsAvailable));
-                    OnPropertyChanged(nameof(ShowTeamsEmptyState));
-                }
-            }
-        }
-
-        public string TeamsStatusMessage
-        {
-            get => _teamsStatusMessage;
-            set
-            {
-                if (_teamsStatusMessage != value)
-                {
-                    _teamsStatusMessage = value;
-                    OnPropertyChanged(nameof(TeamsStatusMessage));
-                }
-            }
-        }
-
-        public bool ShowTeamsEmptyState => IsTeamsAvailable && !IsLoadingTeamsData && TodaysMeetings.Count == 0;
-
-        public int TotalTeamsNotifications => UnreadMessages.Count + TeamsReminders.Count(r => !r.IsCompleted);
-
         public ChatSession SelectedChatSession
         {
             get => _selectedChatSession;
@@ -545,12 +404,27 @@ namespace AIA.Models
 
             // Load data banks
             _ = LoadDataBanksAsync();
+        }
 
-            // Initialize Outlook
-            _ = InitializeOutlookAsync();
+        /// <summary>
+        /// Sets the plugin UI service for plugin integration
+        /// </summary>
+        public void SetPluginUIService(HostPluginUIService pluginUIService)
+        {
+            _pluginUIService = pluginUIService;
+            
+            // Wire up toast events
+            _pluginUIService.ToastRequested += OnPluginToastRequested;
+            
+            OnPropertyChanged(nameof(PluginUIService));
+            OnPropertyChanged(nameof(PluginTabs));
+            OnPropertyChanged(nameof(PluginToolbarButtons));
+        }
 
-            // Initialize Teams
-            _ = InitializeTeamsAsync();
+        private void OnPluginToastRequested(object? sender, ToastEventArgs e)
+        {
+            // Forward to main window via event or direct call
+            // The MainWindow will handle this
         }
 
         private void InitializeReminderNotificationService()
@@ -574,15 +448,6 @@ namespace AIA.Models
                 foreach (var reminder in Reminders)
                 {
                     reminder.RefreshTimeLeft();
-                }
-                // Also refresh Teams meetings time displays
-                foreach (var meeting in TodaysMeetings)
-                {
-                    meeting.RefreshTimeDisplays();
-                }
-                foreach (var teamsReminder in TeamsReminders)
-                {
-                    teamsReminder.RefreshTimeDisplays();
                 }
             };
             _reminderRefreshTimer.Start();
@@ -798,292 +663,6 @@ namespace AIA.Models
             {
                 ClearChatSession(SelectedChatSession);
             }
-        }
-
-        #endregion
-
-        #region Teams Methods
-
-        private async Task InitializeTeamsAsync()
-        {
-            IsTeamsAvailable = TeamsService.IsTeamsAvailable();
-
-            if (IsTeamsAvailable)
-            {
-                TeamsStatusMessage = "Loading Teams data...";
-                await RefreshTeamsDataAsync();
-                StartTeamsRefreshTimer();
-            }
-            else
-            {
-                TeamsStatusMessage = "Teams/Outlook calendar not available.";
-            }
-        }
-
-        private void StartTeamsRefreshTimer()
-        {
-            _teamsRefreshTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMinutes(5)
-            };
-            _teamsRefreshTimer.Tick += async (s, e) =>
-            {
-                await RefreshTeamsDataAsync();
-            };
-            _teamsRefreshTimer.Start();
-        }
-
-        public async Task RefreshTeamsDataAsync()
-        {
-            if (!IsTeamsAvailable)
-            {
-                TeamsService.ResetAvailabilityCheck();
-                IsTeamsAvailable = TeamsService.IsTeamsAvailable();
-
-                if (!IsTeamsAvailable)
-                {
-                    TeamsStatusMessage = "Teams not available. Click refresh to retry.";
-                    return;
-                }
-            }
-
-            IsLoadingTeamsData = true;
-            TeamsStatusMessage = "Loading Teams data...";
-
-            try
-            {
-                // Load meetings from calendar (uses Graph API if configured, otherwise Outlook)
-                var (meetings, timedOut) = await TeamsService.GetTodaysMeetingsWithTimeoutAsync();
-
-                if (timedOut)
-                {
-                    TeamsStatusMessage = "Timeout loading meetings. Calendar may be busy.";
-                    IsLoadingTeamsData = false;
-                    OnPropertyChanged(nameof(ShowTeamsEmptyState));
-                    return;
-                }
-
-                TodaysMeetings.Clear();
-                foreach (var meeting in meetings)
-                {
-                    TodaysMeetings.Add(meeting);
-                }
-
-                // Load unread messages (uses Graph API if configured, otherwise sample data)
-                UnreadMessages.Clear();
-                var messages = await TeamsService.GetUnreadMessagesAsync();
-                foreach (var message in messages)
-                {
-                    UnreadMessages.Add(message);
-                }
-
-                // Load reminders/tasks (uses Graph API if configured, otherwise sample data)
-                TeamsReminders.Clear();
-                var reminders = await TeamsService.GetTeamsRemindersAsync();
-                foreach (var reminder in reminders)
-                {
-                    TeamsReminders.Add(reminder);
-                }
-
-                var meetingCount = TodaysMeetings.Count;
-                var messageCount = UnreadMessages.Count;
-                var graphStatus = TeamsService.IsGraphApiConfigured ? " (Graph API)" : " (Sample data)";
-                TeamsStatusMessage = $"{meetingCount} meeting(s) today, {messageCount} unread message(s){graphStatus}";
-                OnPropertyChanged(nameof(TotalTeamsNotifications));
-            }
-            catch (Exception ex)
-            {
-                TeamsStatusMessage = $"Error: {ex.Message}";
-            }
-            finally
-            {
-                IsLoadingTeamsData = false;
-                OnPropertyChanged(nameof(ShowTeamsEmptyState));
-            }
-        }
-
-        /// <summary>
-        /// Opens a Teams chat for the selected message
-        /// </summary>
-        public bool OpenTeamsChat(TeamsMessage message)
-        {
-            if (message == null) return false;
-            return TeamsService.OpenTeamsChat(message.ChatId);
-        }
-
-        /// <summary>
-        /// Joins a Teams meeting
-        /// </summary>
-        public bool JoinTeamsMeeting(TeamsMeeting meeting)
-        {
-            if (meeting == null || string.IsNullOrEmpty(meeting.JoinUrl))
-                return false;
-
-            return TeamsService.JoinMeeting(meeting.JoinUrl);
-        }
-
-        /// <summary>
-        /// Opens Microsoft Teams application
-        /// </summary>
-        public bool OpenTeamsApp()
-        {
-            return TeamsService.OpenTeamsApp();
-        }
-
-        /// <summary>
-        /// Marks a Teams message as read
-        /// </summary>
-        public void MarkTeamsMessageAsRead(TeamsMessage message)
-        {
-            if (message == null) return;
-            message.IsRead = true;
-            OnPropertyChanged(nameof(TotalTeamsNotifications));
-        }
-
-        /// <summary>
-        /// Toggles completion of a Teams reminder
-        /// </summary>
-        public void CompleteTeamsReminder(TeamsReminder reminder)
-        {
-            if (reminder == null) return;
-            reminder.IsCompleted = !reminder.IsCompleted;
-            OnPropertyChanged(nameof(TotalTeamsNotifications));
-        }
-
-        #endregion
-
-        #region Outlook Methods
-
-        private async Task InitializeOutlookAsync()
-        {
-            IsOutlookAvailable = OutlookService.IsOutlookAvailable();
-            
-            if (IsOutlookAvailable)
-            {
-                OutlookStatusMessage = "Loading flagged emails...";
-                await RefreshFlaggedEmailsAsync();
-                StartOutlookRefreshTimer();
-            }
-            else
-            {
-                OutlookStatusMessage = "Outlook is not installed or not available.";
-            }
-        }
-
-        private void StartOutlookRefreshTimer()
-        {
-            _outlookRefreshTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMinutes(5)
-            };
-            _outlookRefreshTimer.Tick += async (s, e) =>
-            {
-                await RefreshFlaggedEmailsAsync();
-                foreach (var email in FlaggedEmails)
-                {
-                    email.RefreshTimeDisplays();
-                }
-            };
-            _outlookRefreshTimer.Start();
-        }
-
-        public async Task RefreshFlaggedEmailsAsync()
-        {
-            if (!IsOutlookAvailable)
-            {
-                OutlookService.ResetAvailabilityCheck();
-                IsOutlookAvailable = OutlookService.IsOutlookAvailable();
-                
-                if (!IsOutlookAvailable)
-                {
-                    OutlookStatusMessage = "Outlook is not available. Click refresh to retry.";
-                    return;
-                }
-            }
-
-            IsLoadingOutlookEmails = true;
-            OutlookStatusMessage = "Loading flagged emails...";
-
-            try
-            {
-                var (emails, timedOut) = await OutlookService.GetFlaggedEmailsWithTimeoutAsync();
-                
-                if (timedOut)
-                {
-                    OutlookStatusMessage = "Timeout loading emails. Outlook may be busy.";
-                    IsLoadingOutlookEmails = false;
-                    OnPropertyChanged(nameof(ShowOutlookEmptyState));
-                    return;
-                }
-                
-                FlaggedEmails.Clear();
-                foreach (var email in emails)
-                {
-                    FlaggedEmails.Add(email);
-                }
-
-                if (FlaggedEmails.Count == 0)
-                {
-                    OutlookStatusMessage = "No flagged emails found.";
-                }
-                else
-                {
-                    OutlookStatusMessage = $"{FlaggedEmails.Count} flagged email(s)";
-                }
-            }
-            catch (Exception ex)
-            {
-                OutlookStatusMessage = $"Error: {ex.Message}";
-            }
-            finally
-            {
-                IsLoadingOutlookEmails = false;
-                OnPropertyChanged(nameof(ShowOutlookEmptyState));
-            }
-        }
-
-        public async Task MarkEmailFlagCompleteAsync(OutlookEmail email)
-        {
-            if (email == null) return;
-
-            var success = await OutlookService.MarkFlagCompleteAsync(email.EntryId);
-            if (success)
-            {
-                email.FlagStatus = EmailFlagStatus.Complete;
-                FlaggedEmails.Remove(email);
-                
-                if (SelectedOutlookEmail == email)
-                {
-                    SelectedOutlookEmail = null;
-                }
-
-                OutlookStatusMessage = $"{FlaggedEmails.Count} flagged email(s)";
-            }
-        }
-
-        public async Task ClearEmailFlagAsync(OutlookEmail email)
-        {
-            if (email == null) return;
-
-            var success = await OutlookService.ClearFlagAsync(email.EntryId);
-            if (success)
-            {
-                email.FlagStatus = EmailFlagStatus.NotFlagged;
-                FlaggedEmails.Remove(email);
-                
-                if (SelectedOutlookEmail == email)
-                {
-                    SelectedOutlookEmail = null;
-                }
-
-                OutlookStatusMessage = $"{FlaggedEmails.Count} flagged email(s)";
-            }
-        }
-
-        public async Task OpenEmailInOutlookAsync(OutlookEmail email)
-        {
-            if (email == null) return;
-            await OutlookService.OpenEmailAsync(email.EntryId);
         }
 
         #endregion

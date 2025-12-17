@@ -51,7 +51,7 @@
         <!-- Main Content Area - Tab Control -->
         <Grid Margin="10" Grid.Row="1" Grid.ColumnSpan="2">
             <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="5,5,5,5" VerticalAlignment="Stretch">
-                <TabControl Margin="0,8,0,0">
+                <TabControl x:Name="MainTabControl" Margin="0,8,0,0">
                     <!-- Tasks Tab -->
                     <TabItem IsSelected="True">
                         <TabItem.Header>
@@ -85,35 +85,7 @@
                         <views:DataBanksTabView x:Name="DataBanksTab"/>
                     </TabItem>
                     
-                    <!-- Outlook Tab -->
-                    <TabItem>
-                        <TabItem.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <ui:SymbolIcon Margin="0,0,6,0" Symbol="Mail20" />
-                                <TextBlock Text="Outlook" />
-                                <Border Margin="6,0,0,0" Padding="4,1" CornerRadius="8" Background="#33FF4444"
-                                        Visibility="{Binding FlaggedEmails.Count, Converter={StaticResource IntToVisConverter}}">
-                                    <TextBlock Text="{Binding FlaggedEmails.Count}" FontSize="10" Foreground="White"/>
-                                </Border>
-                            </StackPanel>
-                        </TabItem.Header>
-                        <views:OutlookTabView x:Name="OutlookTab"/>
-                    </TabItem>
-                    
-                    <!-- Teams Tab -->
-                    <TabItem>
-                        <TabItem.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <ui:SymbolIcon Margin="0,0,6,0" Symbol="PeopleTeam20" />
-                                <TextBlock Text="Teams" />
-                                <Border Margin="6,0,0,0" Padding="4,1" CornerRadius="8" Background="#335B5FC7"
-                                        Visibility="{Binding TotalTeamsNotifications, Converter={StaticResource IntToVisConverter}}">
-                                    <TextBlock Text="{Binding TotalTeamsNotifications}" FontSize="10" Foreground="White"/>
-                                </Border>
-                            </StackPanel>
-                        </TabItem.Header>
-                        <views:TeamsTabView x:Name="TeamsTab"/>
-                    </TabItem>
+                    <!-- Plugin tabs will be added dynamically here -->
                 </TabControl>
             </Border>
         </Grid>
