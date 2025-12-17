@@ -5,6 +5,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/ffredyk/AIA/actions/workflows/dotnet.yml">
+    <img src="https://github.com/ffredyk/AIA/actions/workflows/dotnet.yml/badge.svg" alt=".NET Build Status" />
+  </a>
+</p>
+
+<p align="center">
   <strong>A modern, extensible WPF desktop application for intelligent task management, reminders, and productivity</strong>
 </p>
 
