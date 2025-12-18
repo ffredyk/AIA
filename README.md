@@ -73,10 +73,10 @@
 
 ### 💬 AI Chat Integration
 - **Multi-Provider Support**:
-  - OpenAI (GPT-4o, GPT-4, GPT-3.5 Turbo)
-  - Azure OpenAI
-  - Google Gemini (2.0 Flash, 1.5 Pro, 1.5 Flash)
-  - Anthropic Claude (3.5 Sonnet, Opus, Sonnet, Haiku)
+  - OpenAI (GPT-5.2)
+  - Azure AI Foundry
+  - Google Gemini 3
+  - Anthropic Claude (4.5 Sonnet, Opus, Haiku)
 - **Intelligent Routing**: Automatic provider selection based on task type
 - **Tool Integration**: AI can interact with tasks, reminders, and data banks
 - **Context Awareness**: AI understands your current tasks and reminders
