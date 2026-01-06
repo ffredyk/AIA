@@ -56,6 +56,8 @@ namespace AIA.Models.AI
                 OnPropertyChanged(nameof(ProviderType));
                 OnPropertyChanged(nameof(ProviderIcon));
                 OnPropertyChanged(nameof(ProviderColor));
+                OnPropertyChanged(nameof(RequiresEndpoint));
+                OnPropertyChanged(nameof(RequiresDeploymentName));
             }
         }
 
