@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:local="clr-namespace:AIA.Views"
+             xmlns:local="clr-namespace:AIA"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="400">
     <Grid>
@@ -26,25 +26,25 @@
             </Grid.ColumnDefinitions>
             
             <!-- New Chat Button -->
-            <ui:Button Grid.Column="0" Margin="5,0,0,0" Click="BtnNewChat_Click" ToolTip="Create new chat">
+            <ui:Button Grid.Column="0" Margin="5,0,0,0" Click="BtnNewChat_Click" ToolTip="{local:Localize Chat_CreateNewChat}">
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon Symbol="Add12" Foreground="White"/>
-                    <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="New"/>
+                    <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Chat_New}"/>
                 </StackPanel>
             </ui:Button>
             
             <!-- Delete Chat Button -->
-            <ui:Button Grid.Column="1" Margin="5,0,0,0" Click="BtnDeleteChat_Click" ToolTip="Delete current chat">
+            <ui:Button Grid.Column="1" Margin="5,0,0,0" Click="BtnDeleteChat_Click" ToolTip="{local:Localize Chat_DeleteCurrentChat}">
                 <ui:SymbolIcon Symbol="Delete12" Foreground="White"/>
             </ui:Button>
             
             <!-- Rename Chat Button -->
-            <ui:Button Grid.Column="2" Margin="5,0,0,0" Click="BtnRenameChat_Click" ToolTip="Rename current chat">
+            <ui:Button Grid.Column="2" Margin="5,0,0,0" Click="BtnRenameChat_Click" ToolTip="{local:Localize Chat_RenameCurrentChat}">
                 <ui:SymbolIcon Symbol="Rename16" Foreground="White"/>
             </ui:Button>
             
             <!-- Clear Chat Button -->
-            <ui:Button Grid.Column="3" Margin="5,0,0,0" Click="BtnClearChat_Click" ToolTip="Clear chat messages">
+            <ui:Button Grid.Column="3" Margin="5,0,0,0" Click="BtnClearChat_Click" ToolTip="{local:Localize Chat_ClearChatMessages}">
                 <ui:SymbolIcon Symbol="Broom16" Foreground="White"/>
             </ui:Button>
             
@@ -101,7 +101,7 @@
                 Margin="10,10,10,0"
                 Panel.ZIndex="100">
             <StackPanel>
-                <TextBlock Text="Rename Chat" Foreground="White" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,10"/>
+                <TextBlock Text="{local:Localize Chat_RenameChat}" Foreground="White" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,10"/>
                 <TextBox x:Name="RenameChatTextBox"
                          Text="{Binding RenameChatTitle, UpdateSourceTrigger=PropertyChanged}"
                          Background="#33FFFFFF"
@@ -111,11 +111,11 @@
                          FontSize="14"
                          KeyDown="RenameChatTextBox_KeyDown"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-                    <ui:Button Content="Cancel" 
+                    <ui:Button Content="{local:Localize Chat_Cancel}" 
                                Click="BtnCancelRename_Click"
                                Margin="0,0,8,0"
                                Padding="16,6"/>
-                    <ui:Button Content="Save" 
+                    <ui:Button Content="{local:Localize Chat_Save}" 
                                Click="BtnConfirmRename_Click"
                                Background="#FF0078D4"
                                Padding="16,6"/>
@@ -274,7 +274,7 @@
                                    VerticalAlignment="Center" 
                                    Foreground="White" 
                                    FontWeight="SemiBold" 
-                                   Text="Send"/>
+                                   Text="{local:Localize Chat_Send}"/>
                     </StackPanel>
                 </ui:Button>
             </Grid>

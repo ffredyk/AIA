@@ -1,0 +1,512 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTitle" xml:space="preserve">
+    <value>AIA - AI Asistent</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Osobní produktivní překryv s podporou AI</value>
+  </data>
+  <data name="Tab_Tasks" xml:space="preserve">
+    <value>Úkoly</value>
+  </data>
+  <data name="Tab_Reminders" xml:space="preserve">
+    <value>Připomínky</value>
+  </data>
+  <data name="Tab_DataBanks" xml:space="preserve">
+    <value>Datové banky</value>
+  </data>
+  <data name="Toolbar_NewTask" xml:space="preserve">
+    <value>Nový úkol</value>
+  </data>
+  <data name="Toolbar_NewReminder" xml:space="preserve">
+    <value>Nová připomínka</value>
+  </data>
+  <data name="Toolbar_NewData" xml:space="preserve">
+    <value>Nová data</value>
+  </data>
+  <data name="Toolbar_Settings" xml:space="preserve">
+    <value>Nastavení</value>
+  </data>
+  <data name="Toolbar_Orchestration" xml:space="preserve">
+    <value>Orchestrace</value>
+  </data>
+  <data name="Toolbar_Automation" xml:space="preserve">
+    <value>Automatizace</value>
+  </data>
+  <data name="Toolbar_AppShutdown" xml:space="preserve">
+    <value>Ukončit aplikaci</value>
+  </data>
+  <data name="Toolbar_Server" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Toolbar_Team" xml:space="preserve">
+    <value>Tým</value>
+  </data>
+  <data name="Toolbar_CloseOverlay" xml:space="preserve">
+    <value>Zavřít překryv</value>
+  </data>
+  <data name="Footer_PressEscToClose" xml:space="preserve">
+    <value>Stiskněte ESC pro zavření překryvu</value>
+  </data>
+  <data name="Tasks_SelectToViewDetails" xml:space="preserve">
+    <value>Vyberte úkol pro zobrazení detailů</value>
+  </data>
+  <data name="Tasks_Status" xml:space="preserve">
+    <value>Stav</value>
+  </data>
+  <data name="Tasks_Priority" xml:space="preserve">
+    <value>Priorita</value>
+  </data>
+  <data name="Tasks_DueDate" xml:space="preserve">
+    <value>Termín</value>
+  </data>
+  <data name="Tasks_Description" xml:space="preserve">
+    <value>Popis</value>
+  </data>
+  <data name="Tasks_Notes" xml:space="preserve">
+    <value>Poznámky</value>
+  </data>
+  <data name="Tasks_Subtasks" xml:space="preserve">
+    <value>Podúkoly</value>
+  </data>
+  <data name="Tasks_NoSubtasksYet" xml:space="preserve">
+    <value>Zatím žádné podúkoly</value>
+  </data>
+  <data name="Tasks_Created" xml:space="preserve">
+    <value>Vytvořeno:</value>
+  </data>
+  <data name="Tasks_Completed" xml:space="preserve">
+    <value>Dokončeno:</value>
+  </data>
+  <data name="Tasks_Add" xml:space="preserve">
+    <value>Přidat</value>
+  </data>
+  <data name="Reminders_SelectToViewDetails" xml:space="preserve">
+    <value>Vyberte připomínku pro zobrazení detailů</value>
+  </data>
+  <data name="Reminders_Severity" xml:space="preserve">
+    <value>Závažnost</value>
+  </data>
+  <data name="Reminders_DueDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="Reminders_DueTime" xml:space="preserve">
+    <value>Čas</value>
+  </data>
+  <data name="Reminders_MarkAsCompleted" xml:space="preserve">
+    <value>Označit jako dokončené</value>
+  </data>
+  <data name="DataBanks_Categories" xml:space="preserve">
+    <value>Kategorie</value>
+  </data>
+  <data name="DataBanks_Entries" xml:space="preserve">
+    <value>Položky</value>
+  </data>
+  <data name="DataBanks_SelectCategory" xml:space="preserve">
+    <value>Vyberte kategorii</value>
+  </data>
+  <data name="DataBanks_SelectEntryToViewDetails" xml:space="preserve">
+    <value>Vyberte položku pro zobrazení detailů</value>
+  </data>
+  <data name="DataBanks_Type" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="DataBanks_FileSize" xml:space="preserve">
+    <value>Velikost souboru</value>
+  </data>
+  <data name="DataBanks_OriginalFile" xml:space="preserve">
+    <value>Původní soubor</value>
+  </data>
+  <data name="DataBanks_Tags" xml:space="preserve">
+    <value>Štítky (oddělené čárkou)</value>
+  </data>
+  <data name="DataBanks_Content" xml:space="preserve">
+    <value>Obsah</value>
+  </data>
+  <data name="DataBanks_ImageMetadata" xml:space="preserve">
+    <value>Metadata obrázku</value>
+  </data>
+  <data name="DataBanks_Modified" xml:space="preserve">
+    <value>Upraveno:</value>
+  </data>
+  <data name="DataBanks_OpenPdf" xml:space="preserve">
+    <value>Otevřít PDF</value>
+  </data>
+  <data name="DataBanks_ImagePreviewUnavailable" xml:space="preserve">
+    <value>Náhled obrázku není dostupný</value>
+  </data>
+  <data name="Chat_New" xml:space="preserve">
+    <value>Nový</value>
+  </data>
+  <data name="Chat_RenameChat" xml:space="preserve">
+    <value>Přejmenovat chat</value>
+  </data>
+  <data name="Chat_Send" xml:space="preserve">
+    <value>Odeslat</value>
+  </data>
+  <data name="Chat_Providers" xml:space="preserve">
+    <value>poskytovatelé</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Nastavení</value>
+  </data>
+  <data name="Settings_Apply" xml:space="preserve">
+    <value>Použít</value>
+  </data>
+  <data name="Settings_Close" xml:space="preserve">
+    <value>Zavřít</value>
+  </data>
+	<data name="Settings_ConfigurePreferences" xml:space="preserve"><value>Konfigurace předvoleb aplikace a možností pluginů</value></data>
+	<data name="Settings_General" xml:space="preserve"><value>Obecné</value></data>
+	<data name="Settings_Plugins" xml:space="preserve"><value>Pluginy</value></data>
+	<data name="Settings_Notifications" xml:space="preserve"><value>Upozornění</value></data>
+	<data name="Settings_Data" xml:space="preserve"><value>Data</value></data>
+	<data name="Settings_About" xml:space="preserve"><value>O aplikaci</value></data>
+	<data name="Settings_Language" xml:space="preserve"><value>Jazyk</value></data>
+	<data name="Settings_LanguageDescription" xml:space="preserve"><value>Vyberte preferovaný jazyk</value></data>
+	<data name="Settings_Startup" xml:space="preserve"><value>Spuštění</value></data>
+	<data name="Settings_RunOnStartup" xml:space="preserve"><value>Spustit při startu Windows</value></data>
+	<data name="Settings_RunOnStartupDesc" xml:space="preserve"><value>Automaticky spustit AIA při startu Windows</value></data>
+	<data name="Settings_OverlayShortcut" xml:space="preserve"><value>Klávesová zkratka překrytí</value></data>
+	<data name="Settings_ShortcutDescription" xml:space="preserve"><value>Klávesová zkratka pro otevření/zavření překrytí</value></data>
+	<data name="Settings_ClickToCapture" xml:space="preserve"><value>Klikněte na pole výše a stiskněte požadovanou kombinaci kláves</value></data>
+	<data name="Settings_PressKeys" xml:space="preserve"><value>Stiskněte klávesy...</value></data>
+	<data name="Settings_NoHotkeySet" xml:space="preserve"><value>Žádná zkratka není nastavena</value></data>
+	<data name="Settings_ClearHotkey" xml:space="preserve"><value>Vymazat zkratku</value></data>
+	<data name="Settings_Behavior" xml:space="preserve"><value>Chování</value></data>
+	<data name="Settings_MinimizeToTray" xml:space="preserve"><value>Minimalizovat do systémové lišty</value></data>
+	<data name="Settings_MinimizeToTrayDesc" xml:space="preserve"><value>Běžet na pozadí při zavření překrytí</value></data>
+	<data name="Settings_Updates" xml:space="preserve"><value>Aktualizace</value></data>
+	<data name="Settings_CheckForUpdates" xml:space="preserve"><value>Kontrolovat aktualizace při spuštění</value></data>
+	<data name="Settings_CheckForUpdatesDesc" xml:space="preserve"><value>Automaticky kontrolovat nové verze při spuštění aplikace</value></data>
+	<data name="Settings_AutoInstallUpdates" xml:space="preserve"><value>Automaticky instalovat aktualizace</value></data>
+	<data name="Settings_AutoInstallUpdatesDesc" xml:space="preserve"><value>Automaticky stahovat a instalovat aktualizace</value></data>
+	<data name="Settings_CheckForUpdatesNow" xml:space="preserve"><value>Zkontrolovat aktualizace nyní</value></data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Uložit</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Zrušit</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Zavřít</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>Smazat</value>
+  </data>
+  <data name="Common_Refresh" xml:space="preserve">
+    <value>Obnovit</value>
+  </data>
+  <data name="Common_Add" xml:space="preserve">
+    <value>Přidat</value>
+  </data>
+  <data name="Status_SettingsSaved" xml:space="preserve">
+    <value>Nastavení byla úspěšně uložena</value>
+  </data>
+  <data name="Status_HotkeyUpdated" xml:space="preserve">
+    <value>Zkratka byla aktualizována</value>
+  </data>
+  <data name="Status_HotkeyFailed" xml:space="preserve">
+    <value>Nepodařilo se zaregistrovat klávesovou zkratku</value>
+  </data>
+  <data name="Status_HotkeyValid" xml:space="preserve">
+    <value>Zkratka je platná. Klikněte na Použít pro uložení.</value>
+  </data>
+  <data name="Status_HotkeyConflict" xml:space="preserve">
+    <value>Tato zkratka může kolidovat s jinou aplikací.</value>
+  </data>
+  <data name="Status_HotkeyCleared" xml:space="preserve">
+    <value>Zkratka byla vymazána. Klikněte na Použít pro uložení.</value>
+  </data>
+  <data name="Status_HotkeyApplied" xml:space="preserve">
+    <value>Zkratka byla úspěšně nastavena:</value>
+  </data>
+  <data name="Status_BackupCreated" xml:space="preserve">
+    <value>Záloha úspěšně vytvořena</value>
+  </data>
+  <data name="Status_BackupFailed" xml:space="preserve">
+    <value>Nepodařilo se vytvořit zálohu</value>
+  </data>
+  <data name="Status_CreatingBackup" xml:space="preserve">
+    <value>Vytváření zálohy...</value>
+  </data>
+  <data name="Status_CheckingUpdates" xml:space="preserve">
+    <value>Kontrola aktualizací...</value>
+  </data>
+  <data name="Status_LatestVersion" xml:space="preserve">
+    <value>Používáte nejnovější verzi</value>
+  </data>
+  <data name="Status_FoundPlugins" xml:space="preserve">
+    <value>Nalezeno {0} plugin(ů)</value>
+  </data>
+  <data name="Status_AddedToStartup" xml:space="preserve">
+    <value>Přidáno do spouštění Windows</value>
+  </data>
+  <data name="Status_RemovedFromStartup" xml:space="preserve">
+    <value>Odebráno ze spouštění Windows</value>
+  </data>
+  <data name="Status_StartupFailed" xml:space="preserve">
+    <value>Nepodařilo se upravit nastavení spouštění. Zkuste spustit jako správce.</value>
+  </data>
+  <data name="Status_PressKeysCombination" xml:space="preserve">
+    <value>Stiskněte požadovanou kombinaci kláves (např. Win+Q, Ctrl+Shift+A)</value>
+  </data>
+	<data name="Reminders_Created" xml:space="preserve"><value>Vytvořeno:</value></data>
+	<data name="DataBanks_Created" xml:space="preserve"><value>Vytvořeno:</value></data>
+	<data name="DataAssets_CurrentDataAssets" xml:space="preserve"><value>Aktuální datové prostředky</value></data>
+	<data name="DataAssets_Refresh" xml:space="preserve"><value>Obnovit</value></data>
+	<data name="DataAssets_NoScreenshots" xml:space="preserve"><value>Žádné snímky obrazovky</value></data>
+	<data name="DataAssets_Window" xml:space="preserve"><value>Okno</value></data>
+	<data name="DataAssets_Screen" xml:space="preserve"><value>Obrazovka</value></data>
+	<data name="DataAssets_CopyToClipboard" xml:space="preserve"><value>Kopírovat do schránky</value></data>
+	<data name="DataAssets_SaveToDisk" xml:space="preserve"><value>Uložit na disk</value></data>
+	<data name="DataAssets_SaveAs" xml:space="preserve"><value>Uložit jako...</value></data>
+	<data name="DataAssets_SaveToDataBank" xml:space="preserve"><value>Uložit do datové banky</value></data>
+	<data name="Chat_CreateNewChat" xml:space="preserve"><value>Vytvořit nový chat</value></data>
+	<data name="Chat_DeleteCurrentChat" xml:space="preserve"><value>Smazat aktuální chat</value></data>
+	<data name="Chat_RenameCurrentChat" xml:space="preserve"><value>Přejmenovat aktuální chat</value></data>
+	<data name="Chat_ClearChatMessages" xml:space="preserve"><value>Vymazat zprávy chatu</value></data>
+	<data name="Chat_Cancel" xml:space="preserve"><value>Zrušit</value></data>
+	<data name="Chat_Save" xml:space="preserve"><value>Uložit</value></data>
+
+	<!-- Orchestration Window -->
+	<data name="Orchestration_Title" xml:space="preserve"><value>Nastavení AI orchestrace</value></data>
+	<data name="Orchestration_Header" xml:space="preserve"><value>AI Orchestrace</value></data>
+	<data name="Orchestration_Description" xml:space="preserve"><value>Konfigurace poskytovatelů AI a nastavení směrování</value></data>
+	<data name="Orchestration_TabProviders" xml:space="preserve"><value>Poskytovatelé</value></data>
+	<data name="Orchestration_TabSettings" xml:space="preserve"><value>Nastavení</value></data>
+	<data name="Orchestration_TabTools" xml:space="preserve"><value>Dostupné nástroje</value></data>
+	<data name="Orchestration_AIProviders" xml:space="preserve"><value>AI poskytovatelé</value></data>
+	<data name="Orchestration_Add" xml:space="preserve"><value>Přidat</value></data>
+	<data name="Orchestration_Default" xml:space="preserve"><value>Výchozí</value></data>
+	<data name="Orchestration_SelectProvider" xml:space="preserve"><value>Vyberte poskytovatele pro konfiguraci</value></data>
+	<data name="Orchestration_ProviderConfiguration" xml:space="preserve"><value>Konfigurace poskytovatele</value></data>
+	<data name="Orchestration_Test" xml:space="preserve"><value>Test</value></data>
+	<data name="Orchestration_TestConnection" xml:space="preserve"><value>Otestovat připojení</value></data>
+	<data name="Orchestration_SetDefault" xml:space="preserve"><value>Nastavit jako výchozí</value></data>
+	<data name="Orchestration_ProviderType" xml:space="preserve"><value>Typ poskytovatele</value></data>
+	<data name="Orchestration_DisplayName" xml:space="preserve"><value>Zobrazovaný název</value></data>
+	<data name="Orchestration_ApiKey" xml:space="preserve"><value>API klíč</value></data>
+	<data name="Orchestration_EndpointUrl" xml:space="preserve"><value>URL koncového bodu</value></data>
+	<data name="Orchestration_DeploymentName" xml:space="preserve"><value>Název nasazení</value></data>
+	<data name="Orchestration_ModelId" xml:space="preserve"><value>ID modelu</value></data>
+	<data name="Orchestration_RoutingPriority" xml:space="preserve"><value>Priorita směrování</value></data>
+	<data name="Orchestration_Strengths" xml:space="preserve"><value>Silné stránky (oddělené čárkou: coding, creative, analysis, math, research, conversation)</value></data>
+	<data name="Orchestration_MaxContextTokens" xml:space="preserve"><value>Maximální počet tokenů kontextu</value></data>
+	<data name="Orchestration_Enabled" xml:space="preserve"><value>Povoleno</value></data>
+	<data name="Orchestration_Routing" xml:space="preserve"><value>Směrování</value></data>
+	<data name="Orchestration_AutoRouting" xml:space="preserve"><value>Automatické směrování</value></data>
+	<data name="Orchestration_AutoRoutingDesc" xml:space="preserve"><value>Automaticky vybrat nejlepšího AI poskytovatele podle obsahu dotazu</value></data>
+	<data name="Orchestration_ToolsMcp" xml:space="preserve"><value>Nástroje (MCP-like)</value></data>
+	<data name="Orchestration_EnableToolUse" xml:space="preserve"><value>Povolit použití nástrojů</value></data>
+	<data name="Orchestration_EnableToolUseDesc" xml:space="preserve"><value>Umožnit AI přístup k úkolům, připomínkám a datové bance</value></data>
+	<data name="Orchestration_ContextInclusion" xml:space="preserve"><value>Zahrnutí kontextu</value></data>
+	<data name="Orchestration_IncludeTasksContext" xml:space="preserve"><value>Zahrnout úkoly do systémové výzvy</value></data>
+	<data name="Orchestration_IncludeRemindersContext" xml:space="preserve"><value>Zahrnout připomínky do systémové výzvy</value></data>
+	<data name="Orchestration_IncludeDataBankContext" xml:space="preserve"><value>Zahrnout vybranou kategorii datové banky</value></data>
+	<data name="Orchestration_IncludeScreenshotsContext" xml:space="preserve"><value>Zahrnout aktuální snímky obrazovky</value></data>
+	<data name="Orchestration_MaxContextItems" xml:space="preserve"><value>Maximální počet položek kontextu na kategorii</value></data>
+	<data name="Orchestration_GenerationDefaults" xml:space="preserve"><value>Výchozí nastavení generování</value></data>
+	<data name="Orchestration_Temperature" xml:space="preserve"><value>Teplota</value></data>
+	<data name="Orchestration_MaxTokens" xml:space="preserve"><value>Maximální počet tokenů</value></data>
+	<data name="Orchestration_AITools" xml:space="preserve"><value>AI nástroje</value></data>
+	<data name="Orchestration_AIToolsDesc" xml:space="preserve"><value>Tyto nástroje jsou k dispozici AI, když je povoleno použití nástrojů. AI může volat tyto nástroje pro přístup a správu vašich dat.</value></data>
+	<data name="Orchestration_Save" xml:space="preserve"><value>Uložit</value></data>
+	<data name="Orchestration_Close" xml:space="preserve"><value>Zavřít</value></data>
+
+	<!-- Settings - Plugins Tab -->
+	<data name="Settings_EnablePluginSystem" xml:space="preserve"><value>Povolit systém pluginů</value></data>
+	<data name="Settings_EnablePluginSystemDesc" xml:space="preserve"><value>Povolit pluginům rozšiřovat funkce AIA</value></data>
+	<data name="Settings_CheckPluginUpdates" xml:space="preserve"><value>Kontrolovat aktualizace pluginů</value></data>
+	<data name="Settings_AutoUpdatePlugins" xml:space="preserve"><value>Automaticky aktualizovat pluginy</value></data>
+	<data name="Settings_InstalledPlugins" xml:space="preserve"><value>Nainstalované pluginy</value></data>
+	<data name="Settings_NoPluginsInstalled" xml:space="preserve"><value>Žádné pluginy nainstalovány</value></data>
+	<data name="Settings_PlacePluginDlls" xml:space="preserve"><value>Umístěte DLL pluginů do složky Plugins</value></data>
+	<data name="Settings_ConfigurePermissions" xml:space="preserve"><value>Konfigurovat oprávnění</value></data>
+	<data name="Settings_EnableDisable" xml:space="preserve"><value>Povolit/Zakázat</value></data>
+	<data name="Settings_PluginEnabled" xml:space="preserve"><value>Povoleno</value></data>
+	<data name="Settings_PluginDisabled" xml:space="preserve"><value>Zakázáno</value></data>
+	<data name="Settings_BuiltIn" xml:space="preserve"><value>Vestavěný</value></data>
+
+	<!-- Settings - Notifications Tab -->
+	<data name="Settings_ReminderNotifications" xml:space="preserve"><value>Upozornění na připomínky</value></data>
+	<data name="Settings_EnableNotifications" xml:space="preserve"><value>Povolit upozornění</value></data>
+	<data name="Settings_EnableNotificationsDesc" xml:space="preserve"><value>Zobrazovat vyskakovací upozornění na připomínky</value></data>
+	<data name="Settings_ShowWarningNotifications" xml:space="preserve"><value>Zobrazovat varovná upozornění</value></data>
+	<data name="Settings_ShowUrgentNotifications" xml:space="preserve"><value>Zobrazovat naléhavá upozornění</value></data>
+	<data name="Settings_ShowOverdueNotifications" xml:space="preserve"><value>Zobrazovat upozornění na prošlé termíny</value></data>
+	<data name="Settings_PlayNotificationSound" xml:space="preserve"><value>Přehrát zvuk upozornění</value></data>
+	<data name="Settings_Timing" xml:space="preserve"><value>Načasování</value></data>
+	<data name="Settings_WarningMinutes" xml:space="preserve"><value>Varovné upozornění (minuty před termínem)</value></data>
+	<data name="Settings_UrgentMinutes" xml:space="preserve"><value>Naléhavé upozornění (minuty před termínem)</value></data>
+	<data name="Settings_NotificationDuration" xml:space="preserve"><value>Délka zobrazení upozornění (sekundy, 0 = do zavření)</value></data>
+
+	<!-- Settings - Data Tab -->
+	<data name="Settings_DataLocation" xml:space="preserve"><value>Umístění dat</value></data>
+	<data name="Settings_DataStorageFolder" xml:space="preserve"><value>Složka pro ukládání dat</value></data>
+	<data name="Settings_Open" xml:space="preserve"><value>Otevřít</value></data>
+	<data name="Settings_Backup" xml:space="preserve"><value>Záloha</value></data>
+	<data name="Settings_EnableAutoBackups" xml:space="preserve"><value>Povolit automatické zálohování</value></data>
+	<data name="Settings_EnableAutoBackupsDesc" xml:space="preserve"><value>Pravidelně zálohovat vaše data</value></data>
+	<data name="Settings_BackupIntervalHours" xml:space="preserve"><value>Interval zálohování (hodiny)</value></data>
+	<data name="Settings_MaxBackupsToKeep" xml:space="preserve"><value>Maximální počet záloh k uchování</value></data>
+	<data name="Settings_BackupNow" xml:space="preserve"><value>Zálohovat nyní</value></data>
+	<data name="Settings_OpenBackups" xml:space="preserve"><value>Otevřít zálohy</value></data>
+	<data name="Settings_RecentBackups" xml:space="preserve"><value>Nedávné zálohy</value></data>
+
+	<!-- Settings - About Tab -->
+	<data name="Settings_Links" xml:space="preserve"><value>Odkazy</value></data>
+	<data name="Settings_GitHubRepository" xml:space="preserve"><value>GitHub repozitář</value></data>
+	<data name="Settings_SystemInformation" xml:space="preserve"><value>Systémové informace</value></data>
+	<data name="Settings_ApplicationPath" xml:space="preserve"><value>Cesta k aplikaci</value></data>
+	<data name="Settings_PluginsDirectory" xml:space="preserve"><value>Adresář pluginů</value></data>
+	<data name="Settings_DotNetVersion" xml:space="preserve"><value>Verze .NET</value></data>
+	<data name="Settings_LoadedPlugins" xml:space="preserve"><value>Načtené pluginy</value></data>
+	<data name="Settings_Credits" xml:space="preserve"><value>Poděkování</value></data>
+	<data name="Settings_BuiltWith" xml:space="preserve"><value>Vytvořeno pomocí</value></data>
+	<data name="Settings_And" xml:space="preserve"><value>a</value></data>
+	<data name="Settings_Copyright" xml:space="preserve"><value>(c) 2025 ITHead.cz Všechna práva vyhrazena.</value></data>
+
+	<!-- Notification Window -->
+	<data name="Notification_Reminder" xml:space="preserve"><value>PŘIPOMÍNKA</value></data>
+	<data name="Notification_Snooze" xml:space="preserve"><value>Odložit</value></data>
+	<data name="Notification_Complete" xml:space="preserve"><value>Dokončit</value></data>
+	<data name="Notification_View" xml:space="preserve"><value>Zobrazit</value></data>
+	<data name="Notification_SnoozeTooltip" xml:space="preserve"><value>Odložit o 15 minut</value></data>
+	<data name="Notification_CompleteTooltip" xml:space="preserve"><value>Označit jako dokončené</value></data>
+	<data name="Notification_ViewTooltip" xml:space="preserve"><value>Zobrazit detaily připomínky</value></data>
+	<data name="Notification_DueAt" xml:space="preserve"><value>Termín: {0}</value></data>
+
+	<!-- Notification Messages -->
+	<data name="Notification_MinutesLeft" xml:space="preserve"><value>Zbývá {0} minut</value></data>
+	<data name="Notification_HoursMinutesLeft" xml:space="preserve"><value>Zbývá {0} hod. {1} min</value></data>
+	<data name="Notification_HoursLeft" xml:space="preserve"><value>Zbývá {0} hod.</value></data>
+	<data name="Notification_LessThanMinute" xml:space="preserve"><value>Zbývá méně než minuta!</value></data>
+	<data name="Notification_OnlyMinutesLeft" xml:space="preserve"><value>Zbývá pouze {0} minut!</value></data>
+	<data name="Notification_JustExpired" xml:space="preserve"><value>Právě vypršelo!</value></data>
+	<data name="Notification_OverdueMinutes" xml:space="preserve"><value>Zpožděno o {0} minut</value></data>
+	<data name="Notification_OverdueHours" xml:space="preserve"><value>Zpožděno o {0} hodin</value></data>
+	<data name="Notification_OverdueDays" xml:space="preserve"><value>Zpožděno o {0} dní</value></data>
+
+	<!-- Notification Urgency Types -->
+	<data name="Notification_Approaching" xml:space="preserve"><value>Blíží se</value></data>
+	<data name="Notification_DueSoon" xml:space="preserve"><value>Brzy</value></data>
+	<data name="Notification_Overdue" xml:space="preserve"><value>Po termínu</value></data>
+</root>

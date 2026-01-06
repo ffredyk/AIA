@@ -19,6 +19,7 @@ namespace AIA.Models
         private bool _enableAutoBackup = false;
         private int _autoBackupIntervalHours = 24;
         private int _maxBackupCount = 5;
+        private string _language = string.Empty; // Empty = use system language
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -110,6 +111,15 @@ namespace AIA.Models
         {
             get => _maxBackupCount;
             set { _maxBackupCount = value; OnPropertyChanged(nameof(MaxBackupCount)); }
+        }
+
+        /// <summary>
+        /// Language code for the UI (empty = use system language)
+        /// </summary>
+        public string Language
+        {
+            get => _language;
+            set { _language = value; OnPropertyChanged(nameof(Language)); }
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

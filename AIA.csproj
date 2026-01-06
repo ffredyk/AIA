@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>1.0.7.253</AssemblyVersion>
-    <FileVersion>1.0.7.253</FileVersion>
+    <AssemblyVersion>1.0.22.18978</AssemblyVersion>
+    <FileVersion>1.0.22.18978</FileVersion>
 	<UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Icons\AIA.ico</ApplicationIcon>
   </PropertyGroup>
@@ -64,6 +64,17 @@
     <Page Remove="Plugins\Outlook\**" />
     <Page Remove="Plugins\Teams\**" />
     <Page Remove="Plugins\SDK\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.de-de.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings.cs-cz.resx">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@
         xmlns:models="clr-namespace:AIA.Models.AI"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="AI Orchestration Settings" 
+        Title="{local:Localize Orchestration_Title}" 
         Height="700" Width="950"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
@@ -43,8 +43,8 @@
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon Symbol="Bot20" FontSize="24" Foreground="#0078D4" Margin="0,0,12,0"/>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="AI Orchestration" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
-                        <TextBlock Text="Configure AI providers and routing settings" Foreground="#999999" FontSize="12"/>
+                        <TextBlock Text="{local:Localize Orchestration_Header}" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="{local:Localize Orchestration_Description}" Foreground="#999999" FontSize="12"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>
@@ -53,7 +53,7 @@
         <!-- Main Content -->
         <TabControl Grid.Row="1" Margin="8" Background="Transparent">
             <!-- Providers Tab -->
-            <TabItem Header="Providers">
+            <TabItem Header="{local:Localize Orchestration_TabProviders}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="300"/>
@@ -75,17 +75,17 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="AI Providers" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <TextBlock Text="{local:Localize Orchestration_AIProviders}" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                 <ui:Button Grid.Column="1" Padding="8,4" Click="BtnAddProvider">
                                     <StackPanel Orientation="Horizontal">
                                         <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="12"/>
-                                        <TextBlock Text="Add" Foreground="White" FontSize="12" Margin="4,0,0,0"/>
+                                        <TextBlock Text="{local:Localize Orchestration_Add}" Foreground="White" FontSize="12" Margin="4,0,0,0"/>
                                     </StackPanel>
                                 </ui:Button>
                             </Grid>
                         </Border>
                         
-                        <!-- Providers ListView -->
+                        <!-- Providers ListView - Update Default badge -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="8,0,8,8">
                             <ItemsControl x:Name="ProvidersListControl" ItemsSource="{Binding Providers}">
                                 <ItemsControl.ItemTemplate>
@@ -112,33 +112,7 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 
-                                                <!-- Provider Icon -->
-                                                <Border Width="32" Height="32" CornerRadius="6" Margin="0,0,10,0">
-                                                    <Border.Background>
-                                                        <SolidColorBrush Color="{Binding ProviderColor}" Opacity="0.2"/>
-                                                    </Border.Background>
-                                                    <ui:SymbolIcon FontSize="16">
-                                                        <ui:SymbolIcon.Foreground>
-                                                            <SolidColorBrush Color="{Binding ProviderColor}"/>
-                                                        </ui:SymbolIcon.Foreground>
-                                                        <ui:SymbolIcon.Style>
-                                                            <Style TargetType="ui:SymbolIcon">
-                                                                <Setter Property="Symbol" Value="Bot20"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding ProviderType}" Value="AzureOpenAI">
-                                                                        <Setter Property="Symbol" Value="Cloud20"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding ProviderType}" Value="Google">
-                                                                        <Setter Property="Symbol" Value="Globe20"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding ProviderType}" Value="Anthropic">
-                                                                        <Setter Property="Symbol" Value="BrainCircuit20"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </ui:SymbolIcon.Style>
-                                                    </ui:SymbolIcon>
-                                                </Border>
+
                                                 
                                                 <!-- Provider Info -->
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -146,7 +120,7 @@
                                                         <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
                                                         <Border Margin="6,0,0,0" Padding="4,1" CornerRadius="4" Background="#331EB75F"
                                                                 Visibility="{Binding IsDefault, Converter={StaticResource BoolToVis}}">
-                                                            <TextBlock Text="Default" FontSize="9" Foreground="#1EB75F"/>
+                                                            <TextBlock Text="{local:Localize Orchestration_Default}" FontSize="9" Foreground="#1EB75F"/>
                                                         </Border>
                                                     </StackPanel>
                                                     <TextBlock Foreground="#999999" FontSize="11" Margin="0,2,0,0">
@@ -176,7 +150,7 @@
                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                                         Visibility="{Binding SelectedProvider, Converter={StaticResource NullToVis}, ConverterParameter=Inverse}">
                                 <ui:SymbolIcon Symbol="Bot20" FontSize="48" Foreground="#666666"/>
-                                <TextBlock Text="Select a provider to configure" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                                <TextBlock Text="{local:Localize Orchestration_SelectProvider}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
                             </StackPanel>
                             
                             <!-- Provider Details Form -->
@@ -192,19 +166,19 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         
-                                        <TextBlock Text="Provider Configuration" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{local:Localize Orchestration_ProviderConfiguration}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
                                         
-                                        <ui:Button Grid.Column="1" Padding="8,4" Margin="0,0,8,0" Click="BtnTestProvider" ToolTip="Test connection">
+                                        <ui:Button Grid.Column="1" Padding="8,4" Margin="0,0,8,0" Click="BtnTestProvider" ToolTip="{local:Localize Orchestration_TestConnection}">
                                             <StackPanel Orientation="Horizontal">
                                                 <ui:SymbolIcon Symbol="Play12" Foreground="White" FontSize="12"/>
-                                                <TextBlock Text="Test" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                                <TextBlock Text="{local:Localize Orchestration_Test}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
                                             </StackPanel>
                                         </ui:Button>
                                         
                                         <ui:Button Grid.Column="2" Padding="8,4" Margin="0,0,8,0" Click="BtnSetDefault">
                                             <StackPanel Orientation="Horizontal">
                                                 <ui:SymbolIcon Symbol="Star12" Foreground="#FFA500" FontSize="12"/>
-                                                <TextBlock Text="Set Default" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                                <TextBlock Text="{local:Localize Orchestration_SetDefault}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
                                             </StackPanel>
                                         </ui:Button>
                                         
@@ -215,7 +189,7 @@
                                     
                                     <!-- Provider Type -->
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="Provider Type" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_ProviderType}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                         <ComboBox SelectedItem="{Binding ProviderType, Mode=TwoWay}"
                                                   ItemsSource="{Binding Source={StaticResource AIProviderTypeValues}}"
                                                   Background="#3E3E42" Foreground="White" BorderBrush="#555555"/>
@@ -223,14 +197,14 @@
                                     
                                     <!-- Name -->
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="Display Name" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_DisplayName}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                                                  Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                                     </StackPanel>
                                     
                                     <!-- API Key -->
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="API Key" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_ApiKey}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                         <PasswordBox x:Name="ApiKeyInput" 
                                                      Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"
                                                      PasswordChanged="ApiKeyInput_PasswordChanged"/>
@@ -238,21 +212,21 @@
                                     
                                     <!-- Endpoint (Azure only) -->
                                     <StackPanel Margin="0,0,0,12" Visibility="{Binding RequiresEndpoint, Converter={StaticResource BoolToVis}}">
-                                        <TextBlock Text="Endpoint URL" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_EndpointUrl}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                         <TextBox Text="{Binding Endpoint, UpdateSourceTrigger=PropertyChanged}"
                                                  Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                                     </StackPanel>
                                     
                                     <!-- Deployment Name (Azure only) -->
                                     <StackPanel Margin="0,0,0,12" Visibility="{Binding RequiresDeploymentName, Converter={StaticResource BoolToVis}}">
-                                        <TextBlock Text="Deployment Name" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_DeploymentName}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                         <TextBox Text="{Binding DeploymentName, UpdateSourceTrigger=PropertyChanged}"
                                                  Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                                     </StackPanel>
                                     
                                     <!-- Model ID -->
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="Model ID" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_ModelId}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -279,7 +253,7 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Routing Priority" Foreground="#999999" FontSize="11"/>
+                                            <TextBlock Text="{local:Localize Orchestration_RoutingPriority}" Foreground="#999999" FontSize="11"/>
                                             <TextBlock Grid.Column="1" Text="{Binding Priority}" Foreground="#CCCCCC" FontSize="11"/>
                                         </Grid>
                                         <Slider Minimum="0" Maximum="100" Value="{Binding Priority}" Margin="0,4,0,0"/>
@@ -287,7 +261,7 @@
                                     
                                     <!-- Strengths -->
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="Strengths (comma-separated: coding, creative, analysis, math, research, conversation)" 
+                                        <TextBlock Text="{local:Localize Orchestration_Strengths}" 
                                                    Foreground="#999999" FontSize="11" Margin="0,0,0,4" TextWrapping="Wrap"/>
                                         <TextBox Text="{Binding StrengthsText, UpdateSourceTrigger=PropertyChanged}"
                                                  Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
@@ -295,7 +269,7 @@
                                     
                                     <!-- Max Context Tokens -->
                                     <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="Max Context Tokens" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_MaxContextTokens}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                         <TextBox Text="{Binding MaxContextTokens, UpdateSourceTrigger=PropertyChanged}"
                                                  Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                                     </StackPanel>
@@ -307,7 +281,7 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Enabled" Foreground="White" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{local:Localize Orchestration_Enabled}" Foreground="White" VerticalAlignment="Center"/>
                                             <CheckBox Grid.Column="1" IsChecked="{Binding IsEnabled}"/>
                                         </Grid>
                                     </Border>
@@ -324,11 +298,11 @@
             </TabItem>
             
             <!-- Settings Tab -->
-            <TabItem Header="Settings">
+            <TabItem Header="{local:Localize Orchestration_TabSettings}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
                     <StackPanel MaxWidth="600" HorizontalAlignment="Left">
                         <!-- Routing Settings -->
-                        <TextBlock Text="Routing" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                        <TextBlock Text="{local:Localize Orchestration_Routing}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <Grid>
@@ -337,8 +311,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Automatic Routing" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Automatically select the best AI provider based on prompt content" 
+                                    <TextBlock Text="{local:Localize Orchestration_AutoRouting}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Orchestration_AutoRoutingDesc}" 
                                                Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 <CheckBox Grid.Column="1" IsChecked="{Binding Settings.EnableAutoRouting}" VerticalAlignment="Center"/>
@@ -346,7 +320,7 @@
                         </Border>
                         
                         <!-- Tool Settings -->
-                        <TextBlock Text="Tools (MCP-like)" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Orchestration_ToolsMcp}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <Grid>
@@ -355,8 +329,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Enable Tool Use" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Allow AI to use tools to access tasks, reminders, and data bank" 
+                                    <TextBlock Text="{local:Localize Orchestration_EnableToolUse}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Orchestration_EnableToolUseDesc}" 
                                                Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 <CheckBox Grid.Column="1" IsChecked="{Binding Settings.EnableToolUse}" VerticalAlignment="Center"/>
@@ -364,7 +338,7 @@
                         </Border>
                         
                         <!-- Context Settings -->
-                        <TextBlock Text="Context Inclusion" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Orchestration_ContextInclusion}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <Grid>
@@ -372,7 +346,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Include Tasks in System Prompt" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Orchestration_IncludeTasksContext}" Foreground="White"/>
                                 <CheckBox Grid.Column="1" IsChecked="{Binding Settings.IncludeTasksContext}"/>
                             </Grid>
                         </Border>
@@ -383,7 +357,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Include Reminders in System Prompt" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Orchestration_IncludeRemindersContext}" Foreground="White"/>
                                 <CheckBox Grid.Column="1" IsChecked="{Binding Settings.IncludeRemindersContext}"/>
                             </Grid>
                         </Border>
@@ -394,7 +368,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Include Selected Data Bank Category" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Orchestration_IncludeDataBankContext}" Foreground="White"/>
                                 <CheckBox Grid.Column="1" IsChecked="{Binding Settings.IncludeDataBankContext}"/>
                             </Grid>
                         </Border>
@@ -405,19 +379,19 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Include Current Screenshots" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Orchestration_IncludeScreenshotsContext}" Foreground="White"/>
                                 <CheckBox Grid.Column="1" IsChecked="{Binding Settings.IncludeScreenshotsContext}"/>
                             </Grid>
                         </Border>
                         
                         <StackPanel Margin="0,8,0,0">
-                            <TextBlock Text="Max Context Items per Category" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Orchestration_MaxContextItems}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding Settings.MaxContextItems, UpdateSourceTrigger=PropertyChanged}"
                                      Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8" Width="100" HorizontalAlignment="Left"/>
                         </StackPanel>
                         
                         <!-- Generation Settings -->
-                        <TextBlock Text="Generation Defaults" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Orchestration_GenerationDefaults}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
@@ -426,13 +400,13 @@
                             </Grid.ColumnDefinitions>
                             
                             <StackPanel Margin="0,0,8,0">
-                                <TextBlock Text="Temperature" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize Orchestration_Temperature}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <TextBox Text="{Binding Settings.DefaultTemperature, UpdateSourceTrigger=PropertyChanged}"
                                          Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="Max Tokens" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize Orchestration_MaxTokens}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <TextBox Text="{Binding Settings.DefaultMaxTokens, UpdateSourceTrigger=PropertyChanged}"
                                          Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                             </StackPanel>
@@ -442,11 +416,11 @@
             </TabItem>
             
             <!-- Tools Tab -->
-            <TabItem Header="Available Tools">
+            <TabItem Header="{local:Localize Orchestration_TabTools}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
                     <StackPanel>
-                        <TextBlock Text="AI Tools" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,8"/>
-                        <TextBlock Text="These tools are available to the AI when tool use is enabled. The AI can call these tools to access and manage your data." 
+                        <TextBlock Text="{local:Localize Orchestration_AITools}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,8"/>
+                        <TextBlock Text="{local:Localize Orchestration_AIToolsDesc}" 
                                    Foreground="#999999" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,16"/>
                         
                         <ItemsControl x:Name="ToolsListControl">
@@ -490,11 +464,11 @@
                     <ui:Button Padding="16,8" Margin="0,0,8,0" Click="BtnSave">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Save16" Foreground="White" FontSize="14"/>
-                            <TextBlock Text="Save" Foreground="White" FontWeight="SemiBold" Margin="6,0,0,0"/>
+                            <TextBlock Text="{local:Localize Orchestration_Save}" Foreground="White" FontWeight="SemiBold" Margin="6,0,0,0"/>
                         </StackPanel>
                     </ui:Button>
                     <ui:Button Padding="16,8" Click="BtnClose">
-                        <TextBlock Text="Close" Foreground="White"/>
+                        <TextBlock Text="{local:Localize Orchestration_Close}" Foreground="White"/>
                     </ui:Button>
                 </StackPanel>
             </Grid>

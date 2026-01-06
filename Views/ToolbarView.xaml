@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:local="clr-namespace:AIA.Views"
+             xmlns:local="clr-namespace:AIA"
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="1920">
     <Grid>
@@ -20,19 +20,19 @@
                 <ui:Button Click="BtnNewTask">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="ClipboardTaskAdd20" Foreground="White"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="New task"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_NewTask}"/>
                     </StackPanel>
                 </ui:Button>
                 <ui:Button Margin="5,0,0,0" Click="BtnNewReminder">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Lightbulb16" Foreground="White"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="New reminder"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_NewReminder}"/>
                     </StackPanel>
                 </ui:Button>
                 <ui:Button Margin="5,0,0,0">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="ClipboardDataBar20" Foreground="White"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="New data"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_NewData}"/>
                     </StackPanel>
                 </ui:Button>
                 <Separator Width="1" Margin="10,0" Background="White"/>
@@ -45,19 +45,19 @@
                 <ui:Button Click="BtnSettings">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Settings20" Foreground="White"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Settings"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_Settings}"/>
                     </StackPanel>
                 </ui:Button>
                 <ui:Button Margin="5,0,0,0" Click="BtnOrchestration">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Bot20" Foreground="White"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Orchestration"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_Orchestration}"/>
                     </StackPanel>
                 </ui:Button>
                 <ui:Button Margin="5,0,0,0">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="ArrowRepeatAll20" Foreground="White"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Automation"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_Automation}"/>
                     </StackPanel>
                 </ui:Button>
             </StackPanel>
@@ -69,25 +69,25 @@
                 <ui:Button Click="BtnShutdown">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Power20" Foreground="White"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="App Shutdown"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_AppShutdown}"/>
                     </StackPanel>
                 </ui:Button>
                 <ui:Button Margin="5,0,0,0" IsEnabled="False">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Remote20" Foreground="Gray"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="Gray" FontWeight="SemiBold" Text="Server"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="Gray" FontWeight="SemiBold" Text="{local:Localize Toolbar_Server}"/>
                     </StackPanel>
                 </ui:Button>
                 <ui:Button Margin="5,0,0,0" IsEnabled="False">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="PeopleTeam20" Foreground="Gray"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="Gray" FontWeight="SemiBold" Text="Team"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="Gray" FontWeight="SemiBold" Text="{local:Localize Toolbar_Team}"/>
                     </StackPanel>
                 </ui:Button>
                 <ui:Button Margin="5,0,0,0" Click="BtnClose">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="ArrowExit20" Foreground="White"/>
-                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="Close overlay"/>
+                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_CloseOverlay}"/>
                     </StackPanel>
                 </ui:Button>
             </StackPanel>

@@ -140,10 +140,10 @@ namespace AIA.Models
 
         public string UrgencyText => Urgency switch
         {
-            NotificationUrgency.Warning => "Approaching",
-            NotificationUrgency.Urgent => "Due Soon",
-            NotificationUrgency.Overdue => "Overdue",
-            _ => "Reminder"
+            NotificationUrgency.Warning => Services.LocalizationService.Instance.GetString("Notification_Approaching"),
+            NotificationUrgency.Urgent => Services.LocalizationService.Instance.GetString("Notification_DueSoon"),
+            NotificationUrgency.Overdue => Services.LocalizationService.Instance.GetString("Notification_Overdue"),
+            _ => Services.LocalizationService.Instance.GetString("Notification_Reminder")
         };
 
         public string UrgencyColor => Urgency switch

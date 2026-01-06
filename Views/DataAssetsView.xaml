@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:local="clr-namespace:AIA.Views"
+             xmlns:local="clr-namespace:AIA"
              mc:Ignorable="d" 
              d:DesignHeight="200" d:DesignWidth="1000">
     <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="5,5,5,5">
@@ -22,12 +22,12 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon Symbol="ScreenshotRecord20" Foreground="White" Margin="0,0,8,0"/>
-                    <TextBlock FontWeight="SemiBold" Foreground="White" Text="Current data assets"/>
+                    <TextBlock FontWeight="SemiBold" Foreground="White" Text="{local:Localize DataAssets_CurrentDataAssets}"/>
                 </StackPanel>
                 <ui:Button Grid.Column="1" Padding="6,4" Background="Transparent" Click="BtnRefreshDataAssets">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="ArrowSync12" Foreground="White" FontSize="12"/>
-                        <TextBlock Margin="4,0,0,0" Text="Refresh" Foreground="White" FontSize="11"/>
+                        <TextBlock Margin="4,0,0,0" Text="{local:Localize DataAssets_Refresh}" Foreground="White" FontSize="11"/>
                     </StackPanel>
                 </ui:Button>
             </Grid>
@@ -97,10 +97,10 @@
                                                     <TextBlock Margin="4,0,0,0" FontSize="9" Foreground="White">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Text" Value="Window"/>
+                                                                <Setter Property="Text" Value="{local:Localize DataAssets_Window}"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding AssetType}" Value="FullScreen">
-                                                                        <Setter Property="Text" Value="Screen"/>
+                                                                        <Setter Property="Text" Value="{local:Localize DataAssets_Screen}"/>
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -137,28 +137,28 @@
                                         <!-- Copy to Clipboard -->
                                         <ui:Button Grid.Column="0" Padding="4" Background="Transparent" 
                                                    Click="BtnCopyAssetToClipboard" Tag="{Binding}"
-                                                   ToolTip="Copy to Clipboard">
+                                                   ToolTip="{local:Localize DataAssets_CopyToClipboard}">
                                             <ui:SymbolIcon Symbol="Copy16" Foreground="White" FontSize="12"/>
                                         </ui:Button>
                                         
                                         <!-- Save to Disk -->
                                         <ui:Button Grid.Column="1" Padding="4" Background="Transparent" 
                                                    Click="BtnSaveAssetToDisk" Tag="{Binding}"
-                                                   ToolTip="Save to Disk">
+                                                   ToolTip="{local:Localize DataAssets_SaveToDisk}">
                                             <ui:SymbolIcon Symbol="Save16" Foreground="White" FontSize="12"/>
                                         </ui:Button>
                                         
                                         <!-- Save As -->
                                         <ui:Button Grid.Column="2" Padding="4" Background="Transparent" 
                                                    Click="BtnSaveAssetAs" Tag="{Binding}"
-                                                   ToolTip="Save As...">
+                                                   ToolTip="{local:Localize DataAssets_SaveAs}">
                                             <ui:SymbolIcon Symbol="Save20" Foreground="White" FontSize="12"/>
                                         </ui:Button>
                                         
                                         <!-- Save to Data Bank -->
                                         <ui:Button Grid.Column="3" Padding="4" Background="Transparent" 
                                                    Click="BtnSaveAssetToDataBank" Tag="{Binding}"
-                                                   ToolTip="Save to Data Bank"
+                                                   ToolTip="{local:Localize DataAssets_SaveToDataBank}"
                                                    IsEnabled="{Binding DataContext.HasSelectedCategory, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                             <ui:SymbolIcon Symbol="Database20" Foreground="#0078D4" FontSize="12"/>
                                         </ui:Button>
@@ -174,7 +174,7 @@
             <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Visibility="{Binding CurrentDataAssets.Count, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}">
                 <ui:SymbolIcon Symbol="Screenshot20" FontSize="32" Foreground="#666666"/>
-                <TextBlock Text="No screenshots captured" Foreground="#666666" FontSize="12" Margin="0,8,0,0"/>
+                <TextBlock Text="{local:Localize DataAssets_NoScreenshots}" Foreground="#666666" FontSize="12" Margin="0,8,0,0"/>
             </StackPanel>
         </Grid>
     </Border>

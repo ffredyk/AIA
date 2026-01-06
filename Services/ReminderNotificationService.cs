@@ -194,7 +194,7 @@ namespace AIA.Services
         {
             if (timeUntilDue.TotalMinutes < 60)
             {
-                return $"{(int)timeUntilDue.TotalMinutes} minutes left";
+                return string.Format(LocalizationService.Instance.GetString("Notification_MinutesLeft"), (int)timeUntilDue.TotalMinutes);
             }
             else
             {
@@ -202,9 +202,9 @@ namespace AIA.Services
                 var minutes = timeUntilDue.Minutes;
                 if (minutes > 0)
                 {
-                    return $"{hours} hour{(hours > 1 ? "s" : "")} {minutes} min left";
+                    return string.Format(LocalizationService.Instance.GetString("Notification_HoursMinutesLeft"), hours, minutes);
                 }
-                return $"{hours} hour{(hours > 1 ? "s" : "")} left";
+                return string.Format(LocalizationService.Instance.GetString("Notification_HoursLeft"), hours);
             }
         }
 
@@ -212,28 +212,28 @@ namespace AIA.Services
         {
             if (timeUntilDue.TotalMinutes < 1)
             {
-                return "Less than a minute left!";
+                return LocalizationService.Instance.GetString("Notification_LessThanMinute");
             }
-            return $"Only {(int)timeUntilDue.TotalMinutes} minutes left!";
+            return string.Format(LocalizationService.Instance.GetString("Notification_OnlyMinutesLeft"), (int)timeUntilDue.TotalMinutes);
         }
 
         private static string GetOverdueMessage(TimeSpan overdueTime)
         {
             if (overdueTime.TotalMinutes < 1)
             {
-                return "Just expired!";
+                return LocalizationService.Instance.GetString("Notification_JustExpired");
             }
             else if (overdueTime.TotalMinutes < 60)
             {
-                return $"Overdue by {(int)overdueTime.TotalMinutes} minutes";
+                return string.Format(LocalizationService.Instance.GetString("Notification_OverdueMinutes"), (int)overdueTime.TotalMinutes);
             }
             else if (overdueTime.TotalHours < 24)
             {
-                return $"Overdue by {(int)overdueTime.TotalHours} hours";
+                return string.Format(LocalizationService.Instance.GetString("Notification_OverdueHours"), (int)overdueTime.TotalHours);
             }
             else
             {
-                return $"Overdue by {(int)overdueTime.TotalDays} days";
+                return string.Format(LocalizationService.Instance.GetString("Notification_OverdueDays"), (int)overdueTime.TotalDays);
             }
         }
     }

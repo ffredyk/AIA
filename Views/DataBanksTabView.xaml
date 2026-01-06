@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:local="clr-namespace:AIA.Views"
+             xmlns:local="clr-namespace:AIA"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <Grid>
@@ -30,7 +30,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Categories" Foreground="White" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                <TextBlock Text="{local:Localize DataBanks_Categories}" Foreground="White" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
                 <ui:Button Grid.Column="1" Padding="4" Background="Transparent" Click="BtnAddCategory">
                     <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="12"/>
                 </ui:Button>
@@ -134,7 +134,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Entries" Foreground="White" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                <TextBlock Text="{local:Localize DataBanks_Entries}" Foreground="White" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
                 <ui:Button Grid.Column="1" Padding="4" Margin="0,0,4,0" Background="Transparent" Click="BtnImportFile"
                            IsEnabled="{Binding HasSelectedCategory}">
                     <ui:SymbolIcon Symbol="DocumentArrowUp20" Foreground="White" FontSize="14"/>
@@ -172,7 +172,7 @@
             <StackPanel Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Visibility="{Binding HasSelectedCategory, Converter={StaticResource InverseBoolToVis}}">
                 <ui:SymbolIcon Symbol="FolderOpen20" FontSize="32" Foreground="#666666"/>
-                <TextBlock Text="Select a category" Foreground="#666666" Margin="0,8,0,0" FontSize="12"/>
+                <TextBlock Text="{local:Localize DataBanks_SelectCategory}" Foreground="#666666" Margin="0,8,0,0" FontSize="12"/>
             </StackPanel>
             
             <!-- Entries List -->
@@ -259,7 +259,7 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                             Visibility="{Binding HasSelectedDataEntry, Converter={StaticResource InverseBoolToVis}}">
                     <ui:SymbolIcon Symbol="DocumentText20" FontSize="48" Foreground="#666666"/>
-                    <TextBlock Text="Select an entry to view details" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                    <TextBlock Text="{local:Localize DataBanks_SelectEntryToViewDetails}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
                 </StackPanel>
                 
                 <!-- Entry Details -->
@@ -304,7 +304,7 @@
                                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                                                     Visibility="{Binding PreviewImage, Converter={StaticResource NullToVis}, ConverterParameter=Inverse}">
                                             <ui:SymbolIcon Symbol="Image20" FontSize="32" Foreground="#666666"/>
-                                            <TextBlock Text="Image preview unavailable" Foreground="#666666" FontSize="11" Margin="0,8,0,0"/>
+                                            <TextBlock Text="{local:Localize DataBanks_ImagePreviewUnavailable}" Foreground="#666666" FontSize="11" Margin="0,8,0,0"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -328,7 +328,7 @@
                                                    Click="BtnOpenFile" Tag="{Binding}" HorizontalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
                                                 <ui:SymbolIcon Symbol="Open16" Foreground="White" FontSize="12"/>
-                                                <TextBlock Text="Open PDF" Foreground="White" FontSize="12" Margin="6,0,0,0"/>
+                                                <TextBlock Text="{local:Localize DataBanks_OpenPdf}" Foreground="White" FontSize="12" Margin="6,0,0,0"/>
                                             </StackPanel>
                                         </ui:Button>
                                     </StackPanel>
@@ -359,7 +359,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Margin="0,0,8,0">
-                                <TextBlock Text="Type" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize DataBanks_Type}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <ComboBox SelectedItem="{Binding EntryType, Mode=TwoWay}"
                                           ItemsSource="{Binding Source={StaticResource DataEntryTypeValues}}"
                                           Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
@@ -367,20 +367,20 @@
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="8,0,0,0"
                                         Visibility="{Binding FilePath, Converter={StaticResource NullToVis}}">
-                                <TextBlock Text="File Size" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize DataBanks_FileSize}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <TextBlock Text="{Binding FileSizeText}" Foreground="White" FontSize="13" Margin="0,6,0,0"/>
                             </StackPanel>
                         </Grid>
                         
                         <!-- Original File Name -->
                         <StackPanel Margin="0,0,0,16" Visibility="{Binding OriginalFileName, Converter={StaticResource NullToVis}}">
-                            <TextBlock Text="Original File" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize DataBanks_OriginalFile}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <TextBlock Text="{Binding OriginalFileName}" Foreground="White" FontSize="12"/>
                         </StackPanel>
                         
                         <!-- Tags -->
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Tags (comma separated)" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize DataBanks_Tags}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}"
                                      Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
                                      Padding="8" FontSize="12"
@@ -394,11 +394,9 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Content" Foreground="#999999" FontSize="11"/>
-                                <TextBlock Grid.Column="1" Foreground="#666666" FontSize="10"
-                                           Visibility="{Binding IsImageEntry, Converter={StaticResource BoolToVis}}">
-                                    <Run Text="Image metadata"/>
-                                </TextBlock>
+                                <TextBlock Text="{local:Localize DataBanks_Content}" Foreground="#999999" FontSize="11"/>
+                                <TextBlock Grid.Column="1" Text="{local:Localize DataBanks_ImageMetadata}" Foreground="#666666" FontSize="10"
+                                           Visibility="{Binding IsImageEntry, Converter={StaticResource BoolToVis}}"/>
                             </Grid>
                             <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}"
                                      Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"

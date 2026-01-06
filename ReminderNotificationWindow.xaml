@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:local="clr-namespace:AIA"
         mc:Ignorable="d"
-        Title="Reminder Notification"
+        Title="{local:Localize Notification_Reminder}"
         WindowStyle="None"
         AllowsTransparency="True"
         Topmost="True"
@@ -86,7 +87,7 @@
                     
                     <!-- Title and urgency text -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock x:Name="UrgencyLabel" Text="REMINDER" FontSize="10" FontWeight="Bold" 
+                        <TextBlock x:Name="UrgencyLabel" Text="{local:Localize Notification_Reminder}" FontSize="10" FontWeight="Bold" 
                                    Foreground="#999999"/>
                         <TextBlock x:Name="ReminderTitle" Text="Reminder Title" FontSize="16" FontWeight="SemiBold" 
                                    Foreground="White" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
@@ -136,28 +137,28 @@
                     
                     <!-- Snooze button -->
                     <ui:Button x:Name="BtnSnooze" Padding="12,8" Background="#19FFFFFF" 
-                               Click="BtnSnooze_Click" ToolTip="Snooze for 15 minutes">
+                               Click="BtnSnooze_Click" ToolTip="{local:Localize Notification_SnoozeTooltip}">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Clock12" Foreground="White" FontSize="12"/>
-                            <TextBlock Text="Snooze" Foreground="White" FontSize="12" Margin="6,0,0,0"/>
+                            <TextBlock Text="{local:Localize Notification_Snooze}" Foreground="White" FontSize="12" Margin="6,0,0,0"/>
                         </StackPanel>
                     </ui:Button>
                     
                     <!-- Mark complete button -->
                     <ui:Button Grid.Column="1" Padding="12,8" Margin="8,0,0,0" Background="#331EB75F"
-                               Click="BtnComplete_Click" ToolTip="Mark as completed">
+                               Click="BtnComplete_Click" ToolTip="{local:Localize Notification_CompleteTooltip}">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Checkmark12" Foreground="#1EB75F" FontSize="12"/>
-                            <TextBlock Text="Complete" Foreground="#1EB75F" FontSize="12" Margin="6,0,0,0"/>
+                            <TextBlock Text="{local:Localize Notification_Complete}" Foreground="#1EB75F" FontSize="12" Margin="6,0,0,0"/>
                         </StackPanel>
                     </ui:Button>
                     
                     <!-- View button -->
                     <ui:Button Grid.Column="2" Padding="12,8" Margin="8,0,0,0" Background="#330078D4"
-                               Click="BtnView_Click" ToolTip="View reminder details">
+                               Click="BtnView_Click" ToolTip="{local:Localize Notification_ViewTooltip}">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Open16" Foreground="#0078D4" FontSize="12"/>
-                            <TextBlock Text="View" Foreground="#0078D4" FontSize="12" Margin="6,0,0,0"/>
+                            <TextBlock Text="{local:Localize Notification_View}" Foreground="#0078D4" FontSize="12" Margin="6,0,0,0"/>
                         </StackPanel>
                     </ui:Button>
                 </Grid>

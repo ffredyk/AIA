@@ -57,7 +57,7 @@
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal">
                                 <ui:SymbolIcon Margin="0,0,6,0" Symbol="TaskListSquareDatabase20" />
-                                <TextBlock Text="Tasks" />
+                                <TextBlock Text="{local:Localize Tab_Tasks}" />
                             </StackPanel>
                         </TabItem.Header>
                         <views:TasksTabView x:Name="TasksTab"/>
@@ -68,7 +68,7 @@
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal">
                                 <ui:SymbolIcon Margin="0,0,6,0" Symbol="PersonLightbulb20" />
-                                <TextBlock Text="Reminders" />
+                                <TextBlock Text="{local:Localize Tab_Reminders}" />
                             </StackPanel>
                         </TabItem.Header>
                         <views:RemindersTabView x:Name="RemindersTab"/>
@@ -79,7 +79,7 @@
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal">
                                 <ui:SymbolIcon Margin="0,0,6,0" Symbol="BookDatabase20" />
-                                <TextBlock Text="Data banks" />
+                                <TextBlock Text="{local:Localize Tab_DataBanks}" />
                             </StackPanel>
                         </TabItem.Header>
                         <views:DataBanksTabView x:Name="DataBanksTab"/>
@@ -95,7 +95,7 @@
 
         <!-- Footer -->
         <Grid Grid.Row="3" Grid.ColumnSpan="3" HorizontalAlignment="Center" Margin="10">
-            <TextBlock Foreground="White" FontWeight="SemiBold" Text="Press ESC to close this overlay" />
+            <TextBlock Foreground="White" FontWeight="SemiBold" Text="{local:Localize Footer_PressEscToClose}" />
         </Grid>
 
         <!-- Chat Panel -->

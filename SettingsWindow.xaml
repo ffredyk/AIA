@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:AIA"
         xmlns:models="clr-namespace:AIA.Models"
         mc:Ignorable="d"
-        Title="Settings" 
+        Title="{local:Localize Settings_Title}" 
         Height="750" Width="900"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
@@ -35,8 +35,8 @@
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon Symbol="Settings20" FontSize="24" Foreground="#0078D4" Margin="0,0,12,0"/>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Settings" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
-                        <TextBlock Text="Configure application preferences and plugin options" Foreground="#999999" FontSize="12"/>
+                        <TextBlock Text="{local:Localize Settings_Title}" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="{local:Localize Settings_ConfigurePreferences}" Foreground="#999999" FontSize="12"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>
@@ -46,12 +46,12 @@
         <TabControl Grid.Row="1" Margin="8" Background="Transparent">
             
             <!-- General Tab -->
-            <TabItem Header="General">
+            <TabItem Header="{local:Localize Settings_General}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
                     <StackPanel MaxWidth="600" HorizontalAlignment="Left">
                         
-                        <!-- Startup Section -->
-                        <TextBlock Text="Startup" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                        <!-- Language Section -->
+                        <TextBlock Text="{local:Localize Settings_Language}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <Grid>
@@ -60,8 +60,32 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Run on Windows startup" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Start AIA automatically when Windows starts" 
+                                    <TextBlock Text="{local:Localize Settings_Language}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_LanguageDescription}" 
+                                               Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <ComboBox x:Name="CmbLanguage" Grid.Column="1" Width="150" VerticalAlignment="Center"
+                                          Background="#3E3E42" Foreground="White" BorderBrush="#555555"
+                                          SelectionChanged="CmbLanguage_SelectionChanged">
+                                    <ComboBoxItem Content="English" Tag="en"/>
+                                    <ComboBoxItem Content="Czech" Tag="cs-CZ"/>
+                                    <ComboBoxItem Content="Deutsch" Tag="de-DE"/>
+                                </ComboBox>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- Startup Section -->
+                        <TextBlock Text="{local:Localize Settings_Startup}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{local:Localize Settings_RunOnStartup}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_RunOnStartupDesc}" 
                                                Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 <CheckBox x:Name="ChkRunOnStartup" Grid.Column="1" VerticalAlignment="Center"
@@ -70,11 +94,11 @@
                         </Border>
                         
                         <!-- Overlay Shortcut -->
-                        <TextBlock Text="Overlay Shortcut" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_OverlayShortcut}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <StackPanel>
-                                <TextBlock Text="Keyboard shortcut to open/close the overlay" Foreground="#999999" FontSize="11" Margin="0,0,0,8"/>
+                                <TextBlock Text="{local:Localize Settings_ShortcutDescription}" Foreground="#999999" FontSize="11" Margin="0,0,0,8"/>
                                 
                                 <!-- Interactive Hotkey Capture -->
                                 <Grid>
@@ -115,7 +139,7 @@
                                                        FontWeight="SemiBold"
                                                        VerticalAlignment="Center"/>
                                             <TextBlock x:Name="TxtHotkeyPlaceholder"
-                                                       Text="Press keys..."
+                                                       Text="{local:Localize Settings_PressKeys}"
                                                        Foreground="#666666"
                                                        FontSize="14"
                                                        FontStyle="Italic"
@@ -128,7 +152,7 @@
                                     <ui:Button Grid.Column="1" 
                                                Margin="8,0,0,0" 
                                                Padding="10,6" 
-                                               ToolTip="Clear hotkey"
+                                               ToolTip="{local:Localize Settings_ClearHotkey}"
                                                Click="BtnClearHotkey_Click">
                                         <ui:SymbolIcon Symbol="Dismiss20" Foreground="White" FontSize="14"/>
                                     </ui:Button>
@@ -141,13 +165,13 @@
                                                x:Name="BtnApplyHotkey">
                                         <StackPanel Orientation="Horizontal">
                                             <ui:SymbolIcon Symbol="Checkmark20" Foreground="White" FontSize="14"/>
-                                            <TextBlock Text="Apply" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                            <TextBlock Text="{local:Localize Settings_Apply}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
                                         </StackPanel>
                                     </ui:Button>
                                 </Grid>
                                 
                                 <!-- Instructions -->
-                                <TextBlock Text="Click the box above and press your desired key combination" 
+                                <TextBlock Text="{local:Localize Settings_ClickToCapture}" 
                                            Foreground="#666666" FontSize="10" Margin="0,8,0,0"/>
                                 
                                 <!-- Status Message -->
@@ -160,7 +184,7 @@
                         </Border>
                         
                         <!-- Behavior Section -->
-                        <TextBlock Text="Behavior" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_Behavior}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <Grid>
@@ -169,8 +193,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Minimize to system tray" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Keep running in background when overlay is closed" 
+                                    <TextBlock Text="{local:Localize Settings_MinimizeToTray}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_MinimizeToTrayDesc}" 
                                                Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 <CheckBox x:Name="ChkMinimizeToTray" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
@@ -178,7 +202,7 @@
                         </Border>
                         
                         <!-- Updates Section -->
-                        <TextBlock Text="Updates" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_Updates}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <Grid>
@@ -187,8 +211,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Check for updates on startup" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Automatically check for new versions when the app starts" 
+                                    <TextBlock Text="{local:Localize Settings_CheckForUpdates}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_CheckForUpdatesDesc}" 
                                                Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 <CheckBox x:Name="ChkCheckUpdates" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
@@ -202,8 +226,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Auto-install updates" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Automatically download and install updates" 
+                                    <TextBlock Text="{local:Localize Settings_AutoInstallUpdates}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_AutoInstallUpdatesDesc}" 
                                                Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 <CheckBox x:Name="ChkAutoInstallUpdates" Grid.Column="1" VerticalAlignment="Center"/>
@@ -213,7 +237,7 @@
                         <ui:Button Margin="0,8,0,0" Padding="12,8" Click="BtnCheckForUpdates_Click">
                             <StackPanel Orientation="Horizontal">
                                 <ui:SymbolIcon Symbol="ArrowSync20" Foreground="White" FontSize="14"/>
-                                <TextBlock Text="Check for Updates Now" Foreground="White" Margin="8,0,0,0"/>
+                                <TextBlock Text="{local:Localize Settings_CheckForUpdatesNow}" Foreground="White" Margin="8,0,0,0"/>
                             </StackPanel>
                         </ui:Button>
                         
@@ -222,7 +246,7 @@
             </TabItem>
             
             <!-- Plugins Tab -->
-            <TabItem Header="Plugins">
+            <TabItem Header="{local:Localize Settings_Plugins}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -238,8 +262,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Enable Plugin System" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Allow plugins to extend AIA functionality" 
+                                    <TextBlock Text="{local:Localize Settings_EnablePluginSystem}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_EnablePluginSystemDesc}" 
                                                Foreground="#999999" FontSize="11"/>
                                 </StackPanel>
                                 <CheckBox x:Name="ChkEnablePlugins" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
@@ -250,7 +274,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Check for plugin updates" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Settings_CheckPluginUpdates}" Foreground="White"/>
                                 <CheckBox x:Name="ChkCheckPluginUpdates" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
                             </Grid>
                             
@@ -259,7 +283,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Auto-update plugins" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Settings_AutoUpdatePlugins}" Foreground="White"/>
                                 <CheckBox x:Name="ChkAutoUpdatePlugins" Grid.Column="1" VerticalAlignment="Center"/>
                             </Grid>
                         </StackPanel>
@@ -279,11 +303,11 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Installed Plugins" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{local:Localize Settings_InstalledPlugins}" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                     <ui:Button Grid.Column="1" Padding="8,4" Click="BtnRefreshPlugins_Click">
                                         <StackPanel Orientation="Horizontal">
                                             <ui:SymbolIcon Symbol="ArrowSync12" Foreground="White" FontSize="12"/>
-                                            <TextBlock Text="Refresh" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                            <TextBlock Text="{local:Localize Common_Refresh}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
                                         </StackPanel>
                                     </ui:Button>
                                 </Grid>
@@ -328,11 +352,11 @@
                                                                 <TextBlock FontSize="9">
                                                                     <TextBlock.Style>
                                                                         <Style TargetType="TextBlock">
-                                                                            <Setter Property="Text" Value="Enabled"/>
+                                                                            <Setter Property="Text" Value="{local:Localize Settings_PluginEnabled}"/>
                                                                             <Setter Property="Foreground" Value="#1EB75F"/>
                                                                             <Style.Triggers>
                                                                                 <DataTrigger Binding="{Binding IsEnabled}" Value="False">
-                                                                                    <Setter Property="Text" Value="Disabled"/>
+                                                                                    <Setter Property="Text" Value="{local:Localize Settings_PluginDisabled}"/>
                                                                                     <Setter Property="Foreground" Value="#808080"/>
                                                                                 </DataTrigger>
                                                                             </Style.Triggers>
@@ -342,18 +366,18 @@
                                                             </Border>
                                                             <Border Padding="4,1" CornerRadius="3" Background="#330078D4"
                                                                     Visibility="{Binding IsBuiltIn, Converter={StaticResource BoolToVis}}">
-                                                                <TextBlock Text="Built-in" FontSize="9" Foreground="#0078D4"/>
+                                                                <TextBlock Text="{local:Localize Settings_BuiltIn}" FontSize="9" Foreground="#0078D4"/>
                                                             </Border>
                                                         </StackPanel>
                                                     </StackPanel>
                                                     
                                                     <!-- Actions -->
                                                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <ui:Button Padding="8,6" Margin="0,0,4,0" ToolTip="Configure permissions"
+                                                        <ui:Button Padding="8,6" Margin="0,0,4,0" ToolTip="{local:Localize Settings_ConfigurePermissions}"
                                                                    Click="BtnPluginPermissions_Click" Tag="{Binding}">
                                                             <ui:SymbolIcon Symbol="Shield20" Foreground="White" FontSize="14"/>
                                                         </ui:Button>
-                                                        <CheckBox IsChecked="{Binding IsEnabled}" VerticalAlignment="Center" ToolTip="Enable/Disable"/>
+                                                        <CheckBox IsChecked="{Binding IsEnabled}" VerticalAlignment="Center" ToolTip="{local:Localize Settings_EnableDisable}"/>
                                                     </StackPanel>
                                                 </Grid>
                                             </Border>
@@ -366,8 +390,8 @@
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
                                         x:Name="PluginsEmptyState" Visibility="Collapsed">
                                 <ui:SymbolIcon Symbol="PuzzlePiece20" FontSize="48" Foreground="#666666"/>
-                                <TextBlock Text="No plugins installed" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
-                                <TextBlock Text="Place plugin DLLs in the Plugins folder" Foreground="#555555" FontSize="11" Margin="0,4,0,0"/>
+                                <TextBlock Text="{local:Localize Settings_NoPluginsInstalled}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                                <TextBlock Text="{local:Localize Settings_PlacePluginDlls}" Foreground="#555555" FontSize="11" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -375,11 +399,11 @@
             </TabItem>
             
             <!-- Notifications Tab -->
-            <TabItem Header="Notifications">
+            <TabItem Header="{local:Localize Settings_Notifications}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
                     <StackPanel MaxWidth="600" HorizontalAlignment="Left">
                         
-                        <TextBlock Text="Reminder Notifications" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_ReminderNotifications}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <Grid>
@@ -388,8 +412,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Enable notifications" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Show popup notifications for reminders" 
+                                    <TextBlock Text="{local:Localize Settings_EnableNotifications}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_EnableNotificationsDesc}" 
                                                Foreground="#999999" FontSize="11"/>
                                 </StackPanel>
                                 <CheckBox x:Name="ChkNotificationsEnabled" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
@@ -402,7 +426,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Show warning notifications" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Settings_ShowWarningNotifications}" Foreground="White"/>
                                 <CheckBox x:Name="ChkWarningNotifications" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
                             </Grid>
                         </Border>
@@ -413,7 +437,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Show urgent notifications" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Settings_ShowUrgentNotifications}" Foreground="White"/>
                                 <CheckBox x:Name="ChkUrgentNotifications" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
                             </Grid>
                         </Border>
@@ -424,7 +448,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Show overdue notifications" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Settings_ShowOverdueNotifications}" Foreground="White"/>
                                 <CheckBox x:Name="ChkOverdueNotifications" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
                             </Grid>
                         </Border>
@@ -435,27 +459,27 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Play notification sound" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Settings_PlayNotificationSound}" Foreground="White"/>
                                 <CheckBox x:Name="ChkPlaySound" Grid.Column="1" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
                         
-                        <TextBlock Text="Timing" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_Timing}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <StackPanel Margin="0,0,0,12">
-                            <TextBlock Text="Warning notification (minutes before due)" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Settings_WarningMinutes}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <TextBox x:Name="TxtWarningMinutes" Text="60"
                                      Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8" Width="100" HorizontalAlignment="Left"/>
                         </StackPanel>
                         
                         <StackPanel Margin="0,0,0,12">
-                            <TextBlock Text="Urgent notification (minutes before due)" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Settings_UrgentMinutes}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <TextBox x:Name="TxtUrgentMinutes" Text="15"
                                      Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8" Width="100" HorizontalAlignment="Left"/>
                         </StackPanel>
                         
                         <StackPanel Margin="0,0,0,12">
-                            <TextBlock Text="Notification duration (seconds, 0 = until dismissed)" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Settings_NotificationDuration}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <TextBox x:Name="TxtNotificationDuration" Text="10"
                                      Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8" Width="100" HorizontalAlignment="Left"/>
                         </StackPanel>
@@ -465,15 +489,15 @@
             </TabItem>
             
             <!-- Data Tab -->
-            <TabItem Header="Data">
+            <TabItem Header="{local:Localize Settings_Data}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
                     <StackPanel MaxWidth="600" HorizontalAlignment="Left">
                         
-                        <TextBlock Text="Data Location" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_DataLocation}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
                         
                         <Border Padding="12" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <StackPanel>
-                                <TextBlock Text="Data storage folder" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize Settings_DataStorageFolder}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -484,14 +508,14 @@
                                     <ui:Button Grid.Column="1" Margin="8,0,0,0" Padding="12,6" Click="BtnOpenDataFolder_Click">
                                         <StackPanel Orientation="Horizontal">
                                             <ui:SymbolIcon Symbol="FolderOpen20" Foreground="White" FontSize="14"/>
-                                            <TextBlock Text="Open" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                            <TextBlock Text="{local:Localize Settings_Open}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
                                         </StackPanel>
                                     </ui:Button>
                                 </Grid>
                             </StackPanel>
                         </Border>
                         
-                        <TextBlock Text="Backup" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_Backup}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
                             <Grid>
@@ -500,8 +524,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="Enable automatic backups" Foreground="White" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Periodically backup your data" 
+                                    <TextBlock Text="{local:Localize Settings_EnableAutoBackups}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_EnableAutoBackupsDesc}" 
                                                Foreground="#999999" FontSize="11"/>
                                 </StackPanel>
                                 <CheckBox x:Name="ChkAutoBackup" Grid.Column="1" VerticalAlignment="Center"/>
@@ -515,13 +539,13 @@
                             </Grid.ColumnDefinitions>
                             
                             <StackPanel Margin="0,0,8,0">
-                                <TextBlock Text="Backup interval (hours)" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize Settings_BackupIntervalHours}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <TextBox x:Name="TxtBackupInterval" Text="24"
                                          Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="Maximum backups to keep" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize Settings_MaxBackupsToKeep}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <TextBox x:Name="TxtMaxBackups" Text="5"
                                          Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                             </StackPanel>
@@ -531,19 +555,19 @@
                             <ui:Button Padding="12,8" Click="BtnBackupNow_Click">
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Symbol="ArrowDownload20" Foreground="White" FontSize="14"/>
-                                    <TextBlock Text="Backup Now" Foreground="White" Margin="8,0,0,0"/>
+                                    <TextBlock Text="{local:Localize Settings_BackupNow}" Foreground="White" Margin="8,0,0,0"/>
                                 </StackPanel>
                             </ui:Button>
                             <ui:Button Padding="12,8" Margin="8,0,0,0" Click="BtnOpenBackupFolder_Click">
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Symbol="FolderOpen20" Foreground="White" FontSize="14"/>
-                                    <TextBlock Text="Open Backups" Foreground="White" Margin="8,0,0,0"/>
+                                    <TextBlock Text="{local:Localize Settings_OpenBackups}" Foreground="White" Margin="8,0,0,0"/>
                                 </StackPanel>
                             </ui:Button>
                         </StackPanel>
                         
                         <!-- Backup List -->
-                        <TextBlock Text="Recent Backups" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,8"/>
+                        <TextBlock Text="{local:Localize Settings_RecentBackups}" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,8"/>
                         
                         <Border CornerRadius="6" Background="#2D2D30" MaxHeight="150">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -571,7 +595,7 @@
             </TabItem>
             
             <!-- About Tab -->
-            <TabItem Header="About">
+            <TabItem Header="{local:Localize Settings_About}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
                     <StackPanel MaxWidth="600" HorizontalAlignment="Left">
                         
@@ -589,7 +613,7 @@
                         </StackPanel>
                         
                         <!-- Links -->
-                        <TextBlock Text="Links" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_Links}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
                         
                         <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8" Cursor="Hand"
                                 MouseLeftButtonUp="BtnGitHub_Click">
@@ -601,7 +625,7 @@
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Symbol="Link20" Foreground="#0078D4" FontSize="16" Margin="0,0,12,0"/>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="GitHub Repository" Foreground="White"/>
+                                    <TextBlock Text="{local:Localize Settings_GitHubRepository}" Foreground="White"/>
                                     <TextBlock Text="https://github.com/ffredyk/AIA" Foreground="#666666" FontSize="11"/>
                                 </StackPanel>
                                 <ui:SymbolIcon Grid.Column="2" Symbol="Open20" Foreground="#666666" FontSize="14"/>
@@ -609,7 +633,7 @@
                         </Border>
                         
                         <!-- System Info -->
-                        <TextBlock Text="System Information" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_SystemInformation}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Border Padding="12" CornerRadius="6" Background="#2D2D30">
                             <StackPanel>
@@ -618,7 +642,7 @@
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Application Path" Foreground="#999999" FontSize="11"/>
+                                    <TextBlock Text="{local:Localize Settings_ApplicationPath}" Foreground="#999999" FontSize="11"/>
                                     <TextBlock x:Name="TxtAppPath" Grid.Column="1" Foreground="#AAAAAA" FontSize="11" TextWrapping="Wrap"/>
                                 </Grid>
                                 <Grid Margin="0,0,0,8">
@@ -626,7 +650,7 @@
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Plugins Directory" Foreground="#999999" FontSize="11"/>
+                                    <TextBlock Text="{local:Localize Settings_PluginsDirectory}" Foreground="#999999" FontSize="11"/>
                                     <TextBlock x:Name="TxtPluginsPath" Grid.Column="1" Foreground="#AAAAAA" FontSize="11" TextWrapping="Wrap"/>
                                 </Grid>
                                 <Grid Margin="0,0,0,8">
@@ -634,7 +658,7 @@
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text=".NET Version" Foreground="#999999" FontSize="11"/>
+                                    <TextBlock Text="{local:Localize Settings_DotNetVersion}" Foreground="#999999" FontSize="11"/>
                                     <TextBlock x:Name="TxtDotNetVersion" Grid.Column="1" Foreground="#AAAAAA" FontSize="11"/>
                                 </Grid>
                                 <Grid>
@@ -642,24 +666,27 @@
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Loaded Plugins" Foreground="#999999" FontSize="11"/>
+                                    <TextBlock Text="{local:Localize Settings_LoadedPlugins}" Foreground="#999999" FontSize="11"/>
                                     <TextBlock x:Name="TxtPluginCount" Grid.Column="1" Foreground="#AAAAAA" FontSize="11"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
                         
                         <!-- Credits -->
-                        <TextBlock Text="Credits" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_Credits}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
                         <Border Padding="12" CornerRadius="6" Background="#2D2D30">
                             <StackPanel>
                                 <TextBlock Foreground="#AAAAAA" FontSize="11" TextWrapping="Wrap">
-                                    <Run Text="Built with "/>
+                                    <Run Text="{local:Localize Settings_BuiltWith}"/>
+                                    <Run Text=" "/>
                                     <Run Text="WPF UI" Foreground="#0078D4"/>
-                                    <Run Text=" and "/>
+                                    <Run Text=" "/>
+                                    <Run Text="{local:Localize Settings_And}"/>
+                                    <Run Text=" "/>
                                     <Run Text=".NET 10" Foreground="#0078D4"/>
                                 </TextBlock>
-                                <TextBlock Text="(c) 2025 ITHead.cz All rights reserved." Foreground="#666666" FontSize="10" Margin="0,8,0,0"/>
+                                <TextBlock Text="{local:Localize Settings_Copyright}" Foreground="#666666" FontSize="10" Margin="0,8,0,0"/>
                             </StackPanel>
                         </Border>
                         
@@ -683,11 +710,11 @@
                     <ui:Button Padding="16,8" Margin="0,0,8,0" Click="BtnSave_Click">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Save16" Foreground="White" FontSize="14"/>
-                            <TextBlock Text="Save" Foreground="White" FontWeight="SemiBold" Margin="6,0,0,0"/>
+                            <TextBlock Text="{local:Localize Common_Save}" Foreground="White" FontWeight="SemiBold" Margin="6,0,0,0"/>
                         </StackPanel>
                     </ui:Button>
                     <ui:Button Padding="16,8" Click="BtnClose_Click">
-                        <TextBlock Text="Close" Foreground="White"/>
+                        <TextBlock Text="{local:Localize Common_Close}" Foreground="White"/>
                     </ui:Button>
                 </StackPanel>
             </Grid>

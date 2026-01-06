@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:local="clr-namespace:AIA.Views"
+             xmlns:local="clr-namespace:AIA"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900">
     <Grid>
@@ -179,7 +179,7 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                             Visibility="{Binding HasSelectedReminder, Converter={StaticResource InverseBoolToVis}}">
                     <ui:SymbolIcon Symbol="PersonLightbulb20" FontSize="48" Foreground="#666666"/>
-                    <TextBlock Text="Select a reminder to view details" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                    <TextBlock Text="{local:Localize Reminders_SelectToViewDetails}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
                 </StackPanel>
                 
                 <!-- Reminder Details -->
@@ -231,7 +231,7 @@
                         
                         <!-- Severity -->
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Severity" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Reminders_Severity}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <ComboBox SelectedItem="{Binding Severity, Mode=TwoWay}"
                                       ItemsSource="{Binding Source={StaticResource ReminderSeverityValues}}"
                                       Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"/>
@@ -239,14 +239,14 @@
                         
                         <!-- Due Date and Time -->
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Due Date" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Reminders_DueDate}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay}"
                                         Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"/>
                         </StackPanel>
                         
                         <!-- Due Time -->
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Due Time" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Reminders_DueTime}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -286,7 +286,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Mark as completed" Foreground="White" VerticalAlignment="Center"/>
+                                <TextBlock Text="{local:Localize Reminders_MarkAsCompleted}" Foreground="White" VerticalAlignment="Center"/>
                                 <CheckBox Grid.Column="1" IsChecked="{Binding IsCompleted, Mode=TwoWay}"/>
                             </Grid>
                         </Border>

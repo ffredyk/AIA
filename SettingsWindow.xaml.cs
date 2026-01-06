@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using AIA.Models;
@@ -64,6 +65,22 @@ namespace AIA
 
         private void ApplySettingsToUI()
         {
+            // Language selector
+            var currentLang = LocalizationService.Instance.CurrentLanguageCode;
+            foreach (ComboBoxItem item in CmbLanguage.Items)
+            {
+                if (item.Tag?.ToString() == currentLang)
+                {
+                    CmbLanguage.SelectedItem = item;
+                    break;
+                }
+            }
+            // Default to English if no match
+            if (CmbLanguage.SelectedItem == null && CmbLanguage.Items.Count > 0)
+            {
+                CmbLanguage.SelectedIndex = 0;
+            }
+
             // General tab
             ChkRunOnStartup.IsChecked = _appSettings.RunOnStartup;
             ChkMinimizeToTray.IsChecked = _appSettings.MinimizeToTrayOnClose;
@@ -167,11 +184,11 @@ namespace AIA
             _capturedKey = Key.None;
 
             TxtHotkeyDisplay.Visibility = Visibility.Collapsed;
-            TxtHotkeyPlaceholder.Text = "Press keys...";
+            TxtHotkeyPlaceholder.Text = LocalizationService.Instance.GetString("Settings_PressKeys");
             TxtHotkeyPlaceholder.Visibility = Visibility.Visible;
             
             HotkeyCaptureBorder.Focus();
-            TxtShortcutStatus.Text = "Press your desired key combination (e.g., Win+Q, Ctrl+Shift+A)";
+            TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_PressKeysCombination");
             TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(153, 153, 153));
         }
 
@@ -220,12 +237,12 @@ namespace AIA
             var hotkeyService = App.Current.HotkeyService;
             if (hotkeyService != null && hotkeyService.TestHotkey(_pendingModifiers, _pendingKey))
             {
-                TxtShortcutStatus.Text = "Hotkey is valid. Click Apply to save.";
+                TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_HotkeyValid");
                 TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(30, 183, 95));
             }
             else
             {
-                TxtShortcutStatus.Text = "This hotkey may conflict with another application.";
+                TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_HotkeyConflict");
                 TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 165, 0));
             }
         }
@@ -262,13 +279,25 @@ namespace AIA
             _isCapturingHotkey = false;
             
             UpdateHotkeyDisplay();
-            TxtShortcutStatus.Text = "Hotkey cleared. Click Apply to save.";
+            TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_HotkeyCleared");
             TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(153, 153, 153));
         }
 
         #endregion
 
         #region Event Handlers
+
+        private void CmbLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbLanguage.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag is string languageCode)
+            {
+                LocalizationService.Instance.SetLanguage(languageCode);
+                _appSettings.Language = languageCode;
+                
+                // Note: Full UI refresh would require reopening the window or refreshing all bindings
+                StatusText.Text = LocalizationService.Instance.GetString("Status_SettingsSaved");
+            }
+        }
 
         private void ChkRunOnStartup_Changed(object sender, RoutedEventArgs e)
         {
@@ -279,12 +308,14 @@ namespace AIA
             {
                 // Revert the checkbox if we couldn't change the setting
                 ChkRunOnStartup.IsChecked = !isChecked;
-                StatusText.Text = "Failed to modify startup settings. Try running as administrator.";
+                StatusText.Text = LocalizationService.Instance.GetString("Status_StartupFailed");
             }
             else
             {
                 _appSettings.RunOnStartup = isChecked;
-                StatusText.Text = isChecked ? "Added to Windows startup" : "Removed from Windows startup";
+                StatusText.Text = isChecked 
+                    ? LocalizationService.Instance.GetString("Status_AddedToStartup")
+                    : LocalizationService.Instance.GetString("Status_RemovedFromStartup");
             }
         }
 
@@ -292,7 +323,7 @@ namespace AIA
         {
             if (_pendingKey == Key.None)
             {
-                TxtShortcutStatus.Text = "Please set a valid hotkey first";
+                TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_SetValidHotkey");
                 TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 102, 102));
                 return;
             }
@@ -306,29 +337,29 @@ namespace AIA
             if (success)
             {
                 _appSettings.OverlayShortcut = hotkeyString;
-                TxtShortcutStatus.Text = $"Hotkey applied successfully: {hotkeyString}";
+                TxtShortcutStatus.Text = $"{LocalizationService.Instance.GetString("Status_HotkeyApplied")} {hotkeyString}";
                 TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(30, 183, 95));
-                StatusText.Text = "Hotkey updated successfully";
+                StatusText.Text = LocalizationService.Instance.GetString("Status_HotkeyUpdated");
             }
             else
             {
-                TxtShortcutStatus.Text = "Failed to register hotkey. It may be in use by another application.";
+                TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_HotkeyRegisterFailed");
                 TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 102, 102));
-                StatusText.Text = "Failed to register hotkey";
+                StatusText.Text = LocalizationService.Instance.GetString("Status_HotkeyFailed");
             }
         }
 
         private void BtnCheckForUpdates_Click(object sender, RoutedEventArgs e)
         {
-            StatusText.Text = "Checking for updates...";
+            StatusText.Text = LocalizationService.Instance.GetString("Status_CheckingUpdates");
             // TODO: Implement actual update check
-            StatusText.Text = "You are running the latest version";
+            StatusText.Text = LocalizationService.Instance.GetString("Status_LatestVersion");
         }
 
         private void BtnRefreshPlugins_Click(object sender, RoutedEventArgs e)
         {
             RefreshPluginsList();
-            StatusText.Text = $"Found {Plugins.Count} plugin(s)";
+            StatusText.Text = LocalizationService.Instance.GetString("Status_FoundPlugins", Plugins.Count);
         }
 
         private void BtnPluginPermissions_Click(object sender, RoutedEventArgs e)
@@ -353,13 +384,13 @@ namespace AIA
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Could not open folder: {ex.Message}";
+                StatusText.Text = $"{LocalizationService.Instance.GetString("Status_CouldNotOpenFolder")} {ex.Message}";
             }
         }
 
         private async void BtnBackupNow_Click(object sender, RoutedEventArgs e)
         {
-            StatusText.Text = "Creating backup...";
+            StatusText.Text = LocalizationService.Instance.GetString("Status_CreatingBackup");
             
             var success = await AppSettingsService.CreateBackupAsync();
             
@@ -371,11 +402,11 @@ namespace AIA
                 }
                 
                 RefreshBackupsList();
-                StatusText.Text = "Backup created successfully";
+                StatusText.Text = LocalizationService.Instance.GetString("Status_BackupCreated");
             }
             else
             {
-                StatusText.Text = "Failed to create backup";
+                StatusText.Text = LocalizationService.Instance.GetString("Status_BackupFailed");
             }
         }
 
@@ -397,7 +428,7 @@ namespace AIA
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Could not open folder: {ex.Message}";
+                StatusText.Text = $"{LocalizationService.Instance.GetString("Status_CouldNotOpenFolder")} {ex.Message}";
             }
         }
 
@@ -453,7 +484,7 @@ namespace AIA
             await AppSettingsService.SaveAppSettingsAsync(_appSettings);
             await AppSettingsService.SavePluginSettingsAsync(_pluginSettings);
 
-            StatusText.Text = "Settings saved successfully";
+            StatusText.Text = LocalizationService.Instance.GetString("Status_SettingsSaved");
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)

@@ -43,6 +43,12 @@ namespace AIA
             // Load app settings
             _appSettings = await AppSettingsService.LoadAppSettingsAsync();
 
+            // Initialize localization with saved language preference
+            if (!string.IsNullOrEmpty(_appSettings.Language))
+            {
+                LocalizationService.Instance.InitializeWithSavedLanguage(_appSettings.Language);
+            }
+
             // Create the NotifyIcon
             notifyIcon = new NotifyIcon();
             

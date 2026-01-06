@@ -1,0 +1,375 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTitle" xml:space="preserve">
+    <value>AIA - AI Assistant</value>
+  </data>
+<data name="AppDescription" xml:space="preserve"><value>Personal productivity overlay with AI assistance</value></data>
+
+  <data name="Tab_Tasks" xml:space="preserve"><value>Tasks</value></data>
+  <data name="Tab_Reminders" xml:space="preserve"><value>Reminders</value></data>
+  <data name="Tab_DataBanks" xml:space="preserve"><value>Data banks</value></data>
+
+  <data name="Toolbar_NewTask" xml:space="preserve"><value>New task</value></data>
+  <data name="Toolbar_NewReminder" xml:space="preserve"><value>New reminder</value></data>
+  <data name="Toolbar_NewData" xml:space="preserve"><value>New data</value></data>
+  <data name="Toolbar_Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Toolbar_Orchestration" xml:space="preserve"><value>Orchestration</value></data>
+  <data name="Toolbar_Automation" xml:space="preserve"><value>Automation</value></data>
+  <data name="Toolbar_AppShutdown" xml:space="preserve"><value>App Shutdown</value></data>
+  <data name="Toolbar_Server" xml:space="preserve"><value>Server</value></data>
+  <data name="Toolbar_Team" xml:space="preserve"><value>Team</value></data>
+  <data name="Toolbar_CloseOverlay" xml:space="preserve"><value>Close overlay</value></data>
+
+  <data name="Footer_PressEscToClose" xml:space="preserve"><value>Press ESC to close this overlay</value></data>
+
+  <data name="Tasks_SelectToViewDetails" xml:space="preserve"><value>Select a task to view details</value></data>
+  <data name="Tasks_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Tasks_Priority" xml:space="preserve"><value>Priority</value></data>
+  <data name="Tasks_DueDate" xml:space="preserve"><value>Due Date</value></data>
+  <data name="Tasks_Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Tasks_Notes" xml:space="preserve"><value>Notes</value></data>
+  <data name="Tasks_Subtasks" xml:space="preserve"><value>Subtasks</value></data>
+  <data name="Tasks_NoSubtasksYet" xml:space="preserve"><value>No subtasks yet</value></data>
+  <data name="Tasks_Created" xml:space="preserve"><value>Created:</value></data>
+  <data name="Tasks_Completed" xml:space="preserve"><value>Completed:</value></data>
+  <data name="Tasks_Add" xml:space="preserve"><value>Add</value></data>
+
+  <data name="Reminders_SelectToViewDetails" xml:space="preserve"><value>Select a reminder to view details</value></data>
+  <data name="Reminders_Severity" xml:space="preserve"><value>Severity</value></data>
+  <data name="Reminders_DueDate" xml:space="preserve"><value>Due Date</value></data>
+  <data name="Reminders_DueTime" xml:space="preserve"><value>Due Time</value></data>
+  <data name="Reminders_MarkAsCompleted" xml:space="preserve"><value>Mark as completed</value></data>
+
+  <data name="DataBanks_Categories" xml:space="preserve"><value>Categories</value></data>
+  <data name="DataBanks_Entries" xml:space="preserve"><value>Entries</value></data>
+  <data name="DataBanks_SelectCategory" xml:space="preserve"><value>Select a category</value></data>
+  <data name="DataBanks_SelectEntryToViewDetails" xml:space="preserve"><value>Select an entry to view details</value></data>
+  <data name="DataBanks_Type" xml:space="preserve"><value>Type</value></data>
+  <data name="DataBanks_FileSize" xml:space="preserve"><value>File Size</value></data>
+  <data name="DataBanks_OriginalFile" xml:space="preserve"><value>Original File</value></data>
+  <data name="DataBanks_Tags" xml:space="preserve"><value>Tags (comma separated)</value></data>
+  <data name="DataBanks_Content" xml:space="preserve"><value>Content</value></data>
+  <data name="DataBanks_ImageMetadata" xml:space="preserve"><value>Image metadata</value></data>
+  <data name="DataBanks_Modified" xml:space="preserve"><value>Modified:</value></data>
+  <data name="DataBanks_OpenPdf" xml:space="preserve"><value>Open PDF</value></data>
+  <data name="DataBanks_ImagePreviewUnavailable" xml:space="preserve"><value>Image preview unavailable</value></data>
+
+  <data name="Chat_New" xml:space="preserve"><value>New</value></data>
+  <data name="Chat_RenameChat" xml:space="preserve"><value>Rename Chat</value></data>
+  <data name="Chat_Send" xml:space="preserve"><value>Send</value></data>
+  <data name="Chat_Providers" xml:space="preserve"><value>providers</value></data>
+
+  <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_Apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="Settings_Close" xml:space="preserve"><value>Close</value></data>
+	<data name="Settings_ConfigurePreferences" xml:space="preserve"><value>Configure application preferences and plugin options</value></data>
+	<data name="Settings_General" xml:space="preserve"><value>General</value></data>
+	<data name="Settings_Plugins" xml:space="preserve"><value>Plugins</value></data>
+	<data name="Settings_Notifications" xml:space="preserve"><value>Notifications</value></data>
+	<data name="Settings_Data" xml:space="preserve"><value>Data</value></data>
+	<data name="Settings_About" xml:space="preserve"><value>About</value></data>
+	<data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
+	<data name="Settings_LanguageDescription" xml:space="preserve"><value>Select your preferred language</value></data>
+	<data name="Settings_Startup" xml:space="preserve"><value>Startup</value></data>
+	<data name="Settings_RunOnStartup" xml:space="preserve"><value>Run on Windows startup</value></data>
+	<data name="Settings_RunOnStartupDesc" xml:space="preserve"><value>Start AIA automatically when Windows starts</value></data>
+	<data name="Settings_OverlayShortcut" xml:space="preserve"><value>Overlay Shortcut</value></data>
+	<data name="Settings_ShortcutDescription" xml:space="preserve"><value>Keyboard shortcut to open/close the overlay</value></data>
+	<data name="Settings_ClickToCapture" xml:space="preserve"><value>Click the box above and press your desired key combination</value></data>
+	<data name="Settings_PressKeys" xml:space="preserve"><value>Press keys...</value></data>
+	<data name="Settings_NoHotkeySet" xml:space="preserve"><value>No hotkey set</value></data>
+	<data name="Settings_ClearHotkey" xml:space="preserve"><value>Clear hotkey</value></data>
+	<data name="Settings_Behavior" xml:space="preserve"><value>Behavior</value></data>
+	<data name="Settings_MinimizeToTray" xml:space="preserve"><value>Minimize to system tray</value></data>
+	<data name="Settings_MinimizeToTrayDesc" xml:space="preserve"><value>Keep running in background when overlay is closed</value></data>
+	<data name="Settings_Updates" xml:space="preserve"><value>Updates</value></data>
+	<data name="Settings_CheckForUpdates" xml:space="preserve"><value>Check for updates on startup</value></data>
+	<data name="Settings_CheckForUpdatesDesc" xml:space="preserve"><value>Automatically check for new versions when the app starts</value></data>
+	<data name="Settings_AutoInstallUpdates" xml:space="preserve"><value>Auto-install updates</value></data>
+	<data name="Settings_AutoInstallUpdatesDesc" xml:space="preserve"><value>Automatically download and install updates</value></data>
+	<data name="Settings_CheckForUpdatesNow" xml:space="preserve"><value>Check for Updates Now</value></data>
+
+  <data name="Common_Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Common_Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Common_Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Common_Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Common_Add" xml:space="preserve"><value>Add</value></data>
+
+  <data name="Status_SettingsSaved" xml:space="preserve"><value>Settings saved successfully</value></data>
+  <data name="Status_HotkeyUpdated" xml:space="preserve"><value>Hotkey updated successfully</value></data>
+  <data name="Status_HotkeyFailed" xml:space="preserve"><value>Failed to register hotkey</value></data>
+  <data name="Status_HotkeyValid" xml:space="preserve"><value>Hotkey is valid. Click Apply to save.</value></data>
+  <data name="Status_HotkeyConflict" xml:space="preserve"><value>This hotkey may conflict with another application.</value></data>
+  <data name="Status_HotkeyCleared" xml:space="preserve"><value>Hotkey cleared. Click Apply to save.</value></data>
+  <data name="Status_HotkeyApplied" xml:space="preserve"><value>Hotkey applied successfully:</value></data>
+  <data name="Status_BackupCreated" xml:space="preserve"><value>Backup created successfully</value></data>
+  <data name="Status_BackupFailed" xml:space="preserve"><value>Failed to create backup</value></data>
+  <data name="Status_CreatingBackup" xml:space="preserve"><value>Creating backup...</value></data>
+  <data name="Status_CheckingUpdates" xml:space="preserve"><value>Checking for updates...</value></data>
+  <data name="Status_LatestVersion" xml:space="preserve"><value>You are running the latest version</value></data>
+  <data name="Status_FoundPlugins" xml:space="preserve"><value>Found {0} plugin(s)</value></data>
+  <data name="Status_AddedToStartup" xml:space="preserve"><value>Added to Windows startup</value></data>
+  <data name="Status_RemovedFromStartup" xml:space="preserve"><value>Removed from Windows startup</value></data>
+  <data name="Status_StartupFailed" xml:space="preserve"><value>Failed to modify startup settings. Try running as administrator.</value></data>
+  <data name="Status_PressKeysCombination" xml:space="preserve"><value>Press your desired key combination (e.g., Win+Q, Ctrl+Shift+A)</value></data>
+
+	<data name="Reminders_Created" xml:space="preserve"><value>Created:</value></data>
+	<data name="DataBanks_Created" xml:space="preserve"><value>Created:</value></data>
+	<data name="DataAssets_CurrentDataAssets" xml:space="preserve"><value>Current data assets</value></data>
+	<data name="DataAssets_Refresh" xml:space="preserve"><value>Refresh</value></data>
+	<data name="DataAssets_NoScreenshots" xml:space="preserve"><value>No screenshots captured</value></data>
+	<data name="DataAssets_Window" xml:space="preserve"><value>Window</value></data>
+	<data name="DataAssets_Screen" xml:space="preserve"><value>Screen</value></data>
+	<data name="DataAssets_CopyToClipboard" xml:space="preserve"><value>Copy to Clipboard</value></data>
+	<data name="DataAssets_SaveToDisk" xml:space="preserve"><value>Save to Disk</value></data>
+	<data name="DataAssets_SaveAs" xml:space="preserve"><value>Save As...</value></data>
+	<data name="DataAssets_SaveToDataBank" xml:space="preserve"><value>Save to Data Bank</value></data>
+	<data name="Chat_CreateNewChat" xml:space="preserve"><value>Create new chat</value></data>
+	<data name="Chat_DeleteCurrentChat" xml:space="preserve"><value>Delete current chat</value></data>
+	<data name="Chat_RenameCurrentChat" xml:space="preserve"><value>Rename current chat</value></data>
+	<data name="Chat_ClearChatMessages" xml:space="preserve"><value>Clear chat messages</value></data>
+	<data name="Chat_Cancel" xml:space="preserve"><value>Cancel</value></data>
+	<data name="Chat_Save" xml:space="preserve"><value>Save</value></data>
+
+	<!-- Orchestration Window -->
+	<data name="Orchestration_Title" xml:space="preserve"><value>AI Orchestration Settings</value></data>
+	<data name="Orchestration_Header" xml:space="preserve"><value>AI Orchestration</value></data>
+	<data name="Orchestration_Description" xml:space="preserve"><value>Configure AI providers and routing settings</value></data>
+	<data name="Orchestration_TabProviders" xml:space="preserve"><value>Providers</value></data>
+	<data name="Orchestration_TabSettings" xml:space="preserve"><value>Settings</value></data>
+	<data name="Orchestration_TabTools" xml:space="preserve"><value>Available Tools</value></data>
+	<data name="Orchestration_AIProviders" xml:space="preserve"><value>AI Providers</value></data>
+	<data name="Orchestration_Add" xml:space="preserve"><value>Add</value></data>
+	<data name="Orchestration_Default" xml:space="preserve"><value>Default</value></data>
+	<data name="Orchestration_SelectProvider" xml:space="preserve"><value>Select a provider to configure</value></data>
+	<data name="Orchestration_ProviderConfiguration" xml:space="preserve"><value>Provider Configuration</value></data>
+	<data name="Orchestration_Test" xml:space="preserve"><value>Test</value></data>
+	<data name="Orchestration_TestConnection" xml:space="preserve"><value>Test connection</value></data>
+	<data name="Orchestration_SetDefault" xml:space="preserve"><value>Set Default</value></data>
+	<data name="Orchestration_ProviderType" xml:space="preserve"><value>Provider Type</value></data>
+	<data name="Orchestration_DisplayName" xml:space="preserve"><value>Display Name</value></data>
+	<data name="Orchestration_ApiKey" xml:space="preserve"><value>API Key</value></data>
+	<data name="Orchestration_EndpointUrl" xml:space="preserve"><value>Endpoint URL</value></data>
+	<data name="Orchestration_DeploymentName" xml:space="preserve"><value>Deployment Name</value></data>
+	<data name="Orchestration_ModelId" xml:space="preserve"><value>Model ID</value></data>
+	<data name="Orchestration_RoutingPriority" xml:space="preserve"><value>Routing Priority</value></data>
+	<data name="Orchestration_Strengths" xml:space="preserve"><value>Strengths (comma-separated: coding, creative, analysis, math, research, conversation)</value></data>
+	<data name="Orchestration_MaxContextTokens" xml:space="preserve"><value>Max Context Tokens</value></data>
+	<data name="Orchestration_Enabled" xml:space="preserve"><value>Enabled</value></data>
+	<data name="Orchestration_Routing" xml:space="preserve"><value>Routing</value></data>
+	<data name="Orchestration_AutoRouting" xml:space="preserve"><value>Automatic Routing</value></data>
+	<data name="Orchestration_AutoRoutingDesc" xml:space="preserve"><value>Automatically select the best AI provider based on prompt content</value></data>
+	<data name="Orchestration_ToolsMcp" xml:space="preserve"><value>Tools (MCP-like)</value></data>
+	<data name="Orchestration_EnableToolUse" xml:space="preserve"><value>Enable Tool Use</value></data>
+	<data name="Orchestration_EnableToolUseDesc" xml:space="preserve"><value>Allow AI to use tools to access tasks, reminders, and data bank</value></data>
+	<data name="Orchestration_ContextInclusion" xml:space="preserve"><value>Context Inclusion</value></data>
+	<data name="Orchestration_IncludeTasksContext" xml:space="preserve"><value>Include Tasks in System Prompt</value></data>
+	<data name="Orchestration_IncludeRemindersContext" xml:space="preserve"><value>Include Reminders in System Prompt</value></data>
+	<data name="Orchestration_IncludeDataBankContext" xml:space="preserve"><value>Include Selected Data Bank Category</value></data>
+	<data name="Orchestration_IncludeScreenshotsContext" xml:space="preserve"><value>Include Current Screenshots</value></data>
+	<data name="Orchestration_MaxContextItems" xml:space="preserve"><value>Max Context Items per Category</value></data>
+	<data name="Orchestration_GenerationDefaults" xml:space="preserve"><value>Generation Defaults</value></data>
+	<data name="Orchestration_Temperature" xml:space="preserve"><value>Temperature</value></data>
+	<data name="Orchestration_MaxTokens" xml:space="preserve"><value>Max Tokens</value></data>
+	<data name="Orchestration_AITools" xml:space="preserve"><value>AI Tools</value></data>
+	<data name="Orchestration_AIToolsDesc" xml:space="preserve"><value>These tools are available to the AI when tool use is enabled. The AI can call these tools to access and manage your data.</value></data>
+	<data name="Orchestration_Save" xml:space="preserve"><value>Save</value></data>
+	<data name="Orchestration_Close" xml:space="preserve"><value>Close</value></data>
+
+	<!-- Settings - Plugins Tab -->
+	<data name="Settings_EnablePluginSystem" xml:space="preserve"><value>Enable Plugin System</value></data>
+	<data name="Settings_EnablePluginSystemDesc" xml:space="preserve"><value>Allow plugins to extend AIA functionality</value></data>
+	<data name="Settings_CheckPluginUpdates" xml:space="preserve"><value>Check for plugin updates</value></data>
+	<data name="Settings_AutoUpdatePlugins" xml:space="preserve"><value>Auto-update plugins</value></data>
+	<data name="Settings_InstalledPlugins" xml:space="preserve"><value>Installed Plugins</value></data>
+	<data name="Settings_NoPluginsInstalled" xml:space="preserve"><value>No plugins installed</value></data>
+	<data name="Settings_PlacePluginDlls" xml:space="preserve"><value>Place plugin DLLs in the Plugins folder</value></data>
+	<data name="Settings_ConfigurePermissions" xml:space="preserve"><value>Configure permissions</value></data>
+	<data name="Settings_EnableDisable" xml:space="preserve"><value>Enable/Disable</value></data>
+	<data name="Settings_PluginEnabled" xml:space="preserve"><value>Enabled</value></data>
+	<data name="Settings_PluginDisabled" xml:space="preserve"><value>Disabled</value></data>
+	<data name="Settings_BuiltIn" xml:space="preserve"><value>Built-in</value></data>
+
+	<!-- Settings - Notifications Tab -->
+	<data name="Settings_ReminderNotifications" xml:space="preserve"><value>Reminder Notifications</value></data>
+	<data name="Settings_EnableNotifications" xml:space="preserve"><value>Enable notifications</value></data>
+	<data name="Settings_EnableNotificationsDesc" xml:space="preserve"><value>Show popup notifications for reminders</value></data>
+	<data name="Settings_ShowWarningNotifications" xml:space="preserve"><value>Show warning notifications</value></data>
+	<data name="Settings_ShowUrgentNotifications" xml:space="preserve"><value>Show urgent notifications</value></data>
+	<data name="Settings_ShowOverdueNotifications" xml:space="preserve"><value>Show overdue notifications</value></data>
+	<data name="Settings_PlayNotificationSound" xml:space="preserve"><value>Play notification sound</value></data>
+	<data name="Settings_Timing" xml:space="preserve"><value>Timing</value></data>
+	<data name="Settings_WarningMinutes" xml:space="preserve"><value>Warning notification (minutes before due)</value></data>
+	<data name="Settings_UrgentMinutes" xml:space="preserve"><value>Urgent notification (minutes before due)</value></data>
+	<data name="Settings_NotificationDuration" xml:space="preserve"><value>Notification duration (seconds, 0 = until dismissed)</value></data>
+
+	<!-- Settings - Data Tab -->
+	<data name="Settings_DataLocation" xml:space="preserve"><value>Data Location</value></data>
+	<data name="Settings_DataStorageFolder" xml:space="preserve"><value>Data storage folder</value></data>
+	<data name="Settings_Open" xml:space="preserve"><value>Open</value></data>
+	<data name="Settings_Backup" xml:space="preserve"><value>Backup</value></data>
+	<data name="Settings_EnableAutoBackups" xml:space="preserve"><value>Enable automatic backups</value></data>
+	<data name="Settings_EnableAutoBackupsDesc" xml:space="preserve"><value>Periodically backup your data</value></data>
+	<data name="Settings_BackupIntervalHours" xml:space="preserve"><value>Backup interval (hours)</value></data>
+	<data name="Settings_MaxBackupsToKeep" xml:space="preserve"><value>Maximum backups to keep</value></data>
+	<data name="Settings_BackupNow" xml:space="preserve"><value>Backup Now</value></data>
+	<data name="Settings_OpenBackups" xml:space="preserve"><value>Open Backups</value></data>
+	<data name="Settings_RecentBackups" xml:space="preserve"><value>Recent Backups</value></data>
+
+	<!-- Settings - About Tab -->
+	<data name="Settings_Links" xml:space="preserve"><value>Links</value></data>
+	<data name="Settings_GitHubRepository" xml:space="preserve"><value>GitHub Repository</value></data>
+	<data name="Settings_SystemInformation" xml:space="preserve"><value>System Information</value></data>
+	<data name="Settings_ApplicationPath" xml:space="preserve"><value>Application Path</value></data>
+	<data name="Settings_PluginsDirectory" xml:space="preserve"><value>Plugins Directory</value></data>
+	<data name="Settings_DotNetVersion" xml:space="preserve"><value>.NET Version</value></data>
+	<data name="Settings_LoadedPlugins" xml:space="preserve"><value>Loaded Plugins</value></data>
+	<data name="Settings_Credits" xml:space="preserve"><value>Credits</value></data>
+	<data name="Settings_BuiltWith" xml:space="preserve"><value>Built with</value></data>
+	<data name="Settings_And" xml:space="preserve"><value>and</value></data>
+	<data name="Settings_Copyright" xml:space="preserve"><value>(c) 2025 ITHead.cz All rights reserved.</value></data>
+
+	<!-- Notification Window -->
+	<data name="Notification_Reminder" xml:space="preserve"><value>REMINDER</value></data>
+	<data name="Notification_Snooze" xml:space="preserve"><value>Snooze</value></data>
+	<data name="Notification_Complete" xml:space="preserve"><value>Complete</value></data>
+	<data name="Notification_View" xml:space="preserve"><value>View</value></data>
+	<data name="Notification_SnoozeTooltip" xml:space="preserve"><value>Snooze for 15 minutes</value></data>
+	<data name="Notification_CompleteTooltip" xml:space="preserve"><value>Mark as completed</value></data>
+	<data name="Notification_ViewTooltip" xml:space="preserve"><value>View reminder details</value></data>
+	<data name="Notification_DueAt" xml:space="preserve"><value>Due: {0}</value></data>
+
+	<!-- Notification Messages (ReminderNotificationService) -->
+	<data name="Notification_MinutesLeft" xml:space="preserve"><value>{0} minutes left</value></data>
+	<data name="Notification_HoursMinutesLeft" xml:space="preserve"><value>{0} hour(s) {1} min left</value></data>
+	<data name="Notification_HoursLeft" xml:space="preserve"><value>{0} hour(s) left</value></data>
+	<data name="Notification_LessThanMinute" xml:space="preserve"><value>Less than a minute left!</value></data>
+	<data name="Notification_OnlyMinutesLeft" xml:space="preserve"><value>Only {0} minutes left!</value></data>
+	<data name="Notification_JustExpired" xml:space="preserve"><value>Just expired!</value></data>
+	<data name="Notification_OverdueMinutes" xml:space="preserve"><value>Overdue by {0} minutes</value></data>
+	<data name="Notification_OverdueHours" xml:space="preserve"><value>Overdue by {0} hours</value></data>
+	<data name="Notification_OverdueDays" xml:space="preserve"><value>Overdue by {0} days</value></data>
+
+	<!-- Notification Urgency Types -->
+	<data name="Notification_Approaching" xml:space="preserve"><value>Approaching</value></data>
+	<data name="Notification_DueSoon" xml:space="preserve"><value>Due Soon</value></data>
+	<data name="Notification_Overdue" xml:space="preserve"><value>Overdue</value></data>
+</root>

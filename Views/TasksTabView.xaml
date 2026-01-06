@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:local="clr-namespace:AIA.Views"
+             xmlns:local="clr-namespace:AIA"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900">
     <Grid>
@@ -199,7 +199,7 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                             Visibility="{Binding HasSelectedTask, Converter={StaticResource InverseBoolToVis}}">
                     <ui:SymbolIcon Symbol="TaskListSquareLtr20" FontSize="48" Foreground="#666666"/>
-                    <TextBlock Text="Select a task to view details" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                    <TextBlock Text="{local:Localize Tasks_SelectToViewDetails}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
                 </StackPanel>
                 
                 <!-- Task Details -->
@@ -228,13 +228,13 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Margin="0,0,8,0">
-                                <TextBlock Text="Status" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize Tasks_Status}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <ComboBox SelectedItem="{Binding Status, Mode=TwoWay}"
                                           ItemsSource="{Binding Source={StaticResource TaskStatusValues}}"
                                           Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="Priority" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock Text="{local:Localize Tasks_Priority}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <ComboBox SelectedItem="{Binding Priority, Mode=TwoWay}"
                                           ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
                                           Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"/>
@@ -243,14 +243,14 @@
                         
                         <!-- Due Date -->
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Due Date" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Tasks_DueDate}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay}"
                                         Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"/>
                         </StackPanel>
                         
                         <!-- Description -->
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Description" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Tasks_Description}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                                      Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
                                      TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" Padding="8"/>
@@ -258,7 +258,7 @@
                         
                         <!-- Notes -->
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Notes" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="{local:Localize Tasks_Notes}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
                                      Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
                                      TextWrapping="Wrap" AcceptsReturn="True" MinHeight="80" Padding="8"/>
@@ -271,11 +271,11 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Subtasks" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
+                                <TextBlock Text="{local:Localize Tasks_Subtasks}" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
                                 <ui:Button Grid.Column="1" Padding="6,2" Click="BtnAddSubtask">
                                     <StackPanel Orientation="Horizontal">
                                         <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="10"/>
-                                        <TextBlock Text="Add" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                        <TextBlock Text="{local:Localize Tasks_Add}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
                                     </StackPanel>
                                 </ui:Button>
                             </Grid>
@@ -304,7 +304,7 @@
                             <ItemsControl ItemsSource="{Binding Subtasks}" ItemTemplate="{StaticResource SubtaskTemplate}"/>
                             
                             <!-- Empty State -->
-                            <TextBlock Text="No subtasks yet" Foreground="#666666" FontSize="12" FontStyle="Italic"
+                            <TextBlock Text="{local:Localize Tasks_NoSubtasksYet}" Foreground="#666666" FontSize="12" FontStyle="Italic"
                                        Visibility="{Binding TotalSubtasksCount, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}"
                                        Margin="8,4"/>
                         </StackPanel>
