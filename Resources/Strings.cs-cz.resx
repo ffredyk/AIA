@@ -509,4 +509,147 @@
 	<data name="Notification_Approaching" xml:space="preserve"><value>Blíží se</value></data>
 	<data name="Notification_DueSoon" xml:space="preserve"><value>Brzy</value></data>
 	<data name="Notification_Overdue" xml:space="preserve"><value>Po termínu</value></data>
+
+	<!-- Task Management - General -->
+	<data name="Tasks_NewTask" xml:space="preserve"><value>Nový úkol</value></data>
+	<data name="Tasks_AddNew" xml:space="preserve"><value>Přidat nový úkol</value></data>
+	<data name="Tasks_Template" xml:space="preserve"><value>Šablona</value></data>
+	<data name="Tasks_FromTemplate" xml:space="preserve"><value>Ze šablony</value></data>
+	<data name="Tasks_SelectTemplate" xml:space="preserve"><value>Vybrat šablonu</value></data>
+	<data name="Tasks_FilterSort" xml:space="preserve"><value>Filtrovat a řadit</value></data>
+	<data name="Tasks_Filters" xml:space="preserve"><value>Filtry</value></data>
+	<data name="Tasks_BulkOperations" xml:space="preserve"><value>Hromadné operace</value></data>
+	<data name="Tasks_BulkMode" xml:space="preserve"><value>Hromadný režim</value></data>
+	<data name="Tasks_SearchPlaceholder" xml:space="preserve"><value>Hledat úkoly...</value></data>
+	<data name="Tasks_ImportExport" xml:space="preserve"><value>Import/Export</value></data>
+	<data name="Tasks_ManageTemplates" xml:space="preserve"><value>Spravovat šablony</value></data>
+	<data name="Tasks_Delete" xml:space="preserve"><value>Smazat</value></data>
+	<data name="Tasks_Archive" xml:space="preserve"><value>Archivovat</value></data>
+	<data name="Tasks_Duplicate" xml:space="preserve"><value>Duplikovat</value></data>
+	<data name="Tasks_SaveAsTemplate" xml:space="preserve"><value>Uložit jako šablonu</value></data>
+
+	<!-- Task Management - Tags -->
+	<data name="Tasks_Tags" xml:space="preserve"><value>Štítky</value></data>
+	<data name="Tasks_AddTag" xml:space="preserve"><value>Přidat štítek</value></data>
+	<data name="Tasks_EnterTag" xml:space="preserve"><value>Zadejte štítek</value></data>
+	<data name="Tasks_NoTags" xml:space="preserve"><value>Žádné štítky</value></data>
+
+	<!-- Task Management - Dependencies -->
+	<data name="Tasks_Dependencies" xml:space="preserve"><value>Závislosti</value></data>
+	<data name="Tasks_AddDependency" xml:space="preserve"><value>Přidat závislost</value></data>
+	<data name="Tasks_NoDependencies" xml:space="preserve"><value>Žádné závislosti</value></data>
+	<data name="Tasks_HasDependencies" xml:space="preserve"><value>Má závislosti</value></data>
+
+	<!-- Task Management - Recurrence -->
+	<data name="Tasks_Recurrence" xml:space="preserve"><value>Opakování</value></data>
+	<data name="Tasks_Configure" xml:space="preserve"><value>Konfigurovat</value></data>
+	<data name="Tasks_ConfigureRecurrence" xml:space="preserve"><value>Konfigurovat opakování</value></data>
+	<data name="Tasks_EnableRecurrence" xml:space="preserve"><value>Povolit opakování</value></data>
+	<data name="Tasks_RecurrenceType" xml:space="preserve"><value>Typ opakování</value></data>
+	<data name="Tasks_RecurrenceSettings" xml:space="preserve"><value>Nastavení opakování</value></data>
+	<data name="Tasks_Repeat" xml:space="preserve"><value>Opakovat</value></data>
+	<data name="Tasks_Every" xml:space="preserve"><value>Každý</value></data>
+	<data name="Tasks_UntilDate" xml:space="preserve"><value>Do:</value></data>
+	<data name="Tasks_SetEndDate" xml:space="preserve"><value>Nastavit datum konce</value></data>
+	<data name="Tasks_RecurrencePreview" xml:space="preserve"><value>Náhled opakování</value></data>
+	<data name="Tasks_DaysFromNow" xml:space="preserve"><value>dnů od teď</value></data>
+	<data name="Tasks_DaysFromCreation" xml:space="preserve"><value>dnů od vytvoření</value></data>
+	<data name="Tasks_Days" xml:space="preserve"><value>dní</value></data>
+
+	<!-- Recurrence Types -->
+	<data name="RecurrenceType_Daily" xml:space="preserve"><value>Denně</value></data>
+	<data name="RecurrenceType_Weekly" xml:space="preserve"><value>Týdně</value></data>
+	<data name="RecurrenceType_Monthly" xml:space="preserve"><value>Měsíčně</value></data>
+	<data name="RecurrenceType_Yearly" xml:space="preserve"><value>Ročně</value></data>
+
+	<!-- Recurrence Units -->
+	<data name="RecurrenceUnit_Days" xml:space="preserve"><value>den/dny</value></data>
+	<data name="RecurrenceUnit_Weeks" xml:space="preserve"><value>týden/týdny</value></data>
+	<data name="RecurrenceUnit_Months" xml:space="preserve"><value>měsíc/měsíce</value></data>
+	<data name="RecurrenceUnit_Years" xml:space="preserve"><value>rok/roky</value></data>
+
+	<!-- Task Management - Filtering and Sorting -->
+	<data name="Tasks_FilterAndSort" xml:space="preserve"><value>Filtrovat a řadit úkoly</value></data>
+	<data name="Tasks_FilterByStatus" xml:space="preserve"><value>Filtrovat podle stavu</value></data>
+	<data name="Tasks_FilterByPriority" xml:space="preserve"><value>Filtrovat podle priority</value></data>
+	<data name="Tasks_FilterByTags" xml:space="preserve"><value>Filtrovat podle štítků</value></data>
+	<data name="Tasks_FilterByDueDate" xml:space="preserve"><value>Filtrovat podle termínu</value></data>
+	<data name="Tasks_FilterOptions" xml:space="preserve"><value>Možnosti filtru</value></data>
+	<data name="Tasks_From" xml:space="preserve"><value>Od</value></data>
+	<data name="Tasks_To" xml:space="preserve"><value>Do</value></data>
+	<data name="Tasks_ShowCompleted" xml:space="preserve"><value>Zobrazit dokončené úkoly</value></data>
+	<data name="Tasks_ShowArchived" xml:space="preserve"><value>Zobrazit archivované úkoly</value></data>
+	<data name="Tasks_OnlyOverdue" xml:space="preserve"><value>Pouze zpožděné úkoly</value></data>
+	<data name="Tasks_SortBy" xml:space="preserve"><value>Řadit podle</value></data>
+	<data name="Tasks_SortByTitle" xml:space="preserve"><value>Název</value></data>
+	<data name="Tasks_SortByStatus" xml:space="preserve"><value>Stav</value></data>
+	<data name="Tasks_SortByPriority" xml:space="preserve"><value>Priorita</value></data>
+	<data name="Tasks_SortByDueDate" xml:space="preserve"><value>Termín</value></data>
+	<data name="Tasks_SortByCreated" xml:space="preserve"><value>Datum vytvoření</value></data>
+	<data name="Tasks_Descending" xml:space="preserve"><value>Sestupně</value></data>
+	<data name="Tasks_QuickFilters" xml:space="preserve"><value>Rychlé filtry</value></data>
+	<data name="Tasks_AllTasks" xml:space="preserve"><value>Všechny úkoly</value></data>
+	<data name="Tasks_ActiveOnly" xml:space="preserve"><value>Pouze aktivní</value></data>
+	<data name="Tasks_OverdueOnly" xml:space="preserve"><value>Pouze zpožděné</value></data>
+	<data name="Tasks_ArchivedOnly" xml:space="preserve"><value>Pouze archivované</value></data>
+
+	<!-- Task Management - Bulk Operations -->
+	<data name="Tasks_SelectedCount" xml:space="preserve"><value>vybraných úkolů</value></data>
+	<data name="Tasks_SelectAll" xml:space="preserve"><value>Vybrat vše</value></data>
+	<data name="Tasks_DeselectAll" xml:space="preserve"><value>Zrušit výběr</value></data>
+	<data name="Tasks_ChangeStatus" xml:space="preserve"><value>Změnit stav</value></data>
+	<data name="Tasks_ChangePriority" xml:space="preserve"><value>Změnit prioritu</value></data>
+
+	<!-- Task Management - Templates -->
+	<data name="Tasks_Templates" xml:space="preserve"><value>Šablony</value></data>
+	<data name="Tasks_ChooseTemplate" xml:space="preserve"><value>Vyberte šablonu</value></data>
+	<data name="Tasks_TemplateManager" xml:space="preserve"><value>Správce šablon</value></data>
+	<data name="Tasks_CreateTemplate" xml:space="preserve"><value>Vytvořit šablonu</value></data>
+	<data name="Tasks_TemplateName" xml:space="preserve"><value>Název šablony</value></data>
+	<data name="Tasks_EnterTemplateName" xml:space="preserve"><value>Zadejte název šablony</value></data>
+	<data name="Tasks_TemplateDescription" xml:space="preserve"><value>Popis šablony</value></data>
+	<data name="Tasks_EnterTemplateDescription" xml:space="preserve"><value>Zadejte popis šablony</value></data>
+	<data name="Tasks_DefaultTitle" xml:space="preserve"><value>Výchozí název</value></data>
+	<data name="Tasks_DefaultDescription" xml:space="preserve"><value>Výchozí popis</value></data>
+	<data name="Tasks_DefaultPriority" xml:space="preserve"><value>Výchozí priorita</value></data>
+	<data name="Tasks_RelativeDueDate" xml:space="preserve"><value>Relativní termín</value></data>
+	<data name="Tasks_DefaultTags" xml:space="preserve"><value>Výchozí štítky</value></data>
+	<data name="Tasks_DefaultSubtasks" xml:space="preserve"><value>Výchozí podúkoly</value></data>
+	<data name="Tasks_UsedTimes" xml:space="preserve"><value>Použito</value></data>
+	<data name="Tasks_LastUsed" xml:space="preserve"><value>Naposledy použito:</value></data>
+	<data name="Tasks_New" xml:space="preserve"><value>Nový</value></data>
+	<data name="Tasks_TemplateInfoTitle" xml:space="preserve"><value>Informace o šabloně</value></data>
+	<data name="Tasks_TemplateInfoMessage" xml:space="preserve"><value>Šablona uloží strukturu úkolu včetně názvu, popisu, podúkolů, priority, štítků a relativních termínů.</value></data>
+
+	<!-- Task Management - Import/Export -->
+	<data name="Tasks_ImportExportData" xml:space="preserve"><value>Import/Export úkolů</value></data>
+	<data name="Tasks_ExportTasks" xml:space="preserve"><value>Exportovat úkoly</value></data>
+	<data name="Tasks_ExportDescription" xml:space="preserve"><value>Exportujte své úkoly do JSON souboru pro zálohu nebo sdílení.</value></data>
+	<data name="Tasks_IncludeArchivedTasks" xml:space="preserve"><value>Zahrnout archivované úkoly</value></data>
+	<data name="Tasks_ExportToFile" xml:space="preserve"><value>Exportovat do souboru</value></data>
+	<data name="Tasks_CopyToClipboard" xml:space="preserve"><value>Kopírovat do schránky</value></data>
+	<data name="Tasks_ImportTasks" xml:space="preserve"><value>Importovat úkoly</value></data>
+	<data name="Tasks_ImportDescription" xml:space="preserve"><value>Importujte úkoly ze souboru JSON nebo schránky.</value></data>
+	<data name="Tasks_ReplaceExistingTasks" xml:space="preserve"><value>Nahradit existující úkoly</value></data>
+	<data name="Tasks_ImportFromFile" xml:space="preserve"><value>Importovat ze souboru</value></data>
+	<data name="Tasks_PasteFromClipboard" xml:space="preserve"><value>Vložit ze schránky</value></data>
+	<data name="Tasks_ReplaceWarning" xml:space="preserve"><value>Varování: Toto smaže všechny existující úkoly!</value></data>
+
+	<!-- Task Status Enums -->
+	<data name="TaskStatus_NotStarted" xml:space="preserve"><value>Nezahájeno</value></data>
+	<data name="TaskStatus_InProgress" xml:space="preserve"><value>Probíhá</value></data>
+	<data name="TaskStatus_OnHold" xml:space="preserve"><value>Pozastaveno</value></data>
+	<data name="TaskStatus_Completed" xml:space="preserve"><value>Dokončeno</value></data>
+	<data name="TaskStatus_Cancelled" xml:space="preserve"><value>Zrušeno</value></data>
+
+	<!-- Task Priority Enums -->
+	<data name="TaskPriority_Low" xml:space="preserve"><value>Nízká</value></data>
+	<data name="TaskPriority_Medium" xml:space="preserve"><value>Střední</value></data>
+	<data name="TaskPriority_High" xml:space="preserve"><value>Vysoká</value></data>
+	<data name="TaskPriority_Critical" xml:space="preserve"><value>Kritická</value></data>
+
+	<!-- Common - Additional -->
+	<data name="Common_Apply" xml:space="preserve"><value>Použít</value></data>
+	<data name="Common_OK" xml:space="preserve"><value>OK</value></data>
+	<data name="Common_Create" xml:space="preserve"><value>Vytvořit</value></data>
 </root>

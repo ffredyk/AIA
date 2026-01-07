@@ -372,4 +372,147 @@
 	<data name="Notification_Approaching" xml:space="preserve"><value>Approaching</value></data>
 	<data name="Notification_DueSoon" xml:space="preserve"><value>Due Soon</value></data>
 	<data name="Notification_Overdue" xml:space="preserve"><value>Overdue</value></data>
+
+	<!-- Task Management - General -->
+	<data name="Tasks_NewTask" xml:space="preserve"><value>New Task</value></data>
+	<data name="Tasks_AddNew" xml:space="preserve"><value>Add New Task</value></data>
+	<data name="Tasks_Template" xml:space="preserve"><value>Template</value></data>
+	<data name="Tasks_FromTemplate" xml:space="preserve"><value>From Template</value></data>
+	<data name="Tasks_SelectTemplate" xml:space="preserve"><value>Select Template</value></data>
+	<data name="Tasks_FilterSort" xml:space="preserve"><value>Filter &amp; Sort</value></data>
+	<data name="Tasks_Filters" xml:space="preserve"><value>Filters</value></data>
+	<data name="Tasks_BulkOperations" xml:space="preserve"><value>Bulk Operations</value></data>
+	<data name="Tasks_BulkMode" xml:space="preserve"><value>Bulk Mode</value></data>
+	<data name="Tasks_SearchPlaceholder" xml:space="preserve"><value>Search tasks...</value></data>
+	<data name="Tasks_ImportExport" xml:space="preserve"><value>Import/Export</value></data>
+	<data name="Tasks_ManageTemplates" xml:space="preserve"><value>Manage Templates</value></data>
+	<data name="Tasks_Delete" xml:space="preserve"><value>Delete</value></data>
+	<data name="Tasks_Archive" xml:space="preserve"><value>Archive</value></data>
+	<data name="Tasks_Duplicate" xml:space="preserve"><value>Duplicate</value></data>
+	<data name="Tasks_SaveAsTemplate" xml:space="preserve"><value>Save as Template</value></data>
+
+	<!-- Task Management - Tags -->
+	<data name="Tasks_Tags" xml:space="preserve"><value>Tags</value></data>
+	<data name="Tasks_AddTag" xml:space="preserve"><value>Add Tag</value></data>
+	<data name="Tasks_EnterTag" xml:space="preserve"><value>Enter tag</value></data>
+	<data name="Tasks_NoTags" xml:space="preserve"><value>No tags</value></data>
+
+	<!-- Task Management - Dependencies -->
+	<data name="Tasks_Dependencies" xml:space="preserve"><value>Dependencies</value></data>
+	<data name="Tasks_AddDependency" xml:space="preserve"><value>Add Dependency</value></data>
+	<data name="Tasks_NoDependencies" xml:space="preserve"><value>No dependencies</value></data>
+	<data name="Tasks_HasDependencies" xml:space="preserve"><value>Has dependencies</value></data>
+
+	<!-- Task Management - Recurrence -->
+	<data name="Tasks_Recurrence" xml:space="preserve"><value>Recurrence</value></data>
+	<data name="Tasks_Configure" xml:space="preserve"><value>Configure</value></data>
+	<data name="Tasks_ConfigureRecurrence" xml:space="preserve"><value>Configure Recurrence</value></data>
+	<data name="Tasks_EnableRecurrence" xml:space="preserve"><value>Enable recurrence</value></data>
+	<data name="Tasks_RecurrenceType" xml:space="preserve"><value>Recurrence Type</value></data>
+	<data name="Tasks_RecurrenceSettings" xml:space="preserve"><value>Recurrence Settings</value></data>
+	<data name="Tasks_Repeat" xml:space="preserve"><value>Repeat</value></data>
+	<data name="Tasks_Every" xml:space="preserve"><value>Every</value></data>
+	<data name="Tasks_UntilDate" xml:space="preserve"><value>Until:</value></data>
+	<data name="Tasks_SetEndDate" xml:space="preserve"><value>Set end date</value></data>
+	<data name="Tasks_RecurrencePreview" xml:space="preserve"><value>Recurrence Preview</value></data>
+	<data name="Tasks_DaysFromNow" xml:space="preserve"><value>days from now</value></data>
+	<data name="Tasks_DaysFromCreation" xml:space="preserve"><value>days from creation</value></data>
+	<data name="Tasks_Days" xml:space="preserve"><value>days</value></data>
+
+	<!-- Recurrence Types -->
+	<data name="RecurrenceType_Daily" xml:space="preserve"><value>Daily</value></data>
+	<data name="RecurrenceType_Weekly" xml:space="preserve"><value>Weekly</value></data>
+	<data name="RecurrenceType_Monthly" xml:space="preserve"><value>Monthly</value></data>
+	<data name="RecurrenceType_Yearly" xml:space="preserve"><value>Yearly</value></data>
+
+	<!-- Recurrence Units -->
+	<data name="RecurrenceUnit_Days" xml:space="preserve"><value>day(s)</value></data>
+	<data name="RecurrenceUnit_Weeks" xml:space="preserve"><value>week(s)</value></data>
+	<data name="RecurrenceUnit_Months" xml:space="preserve"><value>month(s)</value></data>
+	<data name="RecurrenceUnit_Years" xml:space="preserve"><value>year(s)</value></data>
+
+	<!-- Task Management - Filtering and Sorting -->
+	<data name="Tasks_FilterAndSort" xml:space="preserve"><value>Filter &amp; Sort Tasks</value></data>
+	<data name="Tasks_FilterByStatus" xml:space="preserve"><value>Filter by Status</value></data>
+	<data name="Tasks_FilterByPriority" xml:space="preserve"><value>Filter by Priority</value></data>
+	<data name="Tasks_FilterByTags" xml:space="preserve"><value>Filter by Tags</value></data>
+	<data name="Tasks_FilterByDueDate" xml:space="preserve"><value>Filter by Due Date</value></data>
+	<data name="Tasks_FilterOptions" xml:space="preserve"><value>Filter Options</value></data>
+	<data name="Tasks_From" xml:space="preserve"><value>From</value></data>
+	<data name="Tasks_To" xml:space="preserve"><value>To</value></data>
+	<data name="Tasks_ShowCompleted" xml:space="preserve"><value>Show completed tasks</value></data>
+	<data name="Tasks_ShowArchived" xml:space="preserve"><value>Show archived tasks</value></data>
+	<data name="Tasks_OnlyOverdue" xml:space="preserve"><value>Only overdue tasks</value></data>
+	<data name="Tasks_SortBy" xml:space="preserve"><value>Sort By</value></data>
+	<data name="Tasks_SortByTitle" xml:space="preserve"><value>Title</value></data>
+	<data name="Tasks_SortByStatus" xml:space="preserve"><value>Status</value></data>
+	<data name="Tasks_SortByPriority" xml:space="preserve"><value>Priority</value></data>
+	<data name="Tasks_SortByDueDate" xml:space="preserve"><value>Due Date</value></data>
+	<data name="Tasks_SortByCreated" xml:space="preserve"><value>Created Date</value></data>
+	<data name="Tasks_Descending" xml:space="preserve"><value>Descending</value></data>
+	<data name="Tasks_QuickFilters" xml:space="preserve"><value>Quick Filters</value></data>
+	<data name="Tasks_AllTasks" xml:space="preserve"><value>All Tasks</value></data>
+	<data name="Tasks_ActiveOnly" xml:space="preserve"><value>Active Only</value></data>
+	<data name="Tasks_OverdueOnly" xml:space="preserve"><value>Overdue Only</value></data>
+	<data name="Tasks_ArchivedOnly" xml:space="preserve"><value>Archived Only</value></data>
+
+	<!-- Task Management - Bulk Operations -->
+	<data name="Tasks_SelectedCount" xml:space="preserve"><value>task(s) selected</value></data>
+	<data name="Tasks_SelectAll" xml:space="preserve"><value>Select All</value></data>
+	<data name="Tasks_DeselectAll" xml:space="preserve"><value>Deselect All</value></data>
+	<data name="Tasks_ChangeStatus" xml:space="preserve"><value>Change Status</value></data>
+	<data name="Tasks_ChangePriority" xml:space="preserve"><value>Change Priority</value></data>
+
+	<!-- Task Management - Templates -->
+	<data name="Tasks_Templates" xml:space="preserve"><value>Templates</value></data>
+	<data name="Tasks_ChooseTemplate" xml:space="preserve"><value>Choose a Template</value></data>
+	<data name="Tasks_TemplateManager" xml:space="preserve"><value>Template Manager</value></data>
+	<data name="Tasks_CreateTemplate" xml:space="preserve"><value>Create Template</value></data>
+	<data name="Tasks_TemplateName" xml:space="preserve"><value>Template Name</value></data>
+	<data name="Tasks_EnterTemplateName" xml:space="preserve"><value>Enter template name</value></data>
+	<data name="Tasks_TemplateDescription" xml:space="preserve"><value>Template Description</value></data>
+	<data name="Tasks_EnterTemplateDescription" xml:space="preserve"><value>Enter template description</value></data>
+	<data name="Tasks_DefaultTitle" xml:space="preserve"><value>Default Title</value></data>
+	<data name="Tasks_DefaultDescription" xml:space="preserve"><value>Default Description</value></data>
+	<data name="Tasks_DefaultPriority" xml:space="preserve"><value>Default Priority</value></data>
+	<data name="Tasks_RelativeDueDate" xml:space="preserve"><value>Relative Due Date</value></data>
+	<data name="Tasks_DefaultTags" xml:space="preserve"><value>Default Tags</value></data>
+	<data name="Tasks_DefaultSubtasks" xml:space="preserve"><value>Default Subtasks</value></data>
+	<data name="Tasks_UsedTimes" xml:space="preserve"><value>Used</value></data>
+	<data name="Tasks_LastUsed" xml:space="preserve"><value>Last used:</value></data>
+	<data name="Tasks_New" xml:space="preserve"><value>New</value></data>
+	<data name="Tasks_TemplateInfoTitle" xml:space="preserve"><value>Template Information</value></data>
+	<data name="Tasks_TemplateInfoMessage" xml:space="preserve"><value>The template will save the task structure including title, description, subtasks, priority, tags, and relative due dates.</value></data>
+
+	<!-- Task Management - Import/Export -->
+	<data name="Tasks_ImportExportData" xml:space="preserve"><value>Import/Export Tasks</value></data>
+	<data name="Tasks_ExportTasks" xml:space="preserve"><value>Export Tasks</value></data>
+	<data name="Tasks_ExportDescription" xml:space="preserve"><value>Export your tasks to a JSON file for backup or sharing.</value></data>
+	<data name="Tasks_IncludeArchivedTasks" xml:space="preserve"><value>Include archived tasks</value></data>
+	<data name="Tasks_ExportToFile" xml:space="preserve"><value>Export to File</value></data>
+	<data name="Tasks_CopyToClipboard" xml:space="preserve"><value>Copy to Clipboard</value></data>
+	<data name="Tasks_ImportTasks" xml:space="preserve"><value>Import Tasks</value></data>
+	<data name="Tasks_ImportDescription" xml:space="preserve"><value>Import tasks from a JSON file or clipboard.</value></data>
+	<data name="Tasks_ReplaceExistingTasks" xml:space="preserve"><value>Replace existing tasks</value></data>
+	<data name="Tasks_ImportFromFile" xml:space="preserve"><value>Import from File</value></data>
+	<data name="Tasks_PasteFromClipboard" xml:space="preserve"><value>Paste from Clipboard</value></data>
+	<data name="Tasks_ReplaceWarning" xml:space="preserve"><value>Warning: This will delete all existing tasks!</value></data>
+
+	<!-- Task Status Enums -->
+	<data name="TaskStatus_NotStarted" xml:space="preserve"><value>Not Started</value></data>
+	<data name="TaskStatus_InProgress" xml:space="preserve"><value>In Progress</value></data>
+	<data name="TaskStatus_OnHold" xml:space="preserve"><value>On Hold</value></data>
+	<data name="TaskStatus_Completed" xml:space="preserve"><value>Completed</value></data>
+	<data name="TaskStatus_Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+
+	<!-- Task Priority Enums -->
+	<data name="TaskPriority_Low" xml:space="preserve"><value>Low</value></data>
+	<data name="TaskPriority_Medium" xml:space="preserve"><value>Medium</value></data>
+	<data name="TaskPriority_High" xml:space="preserve"><value>High</value></data>
+	<data name="TaskPriority_Critical" xml:space="preserve"><value>Critical</value></data>
+
+	<!-- Common - Additional -->
+	<data name="Common_Apply" xml:space="preserve"><value>Apply</value></data>
+	<data name="Common_OK" xml:space="preserve"><value>OK</value></data>
+	<data name="Common_Create" xml:space="preserve"><value>Create</value></data>
 </root>

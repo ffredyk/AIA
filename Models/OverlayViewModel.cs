@@ -711,10 +711,68 @@ namespace AIA.Models
 
         #region Tasks and Reminders
 
+        private TaskFilter _currentTaskFilter = TaskFilter.CreateDefault();
+        private bool _isBulkSelectionMode;
+        private ObservableCollection<TaskTemplate> _taskTemplates = new ObservableCollection<TaskTemplate>();
+
+        public TaskFilter CurrentTaskFilter
+        {
+            get => _currentTaskFilter;
+            set
+            {
+                _currentTaskFilter = value;
+                OnPropertyChanged(nameof(CurrentTaskFilter));
+                ApplyTaskFilter();
+            }
+        }
+
+        public bool IsBulkSelectionMode
+        {
+            get => _isBulkSelectionMode;
+            set
+            {
+                _isBulkSelectionMode = value;
+                OnPropertyChanged(nameof(IsBulkSelectionMode));
+                OnPropertyChanged(nameof(SelectedTasksCount));
+                if (!value)
+                {
+                    // Clear all selections when exiting bulk mode
+                    foreach (var task in Tasks)
+                    {
+                        task.IsSelected = false;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the count of currently selected tasks
+        /// </summary>
+        public int SelectedTasksCount => Tasks.Count(t => t.IsSelected);
+
+        public ObservableCollection<TaskTemplate> TaskTemplates
+        {
+            get => _taskTemplates;
+            set
+            {
+                _taskTemplates = value;
+                OnPropertyChanged(nameof(TaskTemplates));
+            }
+        }
+
+        public ObservableCollection<TaskItem> FilteredTasks { get; set; } = new ObservableCollection<TaskItem>();
+
         private async Task LoadTasksAndRemindersAsync()
         {
             var tasks = await TaskReminderService.LoadTasksAsync();
             var reminders = await TaskReminderService.LoadRemindersAsync();
+
+            // Load task templates
+            var templates = await TaskTemplateService.LoadTemplatesAsync();
+            foreach (var template in templates)
+            {
+                TaskTemplates.Add(template);
+            }
 
             if (tasks.Count == 0 && reminders.Count == 0)
             {
@@ -733,7 +791,12 @@ namespace AIA.Models
                 {
                     Reminders.Add(reminder);
                 }
+                
+                // Process recurring tasks
+                await ProcessRecurringTasksAsync();
             }
+
+            ApplyTaskFilter();
         }
 
         /// <summary>
@@ -743,6 +806,14 @@ namespace AIA.Models
         {
             await TaskReminderService.SaveTasksAsync(Tasks);
             await TaskReminderService.SaveRemindersAsync(Reminders);
+        }
+
+        /// <summary>
+        /// Saves task templates to disk
+        /// </summary>
+        public async Task SaveTaskTemplatesAsync()
+        {
+            await TaskTemplateService.SaveTemplatesAsync(TaskTemplates.ToList());
         }
 
         private void InitializeSampleTasks()
@@ -858,6 +929,7 @@ namespace AIA.Models
             NewTaskTitle = string.Empty;
             IsAddingNewTask = false;
             
+            ApplyTaskFilter();
             _ = SaveTasksAndRemindersAsync();
         }
 
@@ -897,8 +969,477 @@ namespace AIA.Models
                 SelectedTask = null;
             }
             
+            ApplyTaskFilter();
             _ = SaveTasksAndRemindersAsync();
         }
+
+        /// <summary>
+        /// Duplicates a task (creates a copy with new ID)
+        /// </summary>
+        public TaskItem? DuplicateTask(TaskItem task, bool resetStatus = true, bool includeSubtasks = true)
+        {
+            if (task == null) return null;
+
+            var duplicate = task.Clone(resetStatus, includeSubtasks);
+            
+            if (task.ParentTaskId.HasValue)
+            {
+                // If it's a subtask, add to the same parent
+                var parent = FindTaskById(task.ParentTaskId.Value);
+                parent?.AddSubtask(duplicate);
+            }
+            else
+            {
+                // Add to main tasks list
+                Tasks.Add(duplicate);
+                SelectedTask = duplicate;
+            }
+
+            ApplyTaskFilter();
+            _ = SaveTasksAndRemindersAsync();
+            
+            return duplicate;
+        }
+
+        /// <summary>
+        /// Archives a task (hides from normal view but keeps in storage)
+        /// </summary>
+        public void ArchiveTask(TaskItem task)
+        {
+            if (task == null) return;
+
+            task.IsArchived = true;
+            if (SelectedTask == task)
+            {
+                SelectedTask = null;
+            }
+            
+            ApplyTaskFilter();
+            _ = SaveTasksAndRemindersAsync();
+        }
+
+        /// <summary>
+        /// Unarchives a task
+        /// </summary>
+        public void UnarchiveTask(TaskItem task)
+        {
+            if (task == null) return;
+
+            task.IsArchived = false;
+            ApplyTaskFilter();
+            _ = SaveTasksAndRemindersAsync();
+        }
+
+        /// <summary>
+        /// Creates a task from a template
+        /// </summary>
+        public TaskItem? CreateTaskFromTemplate(TaskTemplate template)
+        {
+            if (template == null) return null;
+
+            var task = template.CreateTask();
+            Tasks.Add(task);
+            SelectedTask = task;
+
+            ApplyTaskFilter();
+            _ = SaveTasksAndRemindersAsync();
+            _ = SaveTaskTemplatesAsync(); // Save updated usage stats
+
+            return task;
+        }
+
+        /// <summary>
+        /// Creates a template from an existing task
+        /// </summary>
+        public async Task<TaskTemplate?> SaveTaskAsTemplateAsync(TaskItem task, string templateName, string templateDescription = "")
+        {
+            if (task == null || string.IsNullOrWhiteSpace(templateName)) return null;
+
+            var template = await TaskTemplateService.CreateTemplateFromTaskAsync(task, templateName, templateDescription);
+            TaskTemplates.Add(template);
+
+            return template;
+        }
+
+        /// <summary>
+        /// Deletes a task template
+        /// </summary>
+        public async Task<bool> DeleteTaskTemplateAsync(TaskTemplate template)
+        {
+            if (template == null) return false;
+
+            var result = await TaskTemplateService.DeleteTemplateAsync(template.Id);
+            if (result)
+            {
+                TaskTemplates.Remove(template);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Applies the current filter to the tasks list
+        /// </summary>
+        public void ApplyTaskFilter()
+        {
+            FilteredTasks.Clear();
+            
+            var filtered = CurrentTaskFilter.Apply(Tasks);
+            foreach (var task in filtered)
+            {
+                FilteredTasks.Add(task);
+            }
+        }
+
+        /// <summary>
+        /// Adds a tag to a task
+        /// </summary>
+        public void AddTagToTask(TaskItem task, string tag)
+        {
+            if (task == null || string.IsNullOrWhiteSpace(tag)) return;
+
+            tag = tag.Trim();
+            if (!task.Tags.Contains(tag))
+            {
+                task.Tags.Add(tag);
+                _ = SaveTasksAndRemindersAsync();
+            }
+        }
+
+        /// <summary>
+        /// Removes a tag from a task
+        /// </summary>
+        public void RemoveTagFromTask(TaskItem task, string tag)
+        {
+            if (task == null || string.IsNullOrWhiteSpace(tag)) return;
+
+            task.Tags.Remove(tag);
+            _ = SaveTasksAndRemindersAsync();
+        }
+
+        /// <summary>
+        /// Gets all unique tags across all tasks
+        /// </summary>
+        public List<string> GetAllTags()
+        {
+            var tags = new HashSet<string>();
+            foreach (var task in Tasks)
+            {
+                foreach (var tag in task.Tags)
+                {
+                    tags.Add(tag);
+                }
+            }
+            return tags.OrderBy(t => t).ToList();
+        }
+
+        /// <summary>
+        /// Adds a dependency between tasks
+        /// </summary>
+        public void AddTaskDependency(TaskItem task, TaskItem dependsOn)
+        {
+            if (task == null || dependsOn == null) return;
+            if (task.Id == dependsOn.Id) return; // Can't depend on itself
+
+            if (!task.DependencyTaskIds.Contains(dependsOn.Id))
+            {
+                task.DependencyTaskIds.Add(dependsOn.Id);
+                _ = SaveTasksAndRemindersAsync();
+            }
+        }
+
+        /// <summary>
+        /// Removes a dependency between tasks
+        /// </summary>
+        public void RemoveTaskDependency(TaskItem task, Guid dependencyId)
+        {
+            if (task == null) return;
+
+            task.DependencyTaskIds.Remove(dependencyId);
+            _ = SaveTasksAndRemindersAsync();
+        }
+
+        /// <summary>
+        /// Checks if a task can be started based on dependencies
+        /// </summary>
+        public bool CanStartTask(TaskItem task)
+        {
+            if (task == null || task.DependencyTaskIds.Count == 0) return true;
+
+            foreach (var depId in task.DependencyTaskIds)
+            {
+                var depTask = FindTaskById(depId);
+                if (depTask == null || !depTask.IsCompleted)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Gets tasks that depend on the specified task
+        /// </summary>
+        public List<TaskItem> GetDependentTasks(TaskItem task)
+        {
+            if (task == null) return new List<TaskItem>();
+
+            return Tasks.Where(t => t.DependencyTaskIds.Contains(task.Id)).ToList();
+        }
+
+        /// <summary>
+        /// Processes recurring tasks and creates new instances if needed
+        /// </summary>
+        public async Task ProcessRecurringTasksAsync()
+        {
+            var recurringTasks = Tasks.Where(t => t.IsRecurring && t.IsCompleted && !t.IsArchived).ToList();
+
+            foreach (var task in recurringTasks)
+            {
+                if (ShouldCreateNextRecurrence(task))
+                {
+                    var nextTask = CreateNextRecurrence(task);
+                    if (nextTask != null)
+                    {
+                        Tasks.Add(nextTask);
+                        // Archive the completed recurring task
+                        task.IsArchived = true;
+                    }
+                }
+            }
+
+            if (recurringTasks.Count > 0)
+            {
+                ApplyTaskFilter();
+                await SaveTasksAndRemindersAsync();
+            }
+        }
+
+        private bool ShouldCreateNextRecurrence(TaskItem task)
+        {
+            if (!task.IsRecurring || !task.IsCompleted) return false;
+            if (task.RecurrenceEndDate.HasValue && DateTime.Now > task.RecurrenceEndDate.Value) return false;
+
+            // Check if next instance already exists
+            var nextDueDate = CalculateNextDueDate(task);
+            if (!nextDueDate.HasValue) return false;
+
+            // Check if we already have a task with similar title and due date
+            var similar = Tasks.Any(t => 
+                t.Title == task.Title && 
+                t.DueDate.HasValue && 
+                Math.Abs((t.DueDate.Value - nextDueDate.Value).TotalDays) < 1);
+
+            return !similar;
+        }
+
+        private TaskItem? CreateNextRecurrence(TaskItem task)
+        {
+            var nextDueDate = CalculateNextDueDate(task);
+            if (!nextDueDate.HasValue) return null;
+
+            var nextTask = task.Clone(resetStatus: true, includeSubtasks: true);
+            nextTask.DueDate = nextDueDate;
+
+            return nextTask;
+        }
+
+        private DateTime? CalculateNextDueDate(TaskItem task)
+        {
+            if (!task.DueDate.HasValue) return null;
+
+            return task.RecurrenceType switch
+            {
+                RecurrenceType.Daily => task.DueDate.Value.AddDays(task.RecurrenceInterval),
+                RecurrenceType.Weekly => task.DueDate.Value.AddDays(7 * task.RecurrenceInterval),
+                RecurrenceType.Monthly => task.DueDate.Value.AddMonths(task.RecurrenceInterval),
+                RecurrenceType.Yearly => task.DueDate.Value.AddYears(task.RecurrenceInterval),
+                _ => null
+            };
+        }
+
+        #region Bulk Operations
+
+        /// <summary>
+        /// Gets all selected tasks
+        /// </summary>
+        public List<TaskItem> GetSelectedTasks()
+        {
+            return Tasks.Where(t => t.IsSelected).ToList();
+        }
+
+        /// <summary>
+        /// Selects all tasks
+        /// </summary>
+        public void SelectAllTasks()
+        {
+            foreach (var task in FilteredTasks)
+            {
+                task.IsSelected = true;
+            }
+        }
+
+        /// <summary>
+        /// Deselects all tasks
+        /// </summary>
+        public void DeselectAllTasks()
+        {
+            foreach (var task in Tasks)
+            {
+                task.IsSelected = false;
+            }
+        }
+
+        /// <summary>
+        /// Changes status for all selected tasks
+        /// </summary>
+        public void BulkChangeStatus(TaskStatus status)
+        {
+            var selectedTasks = GetSelectedTasks();
+            foreach (var task in selectedTasks)
+            {
+                task.Status = status;
+            }
+            
+            if (selectedTasks.Count > 0)
+            {
+                _ = SaveTasksAndRemindersAsync();
+            }
+        }
+
+        /// <summary>
+        /// Changes priority for all selected tasks
+        /// </summary>
+        public void BulkChangePriority(TaskPriority priority)
+        {
+            var selectedTasks = GetSelectedTasks();
+            foreach (var task in selectedTasks)
+            {
+                task.Priority = priority;
+            }
+            
+            if (selectedTasks.Count > 0)
+            {
+                _ = SaveTasksAndRemindersAsync();
+            }
+        }
+
+        /// <summary>
+        /// Archives all selected tasks
+        /// </summary>
+        public void BulkArchiveTasks()
+        {
+            var selectedTasks = GetSelectedTasks();
+            foreach (var task in selectedTasks)
+            {
+                task.IsArchived = true;
+                task.IsSelected = false;
+            }
+            
+            if (selectedTasks.Count > 0)
+            {
+                ApplyTaskFilter();
+                _ = SaveTasksAndRemindersAsync();
+            }
+        }
+
+        /// <summary>
+        /// Deletes all selected tasks
+        /// </summary>
+        public void BulkDeleteTasks()
+        {
+            var selectedTasks = GetSelectedTasks().ToList();
+            foreach (var task in selectedTasks)
+            {
+                if (!task.ParentTaskId.HasValue) // Only delete top-level tasks
+                {
+                    Tasks.Remove(task);
+                }
+            }
+            
+            if (selectedTasks.Count > 0)
+            {
+                ApplyTaskFilter();
+                _ = SaveTasksAndRemindersAsync();
+            }
+        }
+
+        /// <summary>
+        /// Adds a tag to all selected tasks
+        /// </summary>
+        public void BulkAddTag(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag)) return;
+
+            var selectedTasks = GetSelectedTasks();
+            foreach (var task in selectedTasks)
+            {
+                AddTagToTask(task, tag);
+            }
+        }
+
+        #endregion
+
+        #region Import/Export
+
+        /// <summary>
+        /// Exports tasks to JSON file
+        /// </summary>
+        public async Task<bool> ExportTasksAsync(string filePath, bool includeArchived = false)
+        {
+            try
+            {
+                var tasksToExport = includeArchived ? Tasks.ToList() : Tasks.Where(t => !t.IsArchived).ToList();
+                var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+                var json = System.Text.Json.JsonSerializer.Serialize(tasksToExport, options);
+                await System.IO.File.WriteAllTextAsync(filePath, json);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Imports tasks from JSON file
+        /// </summary>
+        public async Task<int> ImportTasksAsync(string filePath, bool replaceExisting = false)
+        {
+            try
+            {
+                if (!System.IO.File.Exists(filePath)) return 0;
+
+                var json = await System.IO.File.ReadAllTextAsync(filePath);
+                var importedTasks = System.Text.Json.JsonSerializer.Deserialize<List<TaskItem>>(json);
+                
+                if (importedTasks == null) return 0;
+
+                if (replaceExisting)
+                {
+                    Tasks.Clear();
+                }
+
+                foreach (var task in importedTasks)
+                {
+                    // Generate new IDs to avoid conflicts
+                    task.Id = Guid.NewGuid();
+                    foreach (var subtask in task.Subtasks)
+                    {
+                        subtask.Id = Guid.NewGuid();
+                    }
+                    Tasks.Add(task);
+                }
+
+                ApplyTaskFilter();
+                await SaveTasksAndRemindersAsync();
+                
+                return importedTasks.Count;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        #endregion
 
         public TaskItem? FindTaskById(Guid id)
         {

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
+using AIA.Models;
 
 namespace AIA
 {
@@ -110,6 +111,58 @@ namespace AIA
                 return isNull ? Visibility.Visible : Visibility.Collapsed;
             }
             return isNull ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider) => this;
+    }
+
+    /// <summary>
+    /// Converts a RecurrenceType enum to the appropriate unit text (day/days, week/weeks, etc.)
+    /// </summary>
+    public class RecurrenceIntervalConverter : MarkupExtension, IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is RecurrenceType recurrenceType)
+            {
+                return recurrenceType switch
+                {
+                    RecurrenceType.Daily => Services.LocalizationService.Instance["RecurrenceUnit_Days"] ?? "day(s)",
+                    RecurrenceType.Weekly => Services.LocalizationService.Instance["RecurrenceUnit_Weeks"] ?? "week(s)",
+                    RecurrenceType.Monthly => Services.LocalizationService.Instance["RecurrenceUnit_Months"] ?? "month(s)",
+                    RecurrenceType.Yearly => Services.LocalizationService.Instance["RecurrenceUnit_Years"] ?? "year(s)",
+                    _ => ""
+                };
+            }
+            return "";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider) => this;
+    }
+
+    /// <summary>
+    /// Converts a Task ID (Guid) to the task's title by looking it up in the OverlayViewModel
+    /// </summary>
+    public class TaskIdToTitleConverter : MarkupExtension, IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is Guid taskId)
+            {
+                var task = OverlayViewModel.Singleton.FindTaskById(taskId);
+                return task?.Title ?? Services.LocalizationService.Instance["Tasks_UnknownTask"] ?? "[Unknown Task]";
+            }
+            return Services.LocalizationService.Instance["Tasks_InvalidTask"] ?? "[Invalid Task]";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

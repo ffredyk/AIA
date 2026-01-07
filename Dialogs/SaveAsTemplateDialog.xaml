@@ -1,0 +1,61 @@
+<ui:FluentWindow x:Class="AIA.Dialogs.SaveAsTemplateDialog"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:local="clr-namespace:AIA"
+                Title="{local:Localize Tasks_SaveAsTemplate}"
+                Width="500" Height="300"
+                WindowStartupLocation="CenterOwner"
+                Background="{ui:ThemeResource ApplicationBackgroundBrush}">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="{local:Localize Tasks_CreateTemplate}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,20"/>
+        
+        <!-- Form -->
+        <StackPanel Grid.Row="1">
+            <!-- Template Name -->
+            <TextBlock Text="{local:Localize Tasks_TemplateName}" FontSize="11" Margin="0,0,0,4"/>
+            <ui:TextBox x:Name="TxtTemplateName" Margin="0,0,0,16" 
+                       PlaceholderText="{local:Localize Tasks_EnterTemplateName}"
+                       Background="{ui:ThemeResource ControlFillColorDefaultBrush}"/>
+            
+            <!-- Description -->
+            <TextBlock Text="{local:Localize Tasks_TemplateDescription}" FontSize="11" Margin="0,0,0,4"/>
+            <ui:TextBox x:Name="TxtTemplateDescription" Margin="0,0,0,16" 
+                    PlaceholderText="{local:Localize Tasks_EnterTemplateDescription}"
+                    Background="{ui:ThemeResource ControlFillColorDefaultBrush}"
+                    AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80"/>
+            
+            <!-- Info Message -->
+            <Border Background="#19FFA500" BorderBrush="#FFA500" BorderThickness="1" CornerRadius="6" Padding="12">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <ui:SymbolIcon Symbol="Info20" FontSize="16" Foreground="#FFA500" Margin="0,0,8,0"/>
+                        <TextBlock Text="{local:Localize Tasks_TemplateInfoTitle}" FontWeight="SemiBold" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Text="{local:Localize Tasks_TemplateInfoMessage}" 
+                              FontSize="11" TextWrapping="Wrap"
+                              Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        
+        <!-- Action Buttons -->
+        <Grid Grid.Row="2" Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <ui:Button Grid.Column="1" Content="{local:Localize Common_Create}" Appearance="Primary" Click="BtnCreate" Padding="24,8" Margin="0,0,8,0"/>
+            <ui:Button Grid.Column="2" Content="{local:Localize Common_Cancel}" Click="BtnCancel" Padding="24,8"/>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

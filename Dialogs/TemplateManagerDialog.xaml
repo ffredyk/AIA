@@ -1,0 +1,227 @@
+<ui:FluentWindow x:Class="AIA.Dialogs.TemplateManagerDialog"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:local="clr-namespace:AIA"
+                Title="{local:Localize Tasks_TemplateManager}"
+                Width="800" Height="700"
+                WindowStartupLocation="CenterOwner"
+                Background="{ui:ThemeResource ApplicationBackgroundBrush}">
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Templates List -->
+        <Grid Grid.Column="0" Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Grid.Row="0" Text="{local:Localize Tasks_Templates}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+            
+            <ListBox Grid.Row="1" x:Name="TemplatesListBox" Background="{ui:ThemeResource ControlFillColorDefaultBrush}"
+                    SelectionChanged="TemplatesList_SelectionChanged">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,4">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="{Binding Name}" FontWeight="SemiBold" FontSize="13"/>
+                            <TextBlock Grid.Row="1" Text="{Binding Description}" 
+                                      Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                                      FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,4,0,0"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
+                <ui:Button Click="BtnNewTemplate" Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Add12" FontSize="14"/>
+                        <TextBlock Text="{local:Localize Tasks_New}" Margin="6,0,0,0"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Click="BtnDeleteTemplate" Appearance="Danger">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Delete16" FontSize="14"/>
+                        <TextBlock Text="{local:Localize Tasks_Delete}" Margin="6,0,0,0"/>
+                    </StackPanel>
+                </ui:Button>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Template Details -->
+        <Border Grid.Column="1" Grid.Row="0" Margin="16,0,0,0" Padding="16" Background="{ui:ThemeResource ControlFillColorDefaultBrush}" CornerRadius="8">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="DetailsPanel">
+                <StackPanel>
+                    <!-- Name -->
+                    <TextBlock Text="{local:Localize Tasks_TemplateName}" FontSize="11" Margin="0,0,0,4"/>
+                    <TextBox x:Name="TxtTemplateName" Margin="0,0,0,12" Background="{ui:ThemeResource ControlFillColorSecondaryBrush}"/>
+                    
+                    <!-- Description -->
+                    <TextBlock Text="{local:Localize Tasks_TemplateDescription}" FontSize="11" Margin="0,0,0,4"/>
+                    <TextBox x:Name="TxtTemplateDescription" Margin="0,0,0,12" 
+                            Background="{ui:ThemeResource ControlFillColorSecondaryBrush}"
+                            AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
+                    
+                    <!-- Task Title -->
+                    <TextBlock Text="{local:Localize Tasks_DefaultTitle}" FontSize="11" Margin="0,0,0,4"/>
+                    <TextBox x:Name="TxtTaskTitle" Margin="0,0,0,12" Background="{ui:ThemeResource ControlFillColorSecondaryBrush}"/>
+                    
+                    <!-- Task Description -->
+                    <TextBlock Text="{local:Localize Tasks_DefaultDescription}" FontSize="11" Margin="0,0,0,4"/>
+                    <TextBox x:Name="TxtTaskDescription" Margin="0,0,0,12" 
+                            Background="{ui:ThemeResource ControlFillColorSecondaryBrush}"
+                            AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
+                    
+                    <!-- Priority and Due Date -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="{local:Localize Tasks_DefaultPriority}" FontSize="11" Margin="0,0,0,4"/>
+                            <ComboBox x:Name="CmbPriority" Background="{ui:ThemeResource ControlFillColorSecondaryBrush}">
+                                <ComboBoxItem Content="{local:Localize TaskPriority_Low}"/>
+                                <ComboBoxItem Content="{local:Localize TaskPriority_Medium}" IsSelected="True"/>
+                                <ComboBoxItem Content="{local:Localize TaskPriority_High}"/>
+                                <ComboBoxItem Content="{local:Localize TaskPriority_Critical}"/>
+                            </ComboBox>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="{local:Localize Tasks_RelativeDueDate}" FontSize="11" Margin="0,0,0,4"/>
+                            <ui:NumberBox x:Name="NumRelativeDays" Background="{ui:ThemeResource ControlFillColorSecondaryBrush}"
+                                         Minimum="0" Maximum="365" PlaceholderText="{local:Localize Tasks_DaysFromCreation}"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Tags -->
+                    <TextBlock Text="{local:Localize Tasks_DefaultTags}" FontSize="11" Margin="0,0,0,4"/>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBox x:Name="TxtNewTag" PlaceholderText="{local:Localize Tasks_EnterTag}" Background="{ui:ThemeResource ControlFillColorSecondaryBrush}"/>
+                        <ui:Button Grid.Column="1" Margin="8,0,0,0" Content="{local:Localize Tasks_Add}" Click="BtnAddTag"/>
+                    </Grid>
+                    
+                    <ItemsControl x:Name="TagsListControl" Margin="0,0,0,12">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#335B5FC7" CornerRadius="12" Padding="10,4" Margin="0,0,6,6">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding}" FontSize="11"/>
+                                        <ui:Button Padding="2" Margin="6,0,0,0" Background="Transparent" Click="BtnRemoveTag" Tag="{Binding}">
+                                            <ui:SymbolIcon Symbol="Dismiss12" FontSize="10"/>
+                                        </ui:Button>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <!-- Subtasks -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{local:Localize Tasks_DefaultSubtasks}" FontSize="11" VerticalAlignment="Center"/>
+                        <ui:Button Grid.Column="1" Click="BtnAddSubtask">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Add12" FontSize="12"/>
+                                <TextBlock Text="{local:Localize Tasks_AddSubtask}" Margin="4,0,0,0"/>
+                            </StackPanel>
+                        </ui:Button>
+                    </Grid>
+                    
+                    <ItemsControl x:Name="SubtasksListControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{ui:ThemeResource ControlFillColorSecondaryBrush}" 
+                                       CornerRadius="6" Padding="12,8" Margin="0,0,0,6">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" 
+                                                    Background="{ui:ThemeResource ControlFillColorTertiaryBrush}"
+                                                    BorderThickness="0" FontSize="12"/>
+                                            <ui:Button Grid.Column="1" Padding="4" Background="Transparent" Click="BtnRemoveSubtask" Tag="{Binding}">
+                                                <ui:SymbolIcon Symbol="Delete16" FontSize="12" Foreground="#FF6666"/>
+                                            </ui:Button>
+                                        </Grid>
+                                        
+                                        <ui:TextBox Grid.Row="1" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                                                    Background="{ui:ThemeResource ControlFillColorTertiaryBrush}"
+                                                    BorderThickness="0" FontSize="11" Margin="0,4,0,0"
+                                                    PlaceholderText="{local:Localize Tasks_Description}"/>
+                                        
+                                        <Grid Grid.Row="2" Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox SelectedItem="{Binding Priority, Mode=TwoWay}"
+                                                     Background="{ui:ThemeResource ControlFillColorTertiaryBrush}"
+                                                     FontSize="11">
+                                                <ComboBoxItem Content="{local:Localize TaskPriority_Low}"/>
+                                                <ComboBoxItem Content="{local:Localize TaskPriority_Medium}" IsSelected="True"/>
+                                                <ComboBoxItem Content="{local:Localize TaskPriority_High}"/>
+                                                <ComboBoxItem Content="{local:Localize TaskPriority_Critical}"/>
+                                            </ComboBox>
+                                            <ui:NumberBox Grid.Column="1" Value="{Binding RelativeDueDateDays, Mode=TwoWay}"
+                                                         Background="{ui:ThemeResource ControlFillColorTertiaryBrush}"
+                                                         Minimum="0" Maximum="365" PlaceholderText="{local:Localize Tasks_Days}"
+                                                         Width="100" Margin="8,0,0,0"/>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+        
+        <!-- Action Buttons - Now at bottom of dialog, spanning both columns -->
+        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <ui:Button Grid.Column="1" Content="{local:Localize Common_Save}" Appearance="Primary" Click="BtnSave" Padding="24,8" Margin="0,0,8,0"/>
+            <ui:Button Grid.Column="2" Content="{local:Localize Common_Close}" Click="BtnClose" Padding="24,8"/>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

@@ -8,324 +8,687 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" MinWidth="300"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*" MinWidth="350"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         
-        <!-- Task List Panel -->
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            
-            <!-- Add New Task Input -->
-            <Border Grid.Row="0" Margin="8" Padding="8" CornerRadius="6" Background="#19FFFFFF" 
-                    Visibility="{Binding IsAddingNewTask, Converter={StaticResource BoolToVis}}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="NewTaskTitleInput" 
-                             Text="{Binding NewTaskTitle, UpdateSourceTrigger=PropertyChanged}"
-                             Background="Transparent" Foreground="White" BorderThickness="0"
-                             Padding="8,6" FontSize="13" 
-                             KeyDown="NewTaskTitleInput_KeyDown"/>
-                    <ui:Button Grid.Column="1" Margin="4,0" Padding="8,4" Click="BtnConfirmNewTask">
-                        <ui:SymbolIcon Symbol="Checkmark12" Foreground="#1EB75F"/>
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="#0CFFFFFF" BorderBrush="#33FFFFFF" BorderThickness="0,0,0,1" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Left Side Actions -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <ui:Button Click="BtnAddTask" ToolTip="{local:Localize Tasks_AddNew}" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Add12" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_NewTask}" Margin="6,0,0,0"/>
+                        </StackPanel>
                     </ui:Button>
-                    <ui:Button Grid.Column="2" Padding="8,4" Click="BtnCancelNewTask">
-                        <ui:SymbolIcon Symbol="Dismiss12" Foreground="#FF6666"/>
+                    
+                    <ui:Button Click="BtnShowTemplates" ToolTip="{local:Localize Tasks_FromTemplate}" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Document20" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_Template}" Margin="6,0,0,0"/>
+                        </StackPanel>
                     </ui:Button>
-                </Grid>
-            </Border>
+                    
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="4,0"/>
+                    
+                    <ui:Button Click="BtnShowFilters" ToolTip="{local:Localize Tasks_FilterSort}" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Filter20" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_Filters}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                    
+                    <ui:Button Click="BtnToggleBulkMode" ToolTip="{local:Localize Tasks_BulkOperations}">
+                        <ui:Button.Style>
+                            <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBulkSelectionMode}" Value="True">
+                                        <Setter Property="Background" Value="#330078D4"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="SelectAllOn20" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_BulkMode}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                </StackPanel>
+                
+                <!-- Search Box -->
+                <ui:TextBox Grid.Column="1" Margin="16,0" PlaceholderText="{local:Localize Tasks_SearchPlaceholder}"
+                           Text="{Binding CurrentTaskFilter.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                           Icon="Search12" ClearButtonEnabled="True"/>
+                
+                <!-- Right Side Actions -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <ui:Button Click="BtnImportExport" ToolTip="{local:Localize Tasks_ImportExport}" Margin="0,0,4,0">
+                        <ui:SymbolIcon Symbol="ArrowDownload20" FontSize="14"/>
+                    </ui:Button>
+                    
+                    <ui:Button Click="BtnManageTemplates" ToolTip="{local:Localize Tasks_ManageTemplates}">
+                        <ui:SymbolIcon Symbol="Settings20" FontSize="14"/>
+                    </ui:Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Bulk Operations Bar -->
+        <Border Grid.Row="1" Background="#195B5FC7" BorderBrush="#335B5FC7" BorderThickness="0,0,0,1" Padding="12,8"
+                Visibility="{Binding IsBulkSelectionMode, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Foreground="White" VerticalAlignment="Center">
+                    <Run Text="{Binding SelectedTasksCount, Mode=OneWay, FallbackValue=0}"/>
+                    <Run Text="{local:Localize Tasks_SelectedCount}"/>
+                </TextBlock>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <ui:Button Click="BtnBulkSelectAll" Content="{local:Localize Tasks_SelectAll}" Margin="0,0,4,0"/>
+                    <ui:Button Click="BtnBulkDeselectAll" Content="{local:Localize Tasks_DeselectAll}" Margin="0,0,8,0"/>
+                    
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="8,0"/>
+                    
+                    <ui:Button Click="BtnBulkChangeStatus" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="CheckboxChecked20" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_ChangeStatus}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                    
+                    <ui:Button Click="BtnBulkChangePriority" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Flag20" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_ChangePriority}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                    
+                    <ui:Button Click="BtnBulkAddTag" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Tag20" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_AddTag}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                    
+                    <ui:Button Click="BtnBulkArchive" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Archive20" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_Archive}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                    
+                    <ui:Button Click="BtnBulkDelete" Appearance="Danger">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Delete20" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Tasks_Delete}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                </StackPanel>
+                
+                <ui:Button Grid.Column="2" Click="BtnToggleBulkMode" Content="{local:Localize Common_Close}"/>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="300"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" MinWidth="350"/>
+            </Grid.ColumnDefinitions>
             
-            <!-- Tasks ListView -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="8">
-                <ItemsControl x:Name="TasksListControl" ItemsSource="{Binding Tasks}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Margin="0,4" CornerRadius="8" BorderBrush="#33FFFFFF" BorderThickness="1"
-                                    MouseLeftButtonUp="TaskItem_Click" Tag="{Binding}" Cursor="Hand">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#0CFFFFFF"/>
-                                        <Setter Property="BorderThickness" Value="0"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#19FFFFFF"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    
-                                    <!-- Task Header -->
-                                    <Grid Margin="12,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+            <!-- Task List Panel -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Add New Task Input -->
+                <Border Grid.Row="0" Margin="8" Padding="8" CornerRadius="6" Background="#19FFFFFF" 
+                        Visibility="{Binding IsAddingNewTask, Converter={StaticResource BoolToVis}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="NewTaskTitleInput" 
+                                 Text="{Binding NewTaskTitle, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="Transparent" Foreground="White" BorderThickness="0"
+                                 Padding="8,6" FontSize="13" 
+                                 KeyDown="NewTaskTitleInput_KeyDown"/>
+                        <ui:Button Grid.Column="1" Margin="4,0" Padding="8,4" Click="BtnConfirmNewTask">
+                            <ui:SymbolIcon Symbol="Checkmark12" Foreground="#1EB75F"/>
+                        </ui:Button>
+                        <ui:Button Grid.Column="2" Padding="8,4" Click="BtnCancelNewTask">
+                            <ui:SymbolIcon Symbol="Dismiss12" Foreground="#FF6666"/>
+                        </ui:Button>
+                    </Grid>
+                </Border>
+                
+                <!-- Tasks ListView -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="8">
+                    <ItemsControl x:Name="TasksListControl" ItemsSource="{Binding FilteredTasks}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,4" CornerRadius="8" BorderBrush="#33FFFFFF" BorderThickness="1"
+                                        MouseLeftButtonUp="TaskItem_Click" Tag="{Binding}" Cursor="Hand"
+                                        ContextMenuOpening="TaskItem_ContextMenuOpening">
+                                    <Border.ContextMenu>
+                                        <ContextMenu x:Name="TaskContextMenu">
+                                            <MenuItem Header="{local:Localize Tasks_Duplicate}" Click="MenuItem_Duplicate">
+                                                <MenuItem.Icon>
+                                                    <ui:SymbolIcon Symbol="Copy20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Header="{local:Localize Tasks_SaveAsTemplate}" Click="MenuItem_SaveAsTemplate">
+                                                <MenuItem.Icon>
+                                                    <ui:SymbolIcon Symbol="Document20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <Separator/>
+                                            <MenuItem Header="{local:Localize Tasks_Archive}" Click="MenuItem_Archive">
+                                                <MenuItem.Icon>
+                                                    <ui:SymbolIcon Symbol="Archive20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Header="{local:Localize Tasks_Delete}" Click="MenuItem_Delete">
+                                                <MenuItem.Icon>
+                                                    <ui:SymbolIcon Symbol="Delete20"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#0CFFFFFF"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#19FFFFFF"/>
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="Background" Value="#335B5FC7"/>
+                                                    <Setter Property="BorderBrush" Value="#5B5FC7"/>
+                                                    <Setter Property="BorderThickness" Value="2"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
                                         
-                                        <!-- Status Indicator -->
-                                        <Ellipse Width="14" Height="14" Margin="0,0,10,0" VerticalAlignment="Center">
-                                            <Ellipse.Style>
-                                                <Style TargetType="Ellipse">
-                                                    <Setter Property="Fill" Value="#808080"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status}" Value="NotStarted">
-                                                            <Setter Property="Fill" Value="#808080"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="InProgress">
-                                                            <Setter Property="Fill" Value="#0078D4"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="OnHold">
-                                                            <Setter Property="Fill" Value="#FFA500"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                            <Setter Property="Fill" Value="#1EB75F"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Cancelled">
-                                                            <Setter Property="Fill" Value="#FF4444"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Ellipse.Style>
-                                        </Ellipse>
-                                        
-                                        <!-- Task Info -->
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="White" FontSize="14" TextTrimming="CharacterEllipsis">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
+                                        <!-- Task Header -->
+                                        <Grid Margin="12,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- Checkbox (Bulk Mode) -->
+                                            <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" Margin="0,0,8,0"
+                                                     Visibility="{Binding DataContext.IsBulkSelectionMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
+                                                     Click="TaskCheckBox_Click"/>
+                                            
+                                            <!-- Status Indicator -->
+                                            <Ellipse Grid.Column="1" Width="14" Height="14" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="#808080"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                                <Setter Property="TextDecorations" Value="Strikethrough"/>
-                                                                <Setter Property="Opacity" Value="0.6"/>
+                                                            <DataTrigger Binding="{Binding Status}" Value="NotStarted">
+                                                                <Setter Property="Fill" Value="#808080"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="InProgress">
+                                                                <Setter Property="Fill" Value="#0078D4"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="OnHold">
+                                                                <Setter Property="Fill" Value="#FFA500"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                                                <Setter Property="Fill" Value="#1EB75F"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Cancelled">
+                                                                <Setter Property="Fill" Value="#FF4444"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                <TextBlock Text="{Binding DueDateText}" Foreground="#999999" FontSize="11" Margin="0,0,12,0">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
+                                                </Ellipse.Style>
+                                            </Ellipse>
+                                            
+                                            <!-- Task Info -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="White" FontSize="14" TextTrimming="CharacterEllipsis">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                        <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                                        <Setter Property="Opacity" Value="0.6"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    
+                                                    <!-- Recurring Badge -->
+                                                    <Border Background="#336B46C1" CornerRadius="3" Padding="4,2" Margin="8,0,0,0"
+                                                           Visibility="{Binding IsRecurring, Converter={StaticResource BoolToVis}}">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <ui:SymbolIcon Symbol="ArrowRepeatAll20" FontSize="10" Foreground="White"/>
+                                                            <TextBlock Text="{Binding RecurrenceType}" FontSize="9" Foreground="White" Margin="4,0,0,0"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                    
+                                                    <!-- Dependencies Badge -->
+                                                    <Border Background="#33FFA500" CornerRadius="3" Padding="4,2" Margin="4,0,0,0"
+                                                           Visibility="{Binding DependencyTaskIds.Count, Converter={StaticResource IntToVisConverter}}"
+                                                           ToolTip="{local:Localize Tasks_HasDependencies}">
+                                                        <ui:SymbolIcon Symbol="Link20" FontSize="10" Foreground="White"/>
+                                                    </Border>
+                                                </StackPanel>
+                                                
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                    <TextBlock Text="{Binding DueDateText}" Foreground="#999999" FontSize="11" Margin="0,0,12,0">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#FF6666"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding SubtaskProgressText}" Foreground="#999999" FontSize="11"
+                                                               Visibility="{Binding TotalSubtasksCount, Converter={StaticResource IntToVisConverter}}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            
+                                            <!-- Priority Badge -->
+                                            <Border Grid.Column="3" Margin="8,0" Padding="6,2" CornerRadius="4" VerticalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#33808080"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Priority}" Value="Low">
+                                                                <Setter Property="Background" Value="#33808080"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Priority}" Value="Medium">
+                                                                <Setter Property="Background" Value="#330078D4"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Priority}" Value="High">
+                                                                <Setter Property="Background" Value="#33FFA500"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Priority}" Value="Critical">
+                                                                <Setter Property="Background" Value="#33FF4444"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding Priority}" FontSize="10" Foreground="White"/>
+                                            </Border>
+                                            
+                                            <!-- More Actions Button -->
+                                            <ui:Button Grid.Column="4" Padding="4" Margin="4,0" Background="Transparent" Click="BtnTaskActions" Tag="{Binding}">
+                                                <ui:SymbolIcon Symbol="MoreVertical20" FontSize="14" Foreground="White"/>
+                                            </ui:Button>
+                                            
+                                            <!-- Expand/Collapse Button -->
+                                            <ui:Button Grid.Column="5" Padding="4" Background="Transparent" Click="BtnToggleExpand" Tag="{Binding}"
+                                                       Visibility="{Binding TotalSubtasksCount, Converter={StaticResource IntToVisConverter}}">
+                                                <ui:SymbolIcon Foreground="White" FontSize="12">
+                                                    <ui:SymbolIcon.Style>
+                                                        <Style TargetType="ui:SymbolIcon">
+                                                            <Setter Property="Symbol" Value="ChevronDown12"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsOverdue}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#FF6666"/>
+                                                                <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                                    <Setter Property="Symbol" Value="ChevronUp12"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <TextBlock Text="{Binding SubtaskProgressText}" Foreground="#999999" FontSize="11"
-                                                           Visibility="{Binding TotalSubtasksCount, Converter={StaticResource IntToVisConverter}}"/>
-                                            </StackPanel>
-                                        </StackPanel>
+                                                    </ui:SymbolIcon.Style>
+                                                </ui:SymbolIcon>
+                                            </ui:Button>
+                                        </Grid>
                                         
-                                        <!-- Priority Badge -->
-                                        <Border Grid.Column="2" Margin="8,0" Padding="6,2" CornerRadius="4" VerticalAlignment="Center">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#33808080"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Priority}" Value="Low">
-                                                            <Setter Property="Background" Value="#33808080"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Priority}" Value="Medium">
-                                                            <Setter Property="Background" Value="#330078D4"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Priority}" Value="High">
-                                                            <Setter Property="Background" Value="#33FFA500"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Priority}" Value="Critical">
-                                                            <Setter Property="Background" Value="#33FF4444"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock Text="{Binding Priority}" FontSize="10" Foreground="White"/>
-                                        </Border>
-                                        
-                                        <!-- Expand/Collapse Button -->
-                                        <ui:Button Grid.Column="3" Padding="4" Background="Transparent" Click="BtnToggleExpand" Tag="{Binding}"
-                                                   Visibility="{Binding TotalSubtasksCount, Converter={StaticResource IntToVisConverter}}">
-                                            <ui:SymbolIcon Foreground="White" FontSize="12">
-                                                <ui:SymbolIcon.Style>
-                                                    <Style TargetType="ui:SymbolIcon">
-                                                        <Setter Property="Symbol" Value="ChevronDown12"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
-                                                                <Setter Property="Symbol" Value="ChevronUp12"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </ui:SymbolIcon.Style>
-                                            </ui:SymbolIcon>
-                                        </ui:Button>
+                                        <!-- Tags -->
+                                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Tags}" Margin="12,0,12,8"
+                                                     Visibility="{Binding Tags.Count, Converter={StaticResource IntToVisConverter}}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#335B5FC7" CornerRadius="10" Padding="8,3" Margin="0,0,4,4">
+                                                        <TextBlock Text="{Binding}" FontSize="10" Foreground="White"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <!-- Subtasks (Expandable) -->
+                                        <ItemsControl Grid.Row="2" ItemsSource="{Binding Subtasks}" 
+                                                      ItemTemplate="{StaticResource SubtaskTemplate}"
+                                                      Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}"
+                                                      Margin="0,0,0,8"/>
                                     </Grid>
-                                    
-                                    <!-- Subtasks (Expandable) -->
-                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Subtasks}" 
-                                                  ItemTemplate="{StaticResource SubtaskTemplate}"
-                                                  Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}"
-                                                  Margin="0,0,0,8"/>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </Grid>
-        
-        <!-- Splitter -->
-        <GridSplitter Grid.Column="1" Width="4" Background="#33FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
-        
-        <!-- Task Details Panel -->
-        <Border Grid.Column="2" Margin="8" CornerRadius="8" Background="#0CFFFFFF" BorderBrush="#33FFFFFF" BorderThickness="1">
-            <Grid>
-                <!-- No Task Selected -->
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                            Visibility="{Binding HasSelectedTask, Converter={StaticResource InverseBoolToVis}}">
-                    <ui:SymbolIcon Symbol="TaskListSquareLtr20" FontSize="48" Foreground="#666666"/>
-                    <TextBlock Text="{local:Localize Tasks_SelectToViewDetails}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
-                </StackPanel>
-                
-                <!-- Task Details -->
-                <ScrollViewer Visibility="{Binding HasSelectedTask, Converter={StaticResource BoolToVis}}"
-                              VerticalScrollBarVisibility="Auto" Padding="16">
-                    <StackPanel DataContext="{Binding SelectedTask}">
-                        <!-- Task Title -->
-                        <Grid Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox x:Name="TaskTitleEdit" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="Transparent" Foreground="White" BorderThickness="0"
-                                     FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"
-                                     LostFocus="DataEntryField_LostFocus"/>
-                            <ui:Button Grid.Column="1" Padding="6" Background="Transparent" Click="BtnDeleteTask">
-                                <ui:SymbolIcon Symbol="Delete16" Foreground="#FF6666"/>
-                            </ui:Button>
-                        </Grid>
-                        
-                        <!-- Status and Priority -->
-                        <Grid Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Margin="0,0,8,0">
-                                <TextBlock Text="{local:Localize Tasks_Status}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
-                                <ComboBox SelectedItem="{Binding Status, Mode=TwoWay}"
-                                          ItemsSource="{Binding Source={StaticResource TaskStatusValues}}"
-                                          Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="{local:Localize Tasks_Priority}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
-                                <ComboBox SelectedItem="{Binding Priority, Mode=TwoWay}"
-                                          ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
-                                          Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"/>
-                            </StackPanel>
-                        </Grid>
-                        
-                        <!-- Due Date -->
-                        <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="{local:Localize Tasks_DueDate}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
-                            <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay}"
-                                        Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"/>
-                        </StackPanel>
-                        
-                        <!-- Description -->
-                        <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="{local:Localize Tasks_Description}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
-                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
-                                     TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" Padding="8"/>
-                        </StackPanel>
-                        
-                        <!-- Notes -->
-                        <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="{local:Localize Tasks_Notes}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
-                            <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
-                                     TextWrapping="Wrap" AcceptsReturn="True" MinHeight="80" Padding="8"/>
-                        </StackPanel>
-                        
-                        <!-- Subtasks Section -->
-                        <StackPanel Margin="0,0,0,16">
-                            <Grid Margin="0,0,0,8">
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+            
+            <!-- Splitter -->
+            <GridSplitter Grid.Column="1" Width="4" Background="#33FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+            
+            <!-- Task Details Panel -->
+            <Border Grid.Column="2" Margin="8" CornerRadius="8" Background="#0CFFFFFF" BorderBrush="#33FFFFFF" BorderThickness="1">
+                <Grid>
+                    <!-- No Task Selected -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                Visibility="{Binding HasSelectedTask, Converter={StaticResource InverseBoolToVis}}">
+                        <ui:SymbolIcon Symbol="TaskListSquareLtr20" FontSize="48" Foreground="#666666"/>
+                        <TextBlock Text="{local:Localize Tasks_SelectToViewDetails}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                    </StackPanel>
+                    
+                    <!-- Task Details -->
+                    <ScrollViewer Visibility="{Binding HasSelectedTask, Converter={StaticResource BoolToVis}}"
+                                  VerticalScrollBarVisibility="Auto" Padding="16">
+                        <StackPanel DataContext="{Binding SelectedTask}">
+                            <!-- Task Actions -->
+                            <WrapPanel Margin="0,0,0,12">
+                                <ui:Button Click="BtnDuplicateTask" Margin="0,0,4,4" ToolTip="{local:Localize Tasks_Duplicate}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="Copy20" FontSize="14"/>
+                                        <TextBlock Text="{local:Localize Tasks_Duplicate}" Margin="6,0,0,0"/>
+                                    </StackPanel>
+                                </ui:Button>
+                                
+                                <ui:Button Click="BtnSaveAsTemplate" Margin="0,0,4,4" ToolTip="{local:Localize Tasks_SaveAsTemplate}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="Document20" FontSize="14"/>
+                                        <TextBlock Text="{local:Localize Tasks_Template}" Margin="6,0,0,0"/>
+                                    </StackPanel>
+                                </ui:Button>
+                                
+                                <ui:Button Click="BtnArchiveTask" Margin="0,0,4,4" ToolTip="{local:Localize Tasks_Archive}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="Archive20" FontSize="14"/>
+                                        <TextBlock Text="{local:Localize Tasks_Archive}" Margin="6,0,0,0"/>
+                                    </StackPanel>
+                                </ui:Button>
+                            </WrapPanel>
+                            
+                            <!-- Task Title -->
+                            <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{local:Localize Tasks_Subtasks}" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
-                                <ui:Button Grid.Column="1" Padding="6,2" Click="BtnAddSubtask">
-                                    <StackPanel Orientation="Horizontal">
-                                        <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="10"/>
-                                        <TextBlock Text="{local:Localize Tasks_Add}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
-                                    </StackPanel>
+                                <TextBox x:Name="TaskTitleEdit" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="Transparent" Foreground="White" BorderThickness="0"
+                                         FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"
+                                         LostFocus="DataEntryField_LostFocus"/>
+                                <ui:Button Grid.Column="1" Padding="6" Background="Transparent" Click="BtnDeleteTask">
+                                    <ui:SymbolIcon Symbol="Delete16" Foreground="#FF6666"/>
                                 </ui:Button>
                             </Grid>
                             
-                            <!-- New Subtask Input -->
-                            <Border x:Name="NewSubtaskInputPanel" Visibility="Collapsed" Margin="0,0,0,8" Padding="8" CornerRadius="6" Background="#19FFFFFF">
-                                <Grid>
+                            <!-- Status and Priority -->
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Margin="0,0,8,0">
+                                    <TextBlock Text="{local:Localize Tasks_Status}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                    <ComboBox SelectedItem="{Binding Status, Mode=TwoWay}"
+                                              ItemsSource="{Binding Source={StaticResource TaskStatusValues}}"
+                                              Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
+                                              SelectionChanged="TaskProperty_Changed"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="{local:Localize Tasks_Priority}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                    <ComboBox SelectedItem="{Binding Priority, Mode=TwoWay}"
+                                              ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
+                                              Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
+                                              SelectionChanged="TaskProperty_Changed"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- Due Date -->
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="{local:Localize Tasks_DueDate}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay}"
+                                            Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
+                                            SelectedDateChanged="TaskProperty_Changed"/>
+                            </StackPanel>
+                            
+                            <!-- Tags Section -->
+                            <StackPanel Margin="0,0,0,16">
+                                <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox x:Name="NewSubtaskTitleInput" Background="Transparent" Foreground="White" 
-                                             BorderThickness="0" Padding="4" FontSize="12"
-                                             KeyDown="NewSubtaskTitleInput_KeyDown"/>
-                                    <ui:Button Grid.Column="1" Margin="4,0" Padding="6,2" Click="BtnConfirmNewSubtask">
-                                        <ui:SymbolIcon Symbol="Checkmark12" Foreground="#1EB75F"/>
-                                    </ui:Button>
-                                    <ui:Button Grid.Column="2" Padding="6,2" Click="BtnCancelNewSubtask">
-                                        <ui:SymbolIcon Symbol="Dismiss12" Foreground="#FF6666"/>
+                                    <TextBlock Text="{local:Localize Tasks_Tags}" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
+                                    <ui:Button Grid.Column="1" Padding="6,2" Click="BtnAddTag">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="10"/>
+                                            <TextBlock Text="{local:Localize Tasks_AddTag}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                        </StackPanel>
                                     </ui:Button>
                                 </Grid>
-                            </Border>
-                            
-                            <!-- Subtasks List -->
-                            <ItemsControl ItemsSource="{Binding Subtasks}" ItemTemplate="{StaticResource SubtaskTemplate}"/>
-                            
-                            <!-- Empty State -->
-                            <TextBlock Text="{local:Localize Tasks_NoSubtasksYet}" Foreground="#666666" FontSize="12" FontStyle="Italic"
-                                       Visibility="{Binding TotalSubtasksCount, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}"
-                                       Margin="8,4"/>
-                        </StackPanel>
-                        
-                        <!-- Metadata -->
-                        <Border BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="0,12,0,0">
-                            <StackPanel>
-                                <TextBlock Foreground="#666666" FontSize="10">
-                                    <Run Text="Created: "/>
-                                    <Run Text="{Binding CreatedDate, StringFormat='MMM dd, yyyy HH:mm'}"/>
-                                </TextBlock>
-                                <TextBlock Foreground="#666666" FontSize="10" Margin="0,4,0,0"
-                                           Visibility="{Binding CompletedDate, Converter={StaticResource NullToVis}}">
-                                    <Run Text="Completed: "/>
-                                    <Run Text="{Binding CompletedDate, StringFormat='MMM dd, yyyy HH:mm'}"/>
-                                </TextBlock>
+                                
+                                <ItemsControl ItemsSource="{Binding Tags}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#335B5FC7" CornerRadius="12" Padding="10,4" Margin="0,0,6,6">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding}" FontSize="11" Foreground="White" VerticalAlignment="Center"/>
+                                                    <ui:Button Padding="2" Margin="6,0,0,0" Background="Transparent" Click="BtnRemoveTag" Tag="{Binding}">
+                                                        <ui:SymbolIcon Symbol="Dismiss12" FontSize="10" Foreground="White"/>
+                                                    </ui:Button>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                
+                                <TextBlock Text="{local:Localize Tasks_NoTags}" Foreground="#666666" FontSize="12" FontStyle="Italic"
+                                           Visibility="{Binding Tags.Count, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}"
+                                           Margin="0,4"/>
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </Grid>
-        </Border>
+                            
+                            <!-- Recurrence Section -->
+                            <StackPanel Margin="0,0,0,16">
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{local:Localize Tasks_Recurrence}" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
+                                    <ui:Button Grid.Column="1" Padding="6,2" Click="BtnConfigureRecurrence">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="ArrowRepeatAll20" Foreground="White" FontSize="10"/>
+                                            <TextBlock Text="{local:Localize Tasks_Configure}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </ui:Button>
+                                </Grid>
+                                
+                                <Border Background="#196B46C1" CornerRadius="6" Padding="12,8"
+                                       Visibility="{Binding IsRecurring, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel>
+                                        <TextBlock Foreground="White" FontSize="12">
+                                            <Run Text="{Binding RecurrenceType}"/>
+                                            <Run Text="-"/>
+                                            <Run Text="{local:Localize Tasks_Every}"/>
+                                            <Run Text="{Binding RecurrenceInterval}"/>
+                                            <Run Text="{Binding RecurrenceType, Converter={StaticResource RecurrenceIntervalConverter}}"/>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#CCFFFFFF" FontSize="11" Margin="0,4,0,0"
+                                                   Visibility="{Binding RecurrenceEndDate, Converter={StaticResource NullToVis}}">
+                                            <Run Text="{local:Localize Tasks_UntilDate}"/>
+                                            <Run Text="{Binding RecurrenceEndDate, StringFormat='MMM dd, yyyy'}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            
+                            <!-- Dependencies Section -->
+                            <StackPanel Margin="0,0,0,16">
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{local:Localize Tasks_Dependencies}" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
+                                    <ui:Button Grid.Column="1" Padding="6,2" Click="BtnAddDependency">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="10"/>
+                                            <TextBlock Text="{local:Localize Tasks_AddDependency}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </ui:Button>
+                                </Grid>
+                                <ItemsControl x:Name="DependenciesListControl" ItemsSource="{Binding DependencyTaskIds}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#19FFFFFF" CornerRadius="6" Padding="10,6" Margin="0,0,0,6">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Converter={StaticResource TaskIdToTitleConverter}}" 
+                                                              Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                                                    <ui:Button Grid.Column="1" Padding="4" Background="Transparent" Click="BtnRemoveDependency" Tag="{Binding}">
+                                                        <ui:SymbolIcon Symbol="Dismiss12" FontSize="12" Foreground="#FF6666"/>
+                                                    </ui:Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                
+                                <TextBlock Text="{local:Localize Tasks_NoDependencies}" Foreground="#666666" FontSize="12" FontStyle="Italic"
+                                           Visibility="{Binding DependencyTaskIds.Count, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}"
+                                           Margin="0,4"/>
+                            </StackPanel>
+                            
+                            <!-- Description -->
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="{local:Localize Tasks_Description}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
+                                         TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" Padding="8"
+                                         LostFocus="TaskProperty_Changed"/>
+                            </StackPanel>
+                            
+                            <!-- Notes -->
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="{local:Localize Tasks_Notes}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#19FFFFFF" Foreground="White" BorderBrush="#33FFFFFF"
+                                         TextWrapping="Wrap" AcceptsReturn="True" MinHeight="80" Padding="8"
+                                         LostFocus="TaskProperty_Changed"/>
+                            </StackPanel>
+                            
+                            <!-- Subtasks Section -->
+                            <StackPanel Margin="0,0,0,16">
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{local:Localize Tasks_Subtasks}" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
+                                    <ui:Button Grid.Column="1" Padding="6,2" Click="BtnAddSubtask">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="10"/>
+                                            <TextBlock Text="{local:Localize Tasks_Add}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </ui:Button>
+                                </Grid>
+                                
+                                <!-- New Subtask Input -->
+                                <Border x:Name="NewSubtaskInputPanel" Visibility="Collapsed" Margin="0,0,0,8" Padding="8" CornerRadius="6" Background="#19FFFFFF">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="NewSubtaskTitleInput" Background="Transparent" Foreground="White" 
+                                                 BorderThickness="0" Padding="4" FontSize="12"
+                                                 KeyDown="NewSubtaskTitleInput_KeyDown"/>
+                                        <ui:Button Grid.Column="1" Margin="4,0" Padding="6,2" Click="BtnConfirmNewSubtask">
+                                            <ui:SymbolIcon Symbol="Checkmark12" Foreground="#1EB75F"/>
+                                        </ui:Button>
+                                        <ui:Button Grid.Column="2" Padding="6,2" Click="BtnCancelNewSubtask">
+                                            <ui:SymbolIcon Symbol="Dismiss12" Foreground="#FF6666"/>
+                                        </ui:Button>
+                                    </Grid>
+                                </Border>
+                                
+                                <!-- Subtasks List -->
+                                <ItemsControl ItemsSource="{Binding Subtasks}" ItemTemplate="{StaticResource SubtaskTemplate}"/>
+                                
+                                <!-- Empty State -->
+                                <TextBlock Text="{local:Localize Tasks_NoSubtasksYet}" Foreground="#666666" FontSize="12" FontStyle="Italic"
+                                           Visibility="{Binding TotalSubtasksCount, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}"
+                                           Margin="8,4"/>
+                            </StackPanel>
+                            
+                            <!-- Metadata -->
+                            <Border BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Foreground="#666666" FontSize="10">
+                                        <Run Text="{local:Localize Tasks_Created}"/>
+                                        <Run Text="{Binding CreatedDate, StringFormat='MMM dd, yyyy HH:mm'}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="#666666" FontSize="10" Margin="0,4,0,0"
+                                               Visibility="{Binding CompletedDate, Converter={StaticResource NullToVis}}">
+                                        <Run Text="{local:Localize Tasks_Completed}"/>
+                                        <Run Text="{Binding CompletedDate, StringFormat='MMM dd, yyyy HH:mm'}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

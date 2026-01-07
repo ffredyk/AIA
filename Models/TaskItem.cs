@@ -21,6 +21,15 @@ namespace AIA.Models
         Critical
     }
 
+    public enum RecurrenceType
+    {
+        None,
+        Daily,
+        Weekly,
+        Monthly,
+        Yearly
+    }
+
     public class TaskItem : INotifyPropertyChanged
     {
         private Guid _id;
@@ -35,6 +44,11 @@ namespace AIA.Models
         private bool _isExpanded;
         private bool _isEditing;
         private Guid? _parentTaskId;
+        private bool _isArchived;
+        private bool _isSelected;
+        private RecurrenceType _recurrenceType = RecurrenceType.None;
+        private int _recurrenceInterval = 1;
+        private DateTime? _recurrenceEndDate;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -131,12 +145,46 @@ namespace AIA.Models
             set { _parentTaskId = value; OnPropertyChanged(nameof(ParentTaskId)); OnPropertyChanged(nameof(IsSubtask)); }
         }
 
+        public bool IsArchived
+        {
+            get => _isArchived;
+            set { _isArchived = value; OnPropertyChanged(nameof(IsArchived)); }
+        }
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set { _isSelected = value; OnPropertyChanged(nameof(IsSelected)); }
+        }
+
+        public RecurrenceType RecurrenceType
+        {
+            get => _recurrenceType;
+            set { _recurrenceType = value; OnPropertyChanged(nameof(RecurrenceType)); OnPropertyChanged(nameof(IsRecurring)); }
+        }
+
+        public int RecurrenceInterval
+        {
+            get => _recurrenceInterval;
+            set { _recurrenceInterval = value; OnPropertyChanged(nameof(RecurrenceInterval)); }
+        }
+
+        public DateTime? RecurrenceEndDate
+        {
+            get => _recurrenceEndDate;
+            set { _recurrenceEndDate = value; OnPropertyChanged(nameof(RecurrenceEndDate)); }
+        }
+
         public ObservableCollection<TaskItem> Subtasks { get; set; } = new ObservableCollection<TaskItem>();
+        public ObservableCollection<string> Tags { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<Guid> DependencyTaskIds { get; set; } = new ObservableCollection<Guid>();
 
         // Computed properties
         public bool IsCompleted => Status == TaskStatus.Completed;
 
         public bool IsSubtask => ParentTaskId.HasValue;
+
+        public bool IsRecurring => RecurrenceType != RecurrenceType.None;
 
         public bool IsOverdue => DueDate.HasValue && DueDate.Value < DateTime.Now && Status != TaskStatus.Completed;
 
@@ -182,6 +230,8 @@ namespace AIA.Models
             ? $"{CompletedSubtasksCount}/{TotalSubtasksCount} subtasks" 
             : string.Empty;
 
+        public string TagsText => Tags.Count > 0 ? string.Join(", ", Tags) : string.Empty;
+
         public TaskItem()
         {
             Id = Guid.NewGuid();
@@ -192,6 +242,7 @@ namespace AIA.Models
                 OnPropertyChanged(nameof(CompletedSubtasksCount));
                 OnPropertyChanged(nameof(SubtaskProgressText));
             };
+            Tags.CollectionChanged += (s, e) => OnPropertyChanged(nameof(TagsText));
         }
 
         private int GetCompletedSubtasksCount()
@@ -215,6 +266,49 @@ namespace AIA.Models
         {
             OnPropertyChanged(nameof(CompletedSubtasksCount));
             OnPropertyChanged(nameof(SubtaskProgressText));
+        }
+
+        /// <summary>
+        /// Creates a deep copy of this task
+        /// </summary>
+        public TaskItem Clone(bool resetStatus = true, bool includeSubtasks = true)
+        {
+            var clone = new TaskItem
+            {
+                Title = Title,
+                Description = Description,
+                Notes = Notes,
+                Status = resetStatus ? TaskStatus.NotStarted : Status,
+                Priority = Priority,
+                DueDate = DueDate,
+                RecurrenceType = RecurrenceType,
+                RecurrenceInterval = RecurrenceInterval,
+                RecurrenceEndDate = RecurrenceEndDate
+            };
+
+            // Copy tags
+            foreach (var tag in Tags)
+            {
+                clone.Tags.Add(tag);
+            }
+
+            // Copy dependencies
+            foreach (var depId in DependencyTaskIds)
+            {
+                clone.DependencyTaskIds.Add(depId);
+            }
+
+            // Copy subtasks if requested
+            if (includeSubtasks)
+            {
+                foreach (var subtask in Subtasks)
+                {
+                    var subtaskClone = subtask.Clone(resetStatus, false);
+                    clone.AddSubtask(subtaskClone);
+                }
+            }
+
+            return clone;
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

@@ -11,6 +11,8 @@
     <local:IntToVisibilityConverter x:Key="IntToVisConverter"/>
     <local:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
     <local:NullToVisibilityConverter x:Key="NullToVis"/>
+    <local:RecurrenceIntervalConverter x:Key="RecurrenceIntervalConverter"/>
+    <local:TaskIdToTitleConverter x:Key="TaskIdToTitleConverter"/>
     
     <!-- Enum values for binding -->
     <ObjectDataProvider x:Key="TaskStatusValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">

@@ -1,0 +1,103 @@
+<ui:FluentWindow x:Class="AIA.Dialogs.TaskImportExportDialog"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:local="clr-namespace:AIA"
+                Title="{local:Localize Tasks_ImportExport}"
+                Width="500" Height="400"
+                WindowStartupLocation="CenterOwner"
+                Background="{ui:ThemeResource ApplicationBackgroundBrush}">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="{local:Localize Tasks_ImportExportData}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,20"/>
+        
+        <!-- Content -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Export Section -->
+            <Border Grid.Row="0" Background="{ui:ThemeResource ControlFillColorDefaultBrush}" CornerRadius="8" Padding="16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:SymbolIcon Symbol="ArrowUpload20" FontSize="20" Foreground="#0078D4" Margin="0,0,8,0"/>
+                        <TextBlock Text="{local:Localize Tasks_ExportTasks}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <TextBlock Text="{local:Localize Tasks_ExportDescription}" 
+                              TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
+                              Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"/>
+                    
+                    <CheckBox x:Name="ChkIncludeArchived" Content="{local:Localize Tasks_IncludeArchivedTasks}" 
+                             Margin="0,0,0,16" FontSize="12"/>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button Click="BtnExportToFile" Appearance="Primary" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Save20" FontSize="14"/>
+                                <TextBlock Text="{local:Localize Tasks_ExportToFile}" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </ui:Button>
+                        
+                        <ui:Button Click="BtnCopyToClipboard">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Copy20" FontSize="14"/>
+                                <TextBlock Text="{local:Localize Tasks_CopyToClipboard}" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </ui:Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            
+            <!-- Import Section -->
+            <Border Grid.Row="2" Background="{ui:ThemeResource ControlFillColorDefaultBrush}" CornerRadius="8" Padding="16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:SymbolIcon Symbol="ArrowDownload20" FontSize="20" Foreground="#1EB75F" Margin="0,0,8,0"/>
+                        <TextBlock Text="{local:Localize Tasks_ImportTasks}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <TextBlock Text="{local:Localize Tasks_ImportDescription}" 
+                              TextWrapping="Wrap" FontSize="12" Margin="0,0,0,12"
+                              Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"/>
+                    
+                    <CheckBox x:Name="ChkReplaceExisting" Content="{local:Localize Tasks_ReplaceExistingTasks}" 
+                             Margin="0,0,0,16" FontSize="12"/>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button Click="BtnImportFromFile" Appearance="Primary" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Open20" FontSize="14"/>
+                                <TextBlock Text="{local:Localize Tasks_ImportFromFile}" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </ui:Button>
+                        
+                        <ui:Button Click="BtnPasteFromClipboard">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="ClipboardPaste20" FontSize="14"/>
+                                <TextBlock Text="{local:Localize Tasks_PasteFromClipboard}" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </ui:Button>
+                    </StackPanel>
+                    
+                    <!-- Warning -->
+                    <Border Background="#19FF4444" BorderBrush="#FF4444" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,12,0,0"
+                           Visibility="{Binding IsChecked, ElementName=ChkReplaceExisting, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Warning20" FontSize="14" Foreground="#FF4444" Margin="0,0,6,0"/>
+                            <TextBlock Text="{local:Localize Tasks_ReplaceWarning}" FontSize="10" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

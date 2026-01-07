@@ -1,0 +1,158 @@
+<ui:FluentWindow x:Class="AIA.Dialogs.TaskTemplateDialog"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:local="clr-namespace:AIA"
+                Title="{local:Localize Tasks_SelectTemplate}"
+                Width="700" Height="600"
+                WindowStartupLocation="CenterOwner"
+                Background="{ui:ThemeResource ApplicationBackgroundBrush}">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{local:Localize Tasks_ChooseTemplate}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <ui:Button Grid.Column="1" Click="BtnManageTemplates">
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="Settings20" FontSize="14"/>
+                    <TextBlock Text="{local:Localize Tasks_ManageTemplates}" Margin="6,0,0,0"/>
+                </StackPanel>
+            </ui:Button>
+        </Grid>
+        
+        <!-- Templates List -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="TemplatesListControl">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,12" Background="{ui:ThemeResource ControlFillColorDefaultBrush}" 
+                                CornerRadius="8" Cursor="Hand" MouseLeftButtonUp="Template_Click" Tag="{Binding}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{ui:ThemeResource ControlFillColorSecondaryBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid Margin="16,12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <!-- Template Name and Priority -->
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"/>
+                                    <Border Grid.Column="1" Padding="8,3" CornerRadius="4">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#33808080"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DefaultPriority}" Value="Low">
+                                                        <Setter Property="Background" Value="#33808080"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding DefaultPriority}" Value="Medium">
+                                                        <Setter Property="Background" Value="#330078D4"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding DefaultPriority}" Value="High">
+                                                        <Setter Property="Background" Value="#33FFA500"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding DefaultPriority}" Value="Critical">
+                                                        <Setter Property="Background" Value="#33FF4444"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding DefaultPriority}" FontSize="10"/>
+                                    </Border>
+                                </Grid>
+                                
+                                <!-- Description -->
+                                <TextBlock Grid.Row="1" Text="{Binding Description}" 
+                                          Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                                          FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                                
+                                <!-- Template Details -->
+                                <WrapPanel Grid.Row="2" Margin="0,8,0,0">
+                                    <!-- Subtasks Count -->
+                                    <Border Background="#330078D4" CornerRadius="3" Padding="6,3" Margin="0,0,6,0"
+                                           Visibility="{Binding Subtasks.Count, Converter={StaticResource IntToVisConverter}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="TaskListSquareLtr20" FontSize="10"/>
+                                            <TextBlock Margin="4,0,0,0" FontSize="10">
+                                                <Run Text="{Binding Subtasks.Count, Mode=OneWay}"/>
+                                                <Run Text="{local:Localize Tasks_Subtasks}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <!-- Due Date -->
+                                    <Border Background="#336B46C1" CornerRadius="3" Padding="6,3" Margin="0,0,6,0"
+                                           Visibility="{Binding RelativeDueDateDays, Converter={StaticResource NullToVis}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Calendar20" FontSize="10"/>
+                                            <TextBlock Margin="4,0,0,0" FontSize="10">
+                                                <Run Text="{Binding RelativeDueDateDays}"/>
+                                                <Run Text="{local:Localize Tasks_DaysFromNow}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <!-- Tags -->
+                                    <Border Background="#335B5FC7" CornerRadius="3" Padding="6,3" Margin="0,0,6,0"
+                                           Visibility="{Binding Tags.Count, Converter={StaticResource IntToVisConverter}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Tag20" FontSize="10"/>
+                                            <TextBlock Margin="4,0,0,0" FontSize="10">
+                                                <Run Text="{Binding Tags.Count, Mode=OneWay}"/>
+                                                <Run Text="{local:Localize Tasks_Tags}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </WrapPanel>
+                                
+                                <!-- Usage Stats -->
+                                <TextBlock Grid.Row="3" Margin="0,8,0,0" 
+                                          Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                          FontSize="10">
+                                    <Run Text="{local:Localize Tasks_UsedTimes}"/>
+                                    <Run Text="{Binding UseCount, Mode=OneWay}"/>
+                                    <Run Text="&#x2022;"/>
+                                    <Run Text="{local:Localize Tasks_LastUsed}"/>
+                                    <Run Text="{Binding LastUsedDate, StringFormat='MMM dd, yyyy'}"/>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+        <!-- Action Buttons -->
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <ui:Button Grid.Column="1" Content="{local:Localize Common_Cancel}" Click="BtnCancel" Padding="24,8"/>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

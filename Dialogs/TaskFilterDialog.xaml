@@ -1,0 +1,136 @@
+<ui:FluentWindow x:Class="AIA.Dialogs.TaskFilterDialog"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:local="clr-namespace:AIA"
+                Title="{local:Localize Tasks_FilterAndSort}"
+                Width="550" Height="650"
+                WindowStartupLocation="CenterOwner"
+                Background="{ui:ThemeResource ApplicationBackgroundBrush}">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Status Filter -->
+                <TextBlock Text="{local:Localize Tasks_FilterByStatus}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <WrapPanel Margin="0,0,0,20">
+                    <CheckBox x:Name="ChkStatusNotStarted" Content="{local:Localize TaskStatus_NotStarted}" Margin="0,0,12,8"/>
+                    <CheckBox x:Name="ChkStatusInProgress" Content="{local:Localize TaskStatus_InProgress}" Margin="0,0,12,8"/>
+                    <CheckBox x:Name="ChkStatusOnHold" Content="{local:Localize TaskStatus_OnHold}" Margin="0,0,12,8"/>
+                    <CheckBox x:Name="ChkStatusCompleted" Content="{local:Localize TaskStatus_Completed}" Margin="0,0,12,8"/>
+                    <CheckBox x:Name="ChkStatusCancelled" Content="{local:Localize TaskStatus_Cancelled}" Margin="0,0,12,8"/>
+                </WrapPanel>
+                
+                <!-- Priority Filter -->
+                <TextBlock Text="{local:Localize Tasks_FilterByPriority}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <WrapPanel Margin="0,0,0,20">
+                    <CheckBox x:Name="ChkPriorityLow" Content="{local:Localize TaskPriority_Low}" Margin="0,0,12,8"/>
+                    <CheckBox x:Name="ChkPriorityMedium" Content="{local:Localize TaskPriority_Medium}" Margin="0,0,12,8"/>
+                    <CheckBox x:Name="ChkPriorityHigh" Content="{local:Localize TaskPriority_High}" Margin="0,0,12,8"/>
+                    <CheckBox x:Name="ChkPriorityCritical" Content="{local:Localize TaskPriority_Critical}" Margin="0,0,12,8"/>
+                </WrapPanel>
+                
+                <!-- Tags Filter -->
+                <TextBlock Text="{local:Localize Tasks_FilterByTags}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="CmbAvailableTags" IsEditable="True" Background="{ui:ThemeResource ControlFillColorDefaultBrush}"/>
+                    <ui:Button Grid.Column="1" Margin="8,0,0,0" Content="{local:Localize Tasks_Add}" Click="BtnAddTagFilter"/>
+                </Grid>
+                
+                <ItemsControl x:Name="SelectedTagsControl" Margin="0,0,0,20">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#335B5FC7" CornerRadius="12" Padding="10,4" Margin="0,0,6,6">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding}" FontSize="11" VerticalAlignment="Center"/>
+                                    <ui:Button Padding="2" Margin="6,0,0,0" Background="Transparent" Click="BtnRemoveTagFilter" Tag="{Binding}">
+                                        <ui:SymbolIcon Symbol="Dismiss12" FontSize="10"/>
+                                    </ui:Button>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                
+                <!-- Date Range Filter -->
+                <TextBlock Text="{local:Localize Tasks_FilterByDueDate}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{local:Localize Tasks_From}" FontSize="11" Margin="0,0,0,4"/>
+                    <DatePicker Grid.Row="1" Grid.Column="0" x:Name="DueDateFrom" Background="{ui:ThemeResource ControlFillColorDefaultBrush}"/>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{local:Localize Tasks_To}" FontSize="11" Margin="0,0,0,4"/>
+                    <DatePicker Grid.Row="1" Grid.Column="2" x:Name="DueDateTo" Background="{ui:ThemeResource ControlFillColorDefaultBrush}"/>
+                </Grid>
+                
+                <!-- Additional Options -->
+                <TextBlock Text="{local:Localize Tasks_FilterOptions}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <StackPanel Margin="0,0,0,20">
+                    <CheckBox x:Name="ChkShowCompleted" Content="{local:Localize Tasks_ShowCompleted}" Margin="0,0,0,8" IsChecked="True"/>
+                    <CheckBox x:Name="ChkShowArchived" Content="{local:Localize Tasks_ShowArchived}" Margin="0,0,0,8"/>
+                    <CheckBox x:Name="ChkOnlyOverdue" Content="{local:Localize Tasks_OnlyOverdue}" Margin="0,0,0,8"/>
+                </StackPanel>
+                
+                <!-- Sort Options -->
+                <TextBlock Text="{local:Localize Tasks_SortBy}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="CmbSortBy" Background="{ui:ThemeResource ControlFillColorDefaultBrush}">
+                        <ComboBoxItem Content="{local:Localize Tasks_SortByTitle}"/>
+                        <ComboBoxItem Content="{local:Localize Tasks_SortByStatus}"/>
+                        <ComboBoxItem Content="{local:Localize Tasks_SortByPriority}"/>
+                        <ComboBoxItem Content="{local:Localize Tasks_SortByDueDate}" IsSelected="True"/>
+                        <ComboBoxItem Content="{local:Localize Tasks_SortByCreated}"/>
+                    </ComboBox>
+                    <CheckBox Grid.Column="1" x:Name="ChkSortDescending" Content="{local:Localize Tasks_Descending}" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                </Grid>
+                
+                <!-- Presets -->
+                <TextBlock Text="{local:Localize Tasks_QuickFilters}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <WrapPanel>
+                    <ui:Button Content="{local:Localize Tasks_AllTasks}" Margin="0,0,8,8" Click="BtnPresetAll"/>
+                    <ui:Button Content="{local:Localize Tasks_ActiveOnly}" Margin="0,0,8,8" Click="BtnPresetActive"/>
+                    <ui:Button Content="{local:Localize Tasks_OverdueOnly}" Margin="0,0,8,8" Click="BtnPresetOverdue"/>
+                    <ui:Button Content="{local:Localize Tasks_ArchivedOnly}" Margin="0,0,8,8" Click="BtnPresetArchived"/>
+                </WrapPanel>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Action Buttons -->
+        <Grid Grid.Row="1" Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <ui:Button Grid.Column="1" Content="{local:Localize Common_Apply}" Appearance="Primary" Click="BtnApply" Padding="24,8" Margin="0,0,8,0"/>
+            <ui:Button Grid.Column="2" Content="{local:Localize Common_Cancel}" Click="BtnCancel" Padding="24,8"/>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>
