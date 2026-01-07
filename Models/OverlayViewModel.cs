@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using AIA.Models.AI;
 using AIA.Services;
 using AIA.Services.AI;
+using AIA.Services.Automation;
 using AIA.Plugins.Host.Services;
 using AIA.Plugins.SDK;
 
@@ -56,6 +57,9 @@ namespace AIA.Models
         // AI Orchestration service
         private AIOrchestrationService? _aiOrchestrationService;
 
+        // Automation service
+        private AutomationService? _automationService;
+
         // Plugin UI service
         private HostPluginUIService? _pluginUIService;
 
@@ -75,6 +79,11 @@ namespace AIA.Models
         /// AI Orchestration service instance
         /// </summary>
         public AIOrchestrationService AIOrchestration => _aiOrchestrationService ??= new AIOrchestrationService(() => this);
+
+        /// <summary>
+        /// Automation service instance
+        /// </summary>
+        public AutomationService AutomationService => _automationService ??= new AutomationService(() => this);
 
         /// <summary>
         /// Plugin UI service for accessing plugin tabs and toolbar buttons

@@ -1,0 +1,741 @@
+<Window x:Class="AIA.AutomationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:local="clr-namespace:AIA"
+        xmlns:automation="clr-namespace:AIA.Models.Automation"
+        mc:Ignorable="d"
+        Title="{local:Localize Automation_Title}"
+        Height="800" Width="1100"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="#1E1E1E">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <local:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
+        <local:NullToVisibilityConverter x:Key="NullToVis"/>
+        <local:IntToVisibilityConverter x:Key="IntToVis"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2D2D30" BorderBrush="#3E3E42" BorderThickness="0,0,0,1" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="ArrowRepeatAll20" FontSize="24" Foreground="#0078D4" Margin="0,0,12,0"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{local:Localize Automation_Header}" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="{local:Localize Automation_Description}" Foreground="#999999" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Global Enable Toggle -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{local:Localize Automation_Enabled}" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <CheckBox x:Name="GlobalEnableToggle" IsChecked="{Binding Settings.IsEnabled}" Checked="GlobalEnableToggle_Changed" Unchecked="GlobalEnableToggle_Changed"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content -->
+        <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="8" Background="Transparent">
+            <!-- Automations Tab -->
+            <TabItem Header="{local:Localize Automation_TabAutomations}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="350"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Automations List -->
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Add Automation Button -->
+                        <Border Margin="8" Padding="8" CornerRadius="6" Background="#333337">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{local:Localize Automation_Automations}" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <ui:Button Grid.Column="1" Padding="8,4" Click="BtnAddAutomation">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="12"/>
+                                        <TextBlock Text="{local:Localize Automation_Add}" Foreground="White" FontSize="12" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                </ui:Button>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- Automations ListView -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="8,0,8,8">
+                            <ItemsControl x:Name="AutomationsListControl" ItemsSource="{Binding Automations}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,4" CornerRadius="6" Cursor="Hand"
+                                                MouseLeftButtonUp="AutomationItem_Click" Tag="{Binding}">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#2D2D30"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#3E3E42"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid Margin="12,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- Status Indicator -->
+                                                <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Fill" Value="#666666"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Active">
+                                                                    <Setter Property="Fill" Value="#1EB75F"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Running">
+                                                                    <Setter Property="Fill" Value="#0078D4"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Failed">
+                                                                    <Setter Property="Fill" Value="#FF4444"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Paused">
+                                                                    <Setter Property="Fill" Value="#FFA500"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+                                                
+                                                <!-- Automation Info -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
+                                                        <Border Margin="6,0,0,0" Padding="4,1" CornerRadius="4" Background="#330078D4"
+                                                                Visibility="{Binding IsOneTime, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="One-time" FontSize="9" Foreground="#0078D4"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Foreground="#999999" FontSize="11" Margin="0,2,0,0" TextTrimming="CharacterEllipsis">
+                                                        <Run Text="{Binding StatusText, Mode=OneWay}"/>
+                                                        <Run Text=" | "/>
+                                                        <Run Text="{Binding TotalExecutions}"/>
+                                                        <Run Text=" runs"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                
+                                                <!-- Toggle -->
+                                                <CheckBox Grid.Column="2" IsChecked="{Binding IsActive, Mode=OneWay}" VerticalAlignment="Center"
+                                                          Checked="AutomationToggle_Changed" Unchecked="AutomationToggle_Changed" Tag="{Binding}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                    
+                    <!-- Splitter -->
+                    <GridSplitter Grid.Column="1" Width="4" Background="#3E3E42" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+                    
+                    <!-- Automation Details -->
+                    <Border Grid.Column="2" Margin="8" CornerRadius="8" Background="#2D2D30" BorderBrush="#3E3E42" BorderThickness="1">
+                        <Grid>
+                            <!-- No Automation Selected -->
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                        Visibility="{Binding SelectedAutomation, Converter={StaticResource NullToVis}, ConverterParameter=Inverse}">
+                                <ui:SymbolIcon Symbol="ArrowRepeatAll20" FontSize="48" Foreground="#666666"/>
+                                <TextBlock Text="{local:Localize Automation_SelectAutomation}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                            </StackPanel>
+                            
+                            <!-- Automation Details Form -->
+                            <ScrollViewer Visibility="{Binding SelectedAutomation, Converter={StaticResource NullToVis}}"
+                                          VerticalScrollBarVisibility="Auto" Padding="16">
+                                <StackPanel DataContext="{Binding SelectedAutomation}">
+                                    <!-- Header with actions -->
+                                    <Grid Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBlock Text="{local:Localize Automation_Configuration}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        
+                                        <ui:Button Grid.Column="1" Padding="8,4" Margin="0,0,8,0" Click="BtnRunAutomation" ToolTip="{local:Localize Automation_RunNow}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:SymbolIcon Symbol="Play12" Foreground="#1EB75F" FontSize="12"/>
+                                                <TextBlock Text="{local:Localize Automation_Run}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </ui:Button>
+                                        
+                                        <ui:Button Grid.Column="2" Padding="8,4" Margin="0,0,8,0" Click="BtnDuplicateAutomation">
+                                            <ui:SymbolIcon Symbol="Copy16" Foreground="White" FontSize="12"/>
+                                        </ui:Button>
+                                        
+                                        <ui:Button Grid.Column="3" Padding="8,4" Margin="0,0,8,0" Click="BtnExportAutomation">
+                                            <ui:SymbolIcon Symbol="ArrowExportUp16" Foreground="White" FontSize="12"/>
+                                        </ui:Button>
+                                        
+                                        <ui:Button Grid.Column="4" Padding="8,4" Background="#33FF4444" Click="BtnDeleteAutomation">
+                                            <ui:SymbolIcon Symbol="Delete12" Foreground="#FF4444" FontSize="12"/>
+                                        </ui:Button>
+                                    </Grid>
+                                    
+                                    <!-- Basic Info -->
+                                    <TextBlock Text="{local:Localize Automation_BasicInfo}" Foreground="#0078D4" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                    
+                                    <StackPanel Margin="0,0,0,12">
+                                        <TextBlock Text="{local:Localize Automation_Name}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                                 Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Margin="0,0,0,12">
+                                        <TextBlock Text="{local:Localize Automation_DescriptionLabel}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                                 Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"
+                                                 TextWrapping="Wrap" AcceptsReturn="True" Height="60"/>
+                                    </StackPanel>
+                                    
+                                    <Border Padding="12,10" CornerRadius="6" Background="#3E3E42" Margin="0,0,0,16">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{local:Localize Automation_OneTimeTask}" Foreground="White" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{local:Localize Automation_OneTimeTaskDesc}" Foreground="#999999" FontSize="11"/>
+                                            </StackPanel>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding IsOneTime}"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Trigger Section -->
+                                    <TextBlock Text="{local:Localize Automation_Trigger}" Foreground="#0078D4" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                    
+                                    <Border Padding="12" CornerRadius="6" Background="#3E3E42" Margin="0,0,0,16">
+                                        <StackPanel>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{local:Localize Automation_TriggerType}" Foreground="White" VerticalAlignment="Center"/>
+                                                <ComboBox x:Name="TriggerTypeCombo" Grid.Column="1" Width="180"
+                                                          Background="#2D2D30" Foreground="White" BorderBrush="#555555"
+                                                          SelectionChanged="TriggerTypeCombo_SelectionChanged">
+                                                    <ComboBoxItem Content="Manual"/>
+                                                    <ComboBoxItem Content="Clipboard"/>
+                                                    <ComboBoxItem Content="Hotkey"/>
+                                                    <ComboBoxItem Content="File Change"/>
+                                                    <ComboBoxItem Content="Window Context"/>
+                                                    <ComboBoxItem Content="Schedule"/>
+                                                    <ComboBoxItem Content="Automation Chain"/>
+                                                </ComboBox>
+                                            </Grid>
+                                            
+                                            <!-- Trigger-specific configuration will be loaded dynamically -->
+                                            <ContentPresenter x:Name="TriggerConfigContent"/>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <!-- Agent Section -->
+                                    <TextBlock Text="{local:Localize Automation_Agent}" Foreground="#0078D4" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                    
+                                    <Border Padding="12" CornerRadius="6" Background="#3E3E42" Margin="0,0,0,16">
+                                        <StackPanel DataContext="{Binding Agent}">
+                                            <StackPanel Margin="0,0,0,12">
+                                                <TextBlock Text="{local:Localize Automation_AgentType}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                                <ComboBox SelectedItem="{Binding AgentType}"
+                                                          ItemsSource="{Binding Source={x:Static local:AutomationWindow.AgentTypeValues}}"
+                                                          Background="#2D2D30" Foreground="White" BorderBrush="#555555"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Margin="0,0,0,12">
+                                                <TextBlock Text="{local:Localize Automation_SystemPrompt}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                                <TextBox Text="{Binding SystemPrompt, UpdateSourceTrigger=PropertyChanged}"
+                                                         Background="#2D2D30" Foreground="White" BorderBrush="#555555" Padding="8"
+                                                         TextWrapping="Wrap" AcceptsReturn="True" Height="80"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Margin="0,0,0,12">
+                                                <TextBlock Foreground="#999999" FontSize="11" Margin="0,0,0,4" TextWrapping="Wrap">
+                                                    <Run Text="{local:Localize Automation_UserPromptTemplate}"/>
+                                                    <Run Text=" (Use {{variable_name}} for context variables)" Foreground="#666666"/>
+                                                </TextBlock>
+                                                <TextBox Text="{Binding UserPromptTemplate, UpdateSourceTrigger=PropertyChanged}"
+                                                         Background="#2D2D30" Foreground="White" BorderBrush="#555555" Padding="8"
+                                                         TextWrapping="Wrap" AcceptsReturn="True" Height="100"/>
+                                            </StackPanel>
+                                            
+                                            <Grid Margin="0,0,0,12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <StackPanel Margin="0,0,8,0">
+                                                    <TextBlock Text="{local:Localize Automation_MaxIterations}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                                    <TextBox Text="{Binding MaxIterations, UpdateSourceTrigger=PropertyChanged}"
+                                                             Background="#2D2D30" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                                                </StackPanel>
+                                                
+                                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                    <TextBlock Text="{local:Localize Automation_MaxTotalTokens}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                                    <TextBox Text="{Binding MaxTotalTokens, UpdateSourceTrigger=PropertyChanged}"
+                                                             Background="#2D2D30" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            
+                                            <Border Padding="10,8" CornerRadius="4" Background="#2D2D30">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{local:Localize Automation_EnableToolUse}" Foreground="White"/>
+                                                    <CheckBox Grid.Column="1" IsChecked="{Binding EnableToolUse}"/>
+                                                </Grid>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <!-- Actions Section -->
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{local:Localize Automation_Actions}" Foreground="#0078D4" FontWeight="SemiBold"/>
+                                        <ui:Button Grid.Column="1" Padding="6,2" Click="BtnAddAction">
+                                            <ui:SymbolIcon Symbol="Add12" Foreground="White" FontSize="10"/>
+                                        </ui:Button>
+                                    </Grid>
+                                    
+                                    <ItemsControl ItemsSource="{Binding Actions}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Margin="0,0,0,8" Padding="12,10" CornerRadius="6" Background="#3E3E42">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        
+                                                        <ui:SymbolIcon Symbol="{Binding IconSymbol}" Foreground="#0078D4" FontSize="16" Margin="0,0,10,0"/>
+                                                        
+                                                        <StackPanel Grid.Column="1">
+                                                            <TextBlock Text="{Binding ActionType}" Foreground="White" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{Binding Name}" Foreground="#999999" FontSize="11"/>
+                                                        </StackPanel>
+                                                        
+                                                        <CheckBox Grid.Column="2" IsChecked="{Binding IsEnabled}" Margin="0,0,8,0"/>
+                                                        
+                                                        <ui:Button Grid.Column="3" Padding="4" Background="Transparent" Click="BtnRemoveAction" Tag="{Binding}">
+                                                            <ui:SymbolIcon Symbol="Delete12" Foreground="#FF4444" FontSize="10"/>
+                                                        </ui:Button>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    
+                                    <!-- Permissions Section -->
+                                    <TextBlock Text="{local:Localize Automation_Permissions}" Foreground="#0078D4" FontWeight="SemiBold" Margin="0,16,0,8"/>
+                                    
+                                    <Border Padding="12" CornerRadius="6" Background="#3E3E42" Margin="0,0,0,16">
+                                        <StackPanel DataContext="{Binding Permissions}">
+                                            <CheckBox Content="{local:Localize Automation_CanCreateTasks}" IsChecked="{Binding CanCreateTasks}" Foreground="White" Margin="0,0,0,6"/>
+                                            <CheckBox Content="{local:Localize Automation_CanCreateReminders}" IsChecked="{Binding CanCreateReminders}" Foreground="White" Margin="0,0,0,6"/>
+                                            <CheckBox Content="{local:Localize Automation_CanSaveToDataBank}" IsChecked="{Binding CanSaveToDataBank}" Foreground="White" Margin="0,0,0,6"/>
+                                            <CheckBox Content="{local:Localize Automation_CanShowNotifications}" IsChecked="{Binding CanShowNotifications}" Foreground="White" Margin="0,0,0,6"/>
+                                            <CheckBox Content="{local:Localize Automation_CanAccessClipboard}" IsChecked="{Binding CanAccessClipboard}" Foreground="White" Margin="0,0,0,6"/>
+                                            <CheckBox Content="{local:Localize Automation_CanAccessFileSystem}" IsChecked="{Binding CanAccessFileSystem}" Foreground="White" Margin="0,0,0,6"/>
+                                            <CheckBox Content="{local:Localize Automation_CanRunSubAutomations}" IsChecked="{Binding CanRunSubAutomations}" Foreground="White"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+            
+            <!-- Running Tab -->
+            <TabItem Header="{local:Localize Automation_TabRunning}">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <TextBlock Text="{local:Localize Automation_RunningExecutions}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                        <Border Margin="12,0,0,0" Padding="8,4" CornerRadius="12" Background="#330078D4">
+                            <TextBlock x:Name="RunningCountText" Text="0" Foreground="#0078D4" FontWeight="SemiBold"/>
+                        </Border>
+                    </StackPanel>
+                    
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="RunningExecutionsControl" ItemsSource="{Binding RunningExecutions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,8" Padding="16" CornerRadius="8" Background="#2D2D30">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:SymbolIcon Symbol="ArrowRepeatAll20" Foreground="#0078D4" FontSize="16" Margin="0,0,10,0">
+                                                    <ui:SymbolIcon.RenderTransform>
+                                                        <RotateTransform x:Name="SpinTransform" CenterX="8" CenterY="8"/>
+                                                    </ui:SymbolIcon.RenderTransform>
+                                                </ui:SymbolIcon>
+                                                <TextBlock Text="{Binding AutomationName}" Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                <ui:Button Padding="8,4" Margin="0,0,8,0" Click="BtnPauseExecution" Tag="{Binding}">
+                                                    <ui:SymbolIcon Symbol="Pause12" Foreground="White" FontSize="12"/>
+                                                </ui:Button>
+                                                <ui:Button Padding="8,4" Background="#33FF4444" Click="BtnCancelExecution" Tag="{Binding}">
+                                                    <ui:SymbolIcon Symbol="Dismiss12" Foreground="#FF4444" FontSize="12"/>
+                                                </ui:Button>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
+                                                <TextBlock Foreground="#999999" FontSize="12">
+                                                    <Run Text="Iteration"/>
+                                                    <Run Text="{Binding CurrentIteration, Mode=OneWay}"/>
+                                                    <Run Text=" | "/>
+                                                    <Run Text="{Binding TotalTokensUsed, Mode=OneWay}"/>
+                                                    <Run Text=" tokens"/>
+                                                    <Run Text=" | "/>
+                                                    <Run Text="{Binding DurationText, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            
+                                            <!-- Live Trace Log -->
+                                            <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0" Padding="10" 
+                                                    CornerRadius="4" Background="#1E1E1E" MaxHeight="150">
+                                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                                    <ItemsControl ItemsSource="{Binding TraceLog}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock FontSize="11" Margin="0,2" TextWrapping="Wrap">
+                                                                    <Run Text="{Binding Timestamp, StringFormat='[{0:HH:mm:ss}]'}" Foreground="#666666"/>
+                                                                    <Run Text="{Binding Message}" Foreground="{Binding LevelColor}"/>
+                                                                </TextBlock>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </ScrollViewer>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    
+                    <!-- Empty State -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1"
+                                Visibility="{Binding RunningExecutions.Count, Converter={StaticResource IntToVis}, ConverterParameter=Inverse}">
+                        <ui:SymbolIcon Symbol="CheckmarkCircle20" FontSize="48" Foreground="#666666"/>
+                        <TextBlock Text="{local:Localize Automation_NoRunningExecutions}" Foreground="#666666" Margin="0,12,0,0" FontSize="14"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            
+            <!-- History Tab -->
+            <TabItem Header="{local:Localize Automation_TabHistory}">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Text="{local:Localize Automation_ExecutionHistory}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                        
+                        <ui:Button Grid.Column="1" Padding="8,4" Click="BtnClearHistory">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Delete12" Foreground="White" FontSize="12"/>
+                                <TextBlock Text="{local:Localize Automation_ClearHistory}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                            </StackPanel>
+                        </ui:Button>
+                    </Grid>
+                    
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="HistoryListControl" ItemsSource="{Binding ExecutionHistory}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,8" Padding="16" CornerRadius="8" Cursor="Hand"
+                                            MouseLeftButtonUp="HistoryItem_Click" Tag="{Binding}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#2D2D30"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#3E3E42"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- Status Icon -->
+                                            <ui:SymbolIcon FontSize="20" Margin="0,0,12,0">
+                                                <ui:SymbolIcon.Style>
+                                                    <Style TargetType="ui:SymbolIcon">
+                                                        <Setter Property="Symbol" Value="Circle20"/>
+                                                        <Setter Property="Foreground" Value="#666666"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSuccess}" Value="True">
+                                                                <Setter Property="Symbol" Value="CheckmarkCircle20"/>
+                                                                <Setter Property="Foreground" Value="#1EB75F"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Failed">
+                                                                <Setter Property="Symbol" Value="ErrorCircle20"/>
+                                                                <Setter Property="Foreground" Value="#FF4444"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Cancelled">
+                                                                <Setter Property="Symbol" Value="DismissCircle20"/>
+                                                                <Setter Property="Foreground" Value="#999999"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ui:SymbolIcon.Style>
+                                            </ui:SymbolIcon>
+                                            
+                                            <!-- Info -->
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding AutomationName}" Foreground="White" FontWeight="SemiBold"/>
+                                                <TextBlock Foreground="#999999" FontSize="11" Margin="0,2,0,0">
+                                                    <Run Text="{Binding StartedAt, StringFormat='{}{0:g}', Mode=OneWay}"/>
+                                                    <Run Text=" | "/>
+                                                    <Run Text="{Binding DurationText, Mode=OneWay}"/>
+                                                    <Run Text=" | "/>
+                                                    <Run Text="{Binding TotalTokensUsed, Mode=OneWay}"/>
+                                                    <Run Text=" tokens"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            
+                                            <!-- Trigger -->
+                                            <TextBlock Grid.Column="2" Text="{Binding TriggerDescription}" Foreground="#666666" FontSize="11" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            
+            <!-- Settings Tab -->
+            <TabItem Header="{local:Localize Automation_TabSettings}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="600" HorizontalAlignment="Left">
+                        <!-- Execution Settings -->
+                        <TextBlock Text="{local:Localize Automation_ExecutionSettings}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                        
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Margin="0,0,8,0">
+                                <TextBlock Text="{local:Localize Automation_MaxConcurrentAutomations}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Settings.MaxConcurrentAutomations, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="{local:Localize Automation_MaxConcurrentAgents}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Settings.MaxConcurrentAgents, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Margin="0,0,8,0">
+                                <TextBlock Text="{local:Localize Automation_DefaultMaxIterations}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Settings.DefaultMaxIterations, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="{local:Localize Automation_DefaultMaxTotalTokens}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Settings.DefaultMaxTotalTokens, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <!-- Behavior Settings -->
+                        <TextBlock Text="{local:Localize Automation_BehaviorSettings}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{local:Localize Automation_PauseOnOverlay}" Foreground="White"/>
+                                    <TextBlock Text="{local:Localize Automation_PauseOnOverlayDesc}" Foreground="#999999" FontSize="11"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" IsChecked="{Binding Settings.PauseOnOverlayVisible}"/>
+                            </Grid>
+                        </Border>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{local:Localize Automation_ShowExecutionNotifications}" Foreground="White"/>
+                                <CheckBox Grid.Column="1" IsChecked="{Binding Settings.ShowExecutionNotifications}"/>
+                            </Grid>
+                        </Border>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{local:Localize Automation_EnableLiveMonitoring}" Foreground="White"/>
+                                <CheckBox Grid.Column="1" IsChecked="{Binding Settings.EnableLiveMonitoring}"/>
+                            </Grid>
+                        </Border>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{local:Localize Automation_LogDebugTraces}" Foreground="White"/>
+                                <CheckBox Grid.Column="1" IsChecked="{Binding Settings.LogDebugTraces}"/>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- History Settings -->
+                        <TextBlock Text="{local:Localize Automation_HistorySettings}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Margin="0,0,8,0">
+                                <TextBlock Text="{local:Localize Automation_HistoryRetentionDays}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Settings.HistoryRetentionDays, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="{local:Localize Automation_MaxHistoryEntries}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Settings.MaxHistoryEntries, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <!-- Import/Export -->
+                        <TextBlock Text="{local:Localize Automation_ImportExport}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <ui:Button Padding="12,8" Margin="0,0,8,0" Click="BtnImportAutomation">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="ArrowImport16" Foreground="White" FontSize="14"/>
+                                    <TextBlock Text="{local:Localize Automation_ImportAutomation}" Foreground="White" Margin="6,0,0,0"/>
+                                </StackPanel>
+                            </ui:Button>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#2D2D30" BorderBrush="#3E3E42" BorderThickness="0,1,0,0" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock x:Name="StatusText" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <ui:Button Padding="16,8" Margin="0,0,8,0" Click="BtnSave">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Save16" Foreground="White" FontSize="14"/>
+                            <TextBlock Text="{local:Localize Automation_Save}" Foreground="White" FontWeight="SemiBold" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </ui:Button>
+                    <ui:Button Padding="16,8" Click="BtnClose">
+                        <TextBlock Text="{local:Localize Automation_Close}" Foreground="White"/>
+                    </ui:Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

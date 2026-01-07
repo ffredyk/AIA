@@ -14,7 +14,9 @@ using System.Windows.Interop;
 using System.Linq;
 using AIA.Models;
 using AIA.Models.AI;
+using AIA.Services;
 using AIA.Services.AI;
+using AIA.Services.Automation;
 using AIA.Plugins.Host.Services;
 using AIA.Plugins.SDK;
 
@@ -38,6 +40,9 @@ namespace AIA
         // Track conversation history for AI
         private readonly List<AIMessage> _conversationHistory = new();
 
+        // Automation service
+        private AutomationService? _automationService;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -55,6 +60,7 @@ namespace AIA
             Toolbar.NewReminderClicked += OnNewReminderClicked;
             Toolbar.SettingsClicked += OnSettingsClicked;
             Toolbar.OrchestrationClicked += OnOrchestrationClicked;
+            Toolbar.AutomationClicked += OnAutomationClicked;
             Toolbar.ShutdownClicked += OnShutdownClicked;
             Toolbar.CloseClicked += OnCloseClicked;
 
@@ -63,6 +69,10 @@ namespace AIA
 
             // Subscribe to reminder notifications
             Models.OverlayViewModel.Singleton.ReminderNotificationTriggered += OnReminderNotificationTriggered;
+
+            // Subscribe to notification service events
+            NotificationService.Instance.ToastRequested += OnNotificationServiceToastRequested;
+            NotificationService.Instance.RichNotificationRequested += OnNotificationServiceRichNotificationRequested;
 
             // Subscribe to plugin UI events when service is available
             var viewModel = Models.OverlayViewModel.Singleton;
@@ -87,6 +97,71 @@ namespace AIA
             
             // Handle when window becomes visible
             IsVisibleChanged += MainWindow_IsVisibleChanged;
+
+            // Get automation service from ViewModel and wire up events
+            WireUpAutomationService();
+        }
+
+        private void WireUpAutomationService()
+        {
+            _automationService = Models.OverlayViewModel.Singleton.AutomationService;
+            
+            if (_automationService != null)
+            {
+                // Wire up automation events
+                _automationService.ExecutionStarted += OnAutomationExecutionStarted;
+                _automationService.ExecutionCompleted += OnAutomationExecutionCompleted;
+                _automationService.ConfirmationRequired += OnAutomationConfirmationRequired;
+            }
+        }
+
+        private void OnAutomationExecutionStarted(object? sender, Models.Automation.AutomationExecution execution)
+        {
+            if (_automationService?.Settings.ShowExecutionNotifications == true)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    ShowToast($"Automation started: {execution.AutomationName}", WpfColor.FromArgb(220, 0, 120, 212));
+                });
+            }
+        }
+
+        private void OnAutomationExecutionCompleted(object? sender, Models.Automation.AutomationExecution execution)
+        {
+            if (_automationService?.Settings.ShowExecutionNotifications == true)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    var color = execution.IsSuccess
+                        ? WpfColor.FromArgb(220, 30, 183, 95)
+                        : WpfColor.FromArgb(220, 255, 68, 68);
+                    var message = execution.IsSuccess
+                        ? $"Automation completed: {execution.AutomationName}"
+                        : $"Automation failed: {execution.AutomationName}";
+                    ShowToast(message, color);
+                });
+            }
+        }
+
+        private void OnAutomationConfirmationRequired(object? sender, ConfirmationRequestEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var result = System.Windows.MessageBox.Show(
+                    e.Message,
+                    "Automation Confirmation",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    e.Confirm();
+                }
+                else
+                {
+                    e.Deny();
+                }
+            });
         }
 
         private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -98,6 +173,10 @@ namespace AIA
                 {
                     WireUpPluginUIEvents(viewModel.PluginUIService);
                 }
+            }
+            else if (e.PropertyName == nameof(OverlayViewModel.AutomationService))
+            {
+                WireUpAutomationService();
             }
         }
 
@@ -265,6 +344,43 @@ namespace AIA
             ShowToast(e.Message, color);
         }
 
+        private void OnNotificationServiceToastRequested(object? sender, NotificationEventArgs e)
+        {
+            var color = e.Type switch
+            {
+                NotificationType.Success => WpfColor.FromArgb(220, 30, 183, 95),
+                NotificationType.Warning => WpfColor.FromArgb(220, 255, 165, 0),
+                NotificationType.Error => WpfColor.FromArgb(220, 255, 68, 68),
+                _ => WpfColor.FromArgb(220, 0, 120, 212)
+            };
+            ShowToast(e.Message, color);
+        }
+
+        private void OnNotificationServiceRichNotificationRequested(object? sender, NotificationEventArgs e)
+        {
+            // For rich notifications, create a notification similar to reminder notifications
+            // but with automation styling
+            ShowAutomationNotification(e);
+        }
+
+        private void ShowAutomationNotification(NotificationEventArgs e)
+        {
+            // Use the same toast system for now, but with title
+            var color = e.Type switch
+            {
+                NotificationType.Success => WpfColor.FromArgb(220, 30, 183, 95),
+                NotificationType.Warning => WpfColor.FromArgb(220, 255, 165, 0),
+                NotificationType.Error => WpfColor.FromArgb(220, 255, 68, 68),
+                _ => WpfColor.FromArgb(220, 0, 120, 212)
+            };
+
+            var message = string.IsNullOrEmpty(e.Title) 
+                ? e.Message 
+                : $"{e.Title}: {e.Message}";
+            
+            ShowToast(message, color);
+        }
+
         #region Toolbar Events
 
         private void OnNewTaskClicked(object? sender, EventArgs e)
@@ -300,6 +416,16 @@ namespace AIA
             var orchestrationWindow = new OrchestrationWindow(viewModel.AIOrchestration);
             orchestrationWindow.Owner = this;
             orchestrationWindow.ShowDialog();
+        }
+
+        private void OnAutomationClicked(object? sender, EventArgs e)
+        {
+            var viewModel = DataContext as OverlayViewModel;
+            if (viewModel == null) return;
+
+            var automationWindow = new AutomationWindow(viewModel.AutomationService);
+            automationWindow.Owner = this;
+            automationWindow.ShowDialog();
         }
 
         private void OnShutdownClicked(object? sender, EventArgs e)

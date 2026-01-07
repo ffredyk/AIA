@@ -31,6 +31,11 @@ namespace AIA.Views
         public event EventHandler? OrchestrationClicked;
 
         /// <summary>
+        /// Event raised when Automation button is clicked
+        /// </summary>
+        public event EventHandler? AutomationClicked;
+
+        /// <summary>
         /// Event raised when Shutdown button is clicked
         /// </summary>
         public event EventHandler? ShutdownClicked;
@@ -58,6 +63,11 @@ namespace AIA.Views
         private void BtnOrchestration(object sender, RoutedEventArgs e)
         {
             OrchestrationClicked?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void BtnAutomation(object sender, RoutedEventArgs e)
+        {
+            AutomationClicked?.Invoke(this, EventArgs.Empty);
         }
 
         private void BtnShutdown(object sender, RoutedEventArgs e)

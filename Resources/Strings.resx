@@ -515,4 +515,90 @@
 	<data name="Common_Apply" xml:space="preserve"><value>Apply</value></data>
 	<data name="Common_OK" xml:space="preserve"><value>OK</value></data>
 	<data name="Common_Create" xml:space="preserve"><value>Create</value></data>
+
+	<!-- Automation Window -->
+	<data name="Automation_Title" xml:space="preserve"><value>Automation Settings</value></data>
+	<data name="Automation_Header" xml:space="preserve"><value>Automation</value></data>
+	<data name="Automation_Description" xml:space="preserve"><value>Configure event-triggered automations and background agents</value></data>
+	<data name="Automation_Enabled" xml:space="preserve"><value>Enabled</value></data>
+	<data name="Automation_TabAutomations" xml:space="preserve"><value>Automations</value></data>
+	<data name="Automation_TabRunning" xml:space="preserve"><value>Running</value></data>
+	<data name="Automation_TabHistory" xml:space="preserve"><value>History</value></data>
+	<data name="Automation_TabSettings" xml:space="preserve"><value>Settings</value></data>
+	<data name="Automation_Automations" xml:space="preserve"><value>Automations</value></data>
+	<data name="Automation_Add" xml:space="preserve"><value>Add</value></data>
+	<data name="Automation_SelectAutomation" xml:space="preserve"><value>Select an automation to configure</value></data>
+	<data name="Automation_Configuration" xml:space="preserve"><value>Configuration</value></data>
+	<data name="Automation_RunNow" xml:space="preserve"><value>Run this automation now</value></data>
+	<data name="Automation_Run" xml:space="preserve"><value>Run</value></data>
+	<data name="Automation_BasicInfo" xml:space="preserve"><value>Basic Information</value></data>
+	<data name="Automation_Name" xml:space="preserve"><value>Name</value></data>
+	<data name="Automation_DescriptionLabel" xml:space="preserve"><value>Description</value></data>
+	<data name="Automation_OneTimeTask" xml:space="preserve"><value>One-time Background Task</value></data>
+	<data name="Automation_OneTimeTaskDesc" xml:space="preserve"><value>Run as a persistent agent until goal is achieved</value></data>
+	<data name="Automation_Trigger" xml:space="preserve"><value>Trigger</value></data>
+	<data name="Automation_TriggerType" xml:space="preserve"><value>Trigger Type</value></data>
+	<data name="Automation_Agent" xml:space="preserve"><value>Agent</value></data>
+	<data name="Automation_AgentType" xml:space="preserve"><value>Agent Type</value></data>
+	<data name="Automation_SystemPrompt" xml:space="preserve"><value>System Prompt</value></data>
+	<data name="Automation_UserPromptTemplate" xml:space="preserve"><value>User Prompt Template</value></data>
+	<data name="Automation_MaxIterations" xml:space="preserve"><value>Max Iterations</value></data>
+	<data name="Automation_MaxTotalTokens" xml:space="preserve"><value>Max Total Tokens</value></data>
+	<data name="Automation_EnableToolUse" xml:space="preserve"><value>Enable Tool Use</value></data>
+	<data name="Automation_Actions" xml:space="preserve"><value>Actions</value></data>
+	<data name="Automation_Permissions" xml:space="preserve"><value>Permissions</value></data>
+	<data name="Automation_CanCreateTasks" xml:space="preserve"><value>Can create tasks</value></data>
+	<data name="Automation_CanCreateReminders" xml:space="preserve"><value>Can create reminders</value></data>
+	<data name="Automation_CanSaveToDataBank" xml:space="preserve"><value>Can save to data bank</value></data>
+	<data name="Automation_CanShowNotifications" xml:space="preserve"><value>Can show notifications</value></data>
+	<data name="Automation_CanAccessClipboard" xml:space="preserve"><value>Can access clipboard</value></data>
+	<data name="Automation_CanAccessFileSystem" xml:space="preserve"><value>Can access file system</value></data>
+	<data name="Automation_CanRunSubAutomations" xml:space="preserve"><value>Can run sub-automations</value></data>
+	<data name="Automation_RunningExecutions" xml:space="preserve"><value>Running Executions</value></data>
+	<data name="Automation_NoRunningExecutions" xml:space="preserve"><value>No automations currently running</value></data>
+	<data name="Automation_ExecutionHistory" xml:space="preserve"><value>Execution History</value></data>
+	<data name="Automation_ClearHistory" xml:space="preserve"><value>Clear History</value></data>
+	<data name="Automation_ExecutionSettings" xml:space="preserve"><value>Execution Settings</value></data>
+	<data name="Automation_MaxConcurrentAutomations" xml:space="preserve"><value>Max Concurrent Automations</value></data>
+	<data name="Automation_MaxConcurrentAgents" xml:space="preserve"><value>Max Concurrent Agents</value></data>
+	<data name="Automation_DefaultMaxIterations" xml:space="preserve"><value>Default Max Iterations</value></data>
+	<data name="Automation_DefaultMaxTotalTokens" xml:space="preserve"><value>Default Max Total Tokens</value></data>
+	<data name="Automation_BehaviorSettings" xml:space="preserve"><value>Behavior Settings</value></data>
+	<data name="Automation_PauseOnOverlay" xml:space="preserve"><value>Pause triggers when overlay is visible</value></data>
+	<data name="Automation_PauseOnOverlayDesc" xml:space="preserve"><value>Temporarily pause trigger monitoring when the overlay is shown</value></data>
+	<data name="Automation_ShowExecutionNotifications" xml:space="preserve"><value>Show execution notifications</value></data>
+	<data name="Automation_EnableLiveMonitoring" xml:space="preserve"><value>Enable live monitoring</value></data>
+	<data name="Automation_LogDebugTraces" xml:space="preserve"><value>Log debug traces</value></data>
+	<data name="Automation_HistorySettings" xml:space="preserve"><value>History Settings</value></data>
+	<data name="Automation_HistoryRetentionDays" xml:space="preserve"><value>History Retention (days)</value></data>
+	<data name="Automation_MaxHistoryEntries" xml:space="preserve"><value>Max History Entries</value></data>
+	<data name="Automation_ImportExport" xml:space="preserve"><value>Import/Export</value></data>
+	<data name="Automation_ImportAutomation" xml:space="preserve"><value>Import Automation</value></data>
+	<data name="Automation_Save" xml:space="preserve"><value>Save</value></data>
+	<data name="Automation_Close" xml:space="preserve"><value>Close</value></data>
+
+	<!-- Automation Trigger Configuration -->
+	<data name="Automation_Trigger_ContentType" xml:space="preserve"><value>Content Type</value></data>
+	<data name="Automation_Trigger_TextFilter" xml:space="preserve"><value>Text Filter (keywords or regex)</value></data>
+	<data name="Automation_Trigger_UseRegex" xml:space="preserve"><value>Use regular expressions</value></data>
+	<data name="Automation_Trigger_Debounce" xml:space="preserve"><value>Debounce</value></data>
+	<data name="Automation_Trigger_Hotkey" xml:space="preserve"><value>Hotkey Combination</value></data>
+	<data name="Automation_Trigger_HotkeyHelp" xml:space="preserve"><value>Click the box and press your desired key combination (e.g., Ctrl+Shift+A)</value></data>
+	<data name="Automation_Trigger_WatchPath" xml:space="preserve"><value>Watch Path</value></data>
+	<data name="Automation_Trigger_FileFilter" xml:space="preserve"><value>File Filter (e.g., *.txt, *.json)</value></data>
+	<data name="Automation_Trigger_IncludeSubdirs" xml:space="preserve"><value>Include subdirectories</value></data>
+	<data name="Automation_Trigger_ChangeTypes" xml:space="preserve"><value>Trigger on Changes</value></data>
+	<data name="Automation_Trigger_WindowTitle" xml:space="preserve"><value>Window Title Filter</value></data>
+	<data name="Automation_Trigger_ProcessName" xml:space="preserve"><value>Process Name Filter</value></data>
+	<data name="Automation_Trigger_TriggerOnMatch" xml:space="preserve"><value>Trigger when filter matches (uncheck to trigger when NOT matching)</value></data>
+	<data name="Automation_Trigger_ScheduledTime" xml:space="preserve"><value>Scheduled Date and Time</value></data>
+	<data name="Automation_Trigger_Recurrence" xml:space="preserve"><value>Recurrence</value></data>
+	<data name="Automation_Trigger_RepeatEvery" xml:space="preserve"><value>Repeat every</value></data>
+	<data name="Automation_Trigger_SourceAutomation" xml:space="preserve"><value>Source Automation</value></data>
+	<data name="Automation_Trigger_ChainHelp" xml:space="preserve"><value>This automation will trigger when the selected source automation completes.</value></data>
+	<data name="Automation_Trigger_RequireSuccess" xml:space="preserve"><value>Only trigger if source automation succeeds</value></data>
+	<data name="Automation_Trigger_Plugin" xml:space="preserve"><value>Plugin</value></data>
+	<data name="Automation_Trigger_PluginTrigger" xml:space="preserve"><value>Plugin Trigger</value></data>
+	<data name="Automation_Trigger_NoPluginTriggers" xml:space="preserve"><value>No plugins with automation triggers are installed.</value></data>
+
 </root>

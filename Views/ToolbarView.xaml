@@ -54,7 +54,7 @@
                         <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_Orchestration}"/>
                     </StackPanel>
                 </ui:Button>
-                <ui:Button Margin="5,0,0,0">
+                <ui:Button Margin="5,0,0,0" Click="BtnAutomation">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="ArrowRepeatAll20" Foreground="White"/>
                         <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold" Text="{local:Localize Toolbar_Automation}"/>

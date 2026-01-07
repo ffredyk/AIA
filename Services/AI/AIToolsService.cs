@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using AIA.Models;
 using AIA.Models.AI;
+using AIA.Models.Automation;
+using AIA.Services.Automation;
 using TaskStatus = AIA.Models.TaskStatus;
 
 namespace AIA.Services.AI
@@ -17,6 +20,9 @@ namespace AIA.Services.AI
         private readonly Dictionary<string, AITool> _tools = new();
         private readonly Func<OverlayViewModel> _getViewModel;
 
+        // Current automation context (set during automation execution)
+        private AutomationContext? _currentAutomationContext;
+
         public AIToolsService(Func<OverlayViewModel> getViewModel)
         {
             _getViewModel = getViewModel;
@@ -26,6 +32,33 @@ namespace AIA.Services.AI
         public IEnumerable<AITool> GetAllTools() => _tools.Values;
 
         public AITool? GetTool(string name) => _tools.TryGetValue(name, out var tool) ? tool : null;
+
+        /// <summary>
+        /// Sets the current automation context for variable resolution
+        /// </summary>
+        public void SetAutomationContext(AutomationContext? context)
+        {
+            _currentAutomationContext = context;
+        }
+
+        /// <summary>
+        /// Registers a custom tool (e.g., from a plugin)
+        /// </summary>
+        public void RegisterCustomTool(AITool tool)
+        {
+            if (string.IsNullOrEmpty(tool.Name))
+                throw new ArgumentException("Tool name is required", nameof(tool));
+            
+            _tools[tool.Name] = tool;
+        }
+
+        /// <summary>
+        /// Unregisters a custom tool
+        /// </summary>
+        public void UnregisterCustomTool(string name)
+        {
+            _tools.Remove(name);
+        }
 
         public string ExecuteTool(string name, Dictionary<string, object> arguments)
         {
@@ -267,6 +300,123 @@ namespace AIA.Services.AI
                 Description = "Get a summary of the user's current tasks, reminders, and data",
                 Parameters = new Dictionary<string, AIToolParameter>(),
                 Handler = GetAppSummaryHandler
+            });
+
+            // === NEW AUTOMATION TOOLS ===
+
+            // Notification Tools
+            RegisterTool(new AITool
+            {
+                Name = "show_notification",
+                Description = "Show a notification to the user. Use for important messages, alerts, or status updates.",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["title"] = new AIToolParameter { Type = "string", Description = "Notification title", Required = false },
+                    ["message"] = new AIToolParameter { Type = "string", Description = "Notification message", Required = true },
+                    ["type"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "Notification type for styling",
+                        Required = false,
+                        Enum = new[] { "info", "success", "warning", "error" }
+                    },
+                    ["duration"] = new AIToolParameter { Type = "integer", Description = "Duration in seconds (default 5)", Required = false }
+                },
+                Handler = ShowNotificationHandler
+            });
+
+            // Clipboard Tools
+            RegisterTool(new AITool
+            {
+                Name = "copy_to_clipboard",
+                Description = "Copy text content to the system clipboard",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["content"] = new AIToolParameter { Type = "string", Description = "Text content to copy to clipboard", Required = true }
+                },
+                Handler = CopyToClipboardHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "get_clipboard_text",
+                Description = "Get the current text content from the system clipboard",
+                Parameters = new Dictionary<string, AIToolParameter>(),
+                Handler = GetClipboardTextHandler
+            });
+
+            // File Tools
+            RegisterTool(new AITool
+            {
+                Name = "save_to_file",
+                Description = "Save text content to a file",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["content"] = new AIToolParameter { Type = "string", Description = "Content to save", Required = true },
+                    ["filename"] = new AIToolParameter { Type = "string", Description = "File name (saved to Documents folder if no path specified)", Required = true },
+                    ["folder"] = new AIToolParameter { Type = "string", Description = "Optional folder path (defaults to Documents)", Required = false },
+                    ["append"] = new AIToolParameter { Type = "boolean", Description = "Append to existing file instead of overwriting", Required = false }
+                },
+                Handler = SaveToFileHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "read_file",
+                Description = "Read text content from a file",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["filepath"] = new AIToolParameter { Type = "string", Description = "Full path to the file", Required = true }
+                },
+                Handler = ReadFileHandler
+            });
+
+            // Automation Tools
+            RegisterTool(new AITool
+            {
+                Name = "list_automations",
+                Description = "Get a list of available automations",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["include_disabled"] = new AIToolParameter { Type = "boolean", Description = "Include disabled automations", Required = false }
+                },
+                Handler = ListAutomationsHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "trigger_automation",
+                Description = "Trigger an automation to run",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["name"] = new AIToolParameter { Type = "string", Description = "Name of the automation to trigger", Required = false },
+                    ["id"] = new AIToolParameter { Type = "string", Description = "ID of the automation to trigger", Required = false }
+                },
+                Handler = TriggerAutomationHandler
+            });
+
+            // Context Variables Tool (for automation context)
+            RegisterTool(new AITool
+            {
+                Name = "get_context_variable",
+                Description = "Get a variable from the current automation context",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["name"] = new AIToolParameter { Type = "string", Description = "Variable name", Required = true }
+                },
+                Handler = GetContextVariableHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "set_context_variable",
+                Description = "Set a variable in the current automation context",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["name"] = new AIToolParameter { Type = "string", Description = "Variable name", Required = true },
+                    ["value"] = new AIToolParameter { Type = "string", Description = "Variable value", Required = true }
+                },
+                Handler = SetContextVariableHandler
             });
         }
 
@@ -740,6 +890,312 @@ namespace AIA.Services.AI
                     current = vm.CurrentDataAssets.Count
                 }
             });
+        }
+
+        #endregion
+
+        #region Notification Handlers
+
+        private string ShowNotificationHandler(Dictionary<string, object> args)
+        {
+            if (!TryGetArg<string>(args, "message", out var message) || string.IsNullOrWhiteSpace(message))
+            {
+                return JsonSerializer.Serialize(new { error = "Message is required" });
+            }
+
+            var title = "";
+            TryGetArg<string>(args, "title", out title);
+
+            var typeStr = "info";
+            TryGetArg<string>(args, "type", out typeStr);
+
+            var duration = 5;
+            TryGetArg<int>(args, "duration", out duration);
+            if (duration <= 0) duration = 5;
+
+            var notificationType = typeStr?.ToLowerInvariant() switch
+            {
+                "success" => NotificationType.Success,
+                "warning" => NotificationType.Warning,
+                "error" => NotificationType.Error,
+                _ => NotificationType.Info
+            };
+
+            if (!string.IsNullOrEmpty(title))
+            {
+                NotificationService.Instance.ShowRichNotification(title, message, notificationType, duration);
+            }
+            else
+            {
+                NotificationService.Instance.ShowToast(message, notificationType);
+            }
+
+            return JsonSerializer.Serialize(new { success = true, message = "Notification shown" });
+        }
+
+        #endregion
+
+        #region Clipboard Handlers
+
+        private string CopyToClipboardHandler(Dictionary<string, object> args)
+        {
+            if (!TryGetArg<string>(args, "content", out var content))
+            {
+                return JsonSerializer.Serialize(new { error = "Content is required" });
+            }
+
+            try
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.Clipboard.SetText(content);
+                });
+
+                return JsonSerializer.Serialize(new { success = true, message = "Content copied to clipboard", length = content.Length });
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new { error = $"Failed to copy to clipboard: {ex.Message}" });
+            }
+        }
+
+        private string GetClipboardTextHandler(Dictionary<string, object> args)
+        {
+            try
+            {
+                string? text = null;
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (System.Windows.Clipboard.ContainsText())
+                    {
+                        text = System.Windows.Clipboard.GetText();
+                    }
+                });
+
+                if (text == null)
+                {
+                    return JsonSerializer.Serialize(new { success = true, hasText = false, content = "" });
+                }
+
+                return JsonSerializer.Serialize(new { success = true, hasText = true, content = text, length = text.Length });
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new { error = $"Failed to read clipboard: {ex.Message}" });
+            }
+        }
+
+        #endregion
+
+        #region File Handlers
+
+        private string SaveToFileHandler(Dictionary<string, object> args)
+        {
+            if (!TryGetArg<string>(args, "content", out var content))
+            {
+                return JsonSerializer.Serialize(new { error = "Content is required" });
+            }
+
+            if (!TryGetArg<string>(args, "filename", out var filename) || string.IsNullOrWhiteSpace(filename))
+            {
+                return JsonSerializer.Serialize(new { error = "Filename is required" });
+            }
+
+            try
+            {
+                string folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                if (TryGetArg<string>(args, "folder", out var customFolder) && !string.IsNullOrWhiteSpace(customFolder))
+                {
+                    folder = customFolder;
+                }
+
+                // Ensure folder exists
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                var fullPath = Path.Combine(folder, filename);
+
+                var append = false;
+                TryGetArg<bool>(args, "append", out append);
+
+                if (append && File.Exists(fullPath))
+                {
+                    File.AppendAllText(fullPath, Environment.NewLine + content);
+                }
+                else
+                {
+                    File.WriteAllText(fullPath, content);
+                }
+
+                // Store in context if available
+                _currentAutomationContext?.SetVariable("saved_file_path", fullPath);
+
+                return JsonSerializer.Serialize(new { success = true, filePath = fullPath, message = $"Content saved to {fullPath}" });
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new { error = $"Failed to save file: {ex.Message}" });
+            }
+        }
+
+        private string ReadFileHandler(Dictionary<string, object> args)
+        {
+            if (!TryGetArg<string>(args, "filepath", out var filepath) || string.IsNullOrWhiteSpace(filepath))
+            {
+                return JsonSerializer.Serialize(new { error = "Filepath is required" });
+            }
+
+            try
+            {
+                if (!File.Exists(filepath))
+                {
+                    return JsonSerializer.Serialize(new { error = $"File not found: {filepath}" });
+                }
+
+                var content = File.ReadAllText(filepath);
+                var fileInfo = new FileInfo(filepath);
+
+                return JsonSerializer.Serialize(new
+                {
+                    success = true,
+                    content = content,
+                    length = content.Length,
+                    fileName = fileInfo.Name,
+                    filePath = filepath,
+                    lastModified = fileInfo.LastWriteTime.ToString("o")
+                });
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new { error = $"Failed to read file: {ex.Message}" });
+            }
+        }
+
+        #endregion
+
+        #region Automation Handlers
+
+        private string ListAutomationsHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+
+            var includeDisabled = false;
+            TryGetArg<bool>(args, "include_disabled", out includeDisabled);
+
+            var automations = vm.AutomationService.Automations.AsEnumerable();
+
+            if (!includeDisabled)
+            {
+                automations = automations.Where(a => a.Status != AutomationStatus.Disabled);
+            }
+
+            var result = automations.Select(a => new
+            {
+                id = a.Id.ToString(),
+                name = a.Name,
+                description = a.Description,
+                status = a.Status.ToString(),
+                triggerType = a.Trigger?.TriggerType.ToString() ?? "None",
+                totalExecutions = a.TotalExecutions,
+                successfulExecutions = a.SuccessfulExecutions,
+                lastExecutionDate = a.LastExecutionDate?.ToString("g")
+            }).ToList();
+
+            return JsonSerializer.Serialize(new { count = result.Count, automations = result });
+        }
+
+        private string TriggerAutomationHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+
+            AutomationTask? automation = null;
+
+            if (TryGetArg<string>(args, "id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                automation = vm.AutomationService.Automations.FirstOrDefault(a => a.Id == guid);
+            }
+            else if (TryGetArg<string>(args, "name", out var name) && !string.IsNullOrWhiteSpace(name))
+            {
+                automation = vm.AutomationService.Automations.FirstOrDefault(a => 
+                    a.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (automation == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Automation not found. Provide either 'id' or 'name' parameter." });
+            }
+
+            if (automation.Status == AutomationStatus.Disabled)
+            {
+                return JsonSerializer.Serialize(new { error = $"Automation '{automation.Name}' is disabled" });
+            }
+
+            // Create context, optionally passing current automation context
+            var context = new AutomationContext();
+            if (_currentAutomationContext != null)
+            {
+                foreach (var variable in _currentAutomationContext.Variables)
+                {
+                    context.SetVariable(variable.Key, variable.Value);
+                }
+            }
+
+            // Trigger the automation (fire and forget)
+            _ = vm.AutomationService.TriggerManuallyAsync(automation, context);
+
+            return JsonSerializer.Serialize(new { success = true, message = $"Automation '{automation.Name}' triggered", automationId = automation.Id.ToString() });
+        }
+
+        #endregion
+
+        #region Context Variable Handlers
+
+        private string GetContextVariableHandler(Dictionary<string, object> args)
+        {
+            if (!TryGetArg<string>(args, "name", out var name) || string.IsNullOrWhiteSpace(name))
+            {
+                return JsonSerializer.Serialize(new { error = "Variable name is required" });
+            }
+
+            if (_currentAutomationContext == null)
+            {
+                return JsonSerializer.Serialize(new { error = "No automation context available", hasContext = false });
+            }
+
+            var value = _currentAutomationContext.GetVariable<object>(name);
+            
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                name = name,
+                value = value?.ToString(),
+                hasValue = value != null,
+                valueType = value?.GetType().Name ?? "null"
+            });
+        }
+
+        private string SetContextVariableHandler(Dictionary<string, object> args)
+        {
+            if (!TryGetArg<string>(args, "name", out var name) || string.IsNullOrWhiteSpace(name))
+            {
+                return JsonSerializer.Serialize(new { error = "Variable name is required" });
+            }
+
+            if (!TryGetArg<string>(args, "value", out var value))
+            {
+                return JsonSerializer.Serialize(new { error = "Variable value is required" });
+            }
+
+            if (_currentAutomationContext == null)
+            {
+                return JsonSerializer.Serialize(new { error = "No automation context available", hasContext = false });
+            }
+
+            _currentAutomationContext.SetVariable(name, value);
+
+            return JsonSerializer.Serialize(new { success = true, message = $"Variable '{name}' set", name = name, value = value });
         }
 
         #endregion
