@@ -652,4 +652,16 @@
 	<data name="Common_Apply" xml:space="preserve"><value>Anwenden</value></data>
 	<data name="Common_OK" xml:space="preserve"><value>OK</value></data>
 	<data name="Common_Create" xml:space="preserve"><value>Erstellen</value></data>
+	<data name="Settings_ResetToDefault" xml:space="preserve">
+    <value>Auf Standard zurücksetzen (Win+Q)</value>
+  </data>
+	<data name="Status_SetValidHotkey" xml:space="preserve">
+    <value>Bitte legen Sie eine gültige Tastenkombination fest</value>
+  </data>
+	<data name="Status_HotkeyRegisterFailed" xml:space="preserve">
+    <value>Die Tastenkombination konnte nicht registriert werden. Sie wird möglicherweise von einer anderen Anwendung verwendet.</value>
+  </data>
+	<data name="Status_CouldNotOpenFolder" xml:space="preserve">
+    <value>Ordner konnte nicht geöffnet werden:</value>
+  </data>
 </root>

@@ -10,8 +10,8 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Version>1.0.0</Version>
     <Description>SDK for creating AIA plugins</Description>
-    <AssemblyVersion>1.0.9.18236</AssemblyVersion>
-    <FileVersion>1.0.9.18236</FileVersion>
+    <AssemblyVersion>1.0.10.20184</AssemblyVersion>
+    <FileVersion>1.0.10.20184</FileVersion>
   </PropertyGroup>
 
 </Project>

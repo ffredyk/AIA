@@ -652,4 +652,17 @@
 	<data name="Common_Apply" xml:space="preserve"><value>Použít</value></data>
 	<data name="Common_OK" xml:space="preserve"><value>OK</value></data>
 	<data name="Common_Create" xml:space="preserve"><value>Vytvořit</value></data>
+
+	<data name="Settings_ResetToDefault" xml:space="preserve">
+    <value>Obnovit výchozí (Win+Q)</value>
+  </data>
+	<data name="Status_SetValidHotkey" xml:space="preserve">
+    <value>Nastavte prosím platnou klávesovou zkratku</value>
+  </data>
+	<data name="Status_HotkeyRegisterFailed" xml:space="preserve">
+    <value>Nepodařilo se zaregistrovat klávesovou zkratku. Může být používána jinou aplikací.</value>
+  </data>
+	<data name="Status_CouldNotOpenFolder" xml:space="preserve">
+    <value>Nelze otevřít složku:</value>
+  </data>
 </root>
