@@ -45,6 +45,9 @@ namespace AIA
             // Populate tools list
             ToolsListControl.ItemsSource = _orchestrationService.GetAvailableTools().ToList();
 
+            // Populate auto-naming provider dropdown
+            UpdateAutoNamingProviderDropdown();
+
             // Select first provider if available
             if (Providers.Count > 0)
             {
@@ -52,6 +55,53 @@ namespace AIA
             }
 
             UpdateStatus();
+        }
+
+        private void UpdateAutoNamingProviderDropdown()
+        {
+            // Create a list with "Use first available" option plus all enabled providers
+            var providerOptions = new System.Collections.Generic.List<object>();
+            providerOptions.Add(new { Id = (Guid?)null, Name = "(Use first available)" });
+            
+            foreach (var provider in Providers.Where(p => p.IsEnabled))
+            {
+                providerOptions.Add(provider);
+            }
+
+            AutoNamingProviderCombo.ItemsSource = providerOptions;
+
+            // Select current setting
+            if (Settings.AutoNamingProviderId.HasValue)
+            {
+                var selectedProvider = Providers.FirstOrDefault(p => p.Id == Settings.AutoNamingProviderId.Value);
+                if (selectedProvider != null)
+                {
+                    AutoNamingProviderCombo.SelectedItem = selectedProvider;
+                }
+                else
+                {
+                    AutoNamingProviderCombo.SelectedIndex = 0;
+                }
+            }
+            else
+            {
+                AutoNamingProviderCombo.SelectedIndex = 0;
+            }
+        }
+
+        private void AutoNamingProvider_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AutoNamingProviderCombo.SelectedItem == null) return;
+
+            if (AutoNamingProviderCombo.SelectedItem is AIProvider provider)
+            {
+                Settings.AutoNamingProviderId = provider.Id;
+            }
+            else
+            {
+                // "Use first available" option selected
+                Settings.AutoNamingProviderId = null;
+            }
         }
 
         private void UpdateProviderUI()
@@ -117,6 +167,9 @@ namespace AIA
             _orchestrationService.AddProvider(newProvider);
             SelectedProvider = newProvider;
             UpdateStatus();
+            
+            // Refresh auto-naming dropdown
+            UpdateAutoNamingProviderDropdown();
         }
 
         private async void BtnTestProvider(object sender, RoutedEventArgs e)
@@ -168,6 +221,9 @@ namespace AIA
                 SelectedProvider = Providers.FirstOrDefault(p => p != provider);
                 _orchestrationService.RemoveProvider(provider);
                 UpdateStatus();
+                
+                // Refresh auto-naming dropdown
+                UpdateAutoNamingProviderDropdown();
             }
         }
 

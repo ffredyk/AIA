@@ -605,6 +605,108 @@ namespace AIA.Services.AI
         #region Utility Methods
 
         /// <summary>
+        /// Generate a chat title using AI based on the first user message
+        /// </summary>
+        public async Task<string?> GenerateChatTitleAsync(string firstUserMessage)
+        {
+            System.Diagnostics.Debug.WriteLine($"GenerateChatTitleAsync called with message: {firstUserMessage?.Substring(0, Math.Min(50, firstUserMessage?.Length ?? 0))}...");
+            
+            // Find the provider to use for auto-naming
+            AIProvider? provider = null;
+            
+            if (Settings.AutoNamingProviderId.HasValue)
+            {
+                provider = Providers.FirstOrDefault(p => p.Id == Settings.AutoNamingProviderId.Value && p.IsEnabled);
+                System.Diagnostics.Debug.WriteLine($"Auto-naming provider ID specified: {Settings.AutoNamingProviderId.Value}, found: {provider != null}");
+            }
+            
+            // Fallback to first enabled provider
+            if (provider == null)
+            {
+                provider = Providers.FirstOrDefault(p => p.IsEnabled);
+                System.Diagnostics.Debug.WriteLine($"Using fallback provider: {provider?.Name ?? "none"}");
+            }
+            
+            if (provider == null)
+            {
+                System.Diagnostics.Debug.WriteLine("No provider available for auto-naming");
+                return null;
+            }
+
+            if (!_clients.TryGetValue(provider.ProviderType, out var client))
+            {
+                System.Diagnostics.Debug.WriteLine($"No client available for provider type: {provider.ProviderType}");
+                return null;
+            }
+
+            if (!client.ValidateConfiguration(provider))
+            {
+                System.Diagnostics.Debug.WriteLine($"Provider validation failed for: {provider.Name}");
+                return null;
+            }
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Calling AI for title generation with temp={Settings.AutoNamingTemperature}, maxTokens={Settings.AutoNamingMaxTokens}");
+                
+                var request = new AIRequest
+                {
+                    Messages = new List<AIMessage>
+                    {
+                        new AIMessage
+                        {
+                            Role = "user",
+                            Content = $"Generate a concise 3-5 word title that summarizes this message. Return ONLY the title, no quotes, no punctuation, no explanation:\n\n{firstUserMessage}"
+                        }
+                    },
+                    MaxTokens = Settings.AutoNamingMaxTokens,
+                    Temperature = Settings.AutoNamingTemperature,
+                    SystemPrompt = "You are a title generator. You create very short, concise titles (3-5 words max) that capture the essence of a message. Respond with only the title, nothing else.",
+                    Tools = null, // IMPORTANT: Explicitly disable tools for auto-naming
+                    StreamResponse = false
+                };
+
+                System.Diagnostics.Debug.WriteLine($"Making API call to {provider.Name} ({provider.ProviderType})...");
+                var response = await client.GenerateAsync(provider, request);
+                System.Diagnostics.Debug.WriteLine($"API call completed. Success: {response.Success}");
+
+                // Check if response has tool calls (which would make Content empty)
+                if (response.ToolCalls != null && response.ToolCalls.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"WARNING: Response has {response.ToolCalls.Count} tool calls, but tools should be disabled for auto-naming!");
+                }
+
+                if (response.Success && !string.IsNullOrWhiteSpace(response.Content))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Raw response content: '{response.Content}'");
+                    
+                    // Clean up the response - remove quotes, trim, and limit length
+                    var title = response.Content.Trim().Trim('"', '\'', '.', '!', '?');
+                    
+                    // Limit to reasonable length
+                    if (title.Length > 50)
+                        title = title.Substring(0, 47) + "...";
+                    
+                    System.Diagnostics.Debug.WriteLine($"Generated title (cleaned): '{title}'");
+                    return title;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"AI response failed or empty. Success: {response.Success}, Content: '{response.Content ?? "(null)"}', Error: {response.Error ?? "(none)"}");
+                    System.Diagnostics.Debug.WriteLine($"Response FinishReason: {response.FinishReason ?? "(none)"}, ToolCalls count: {response.ToolCalls?.Count ?? 0}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception in GenerateChatTitleAsync: {ex.GetType().Name}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                // Silently fail - will keep default name
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Get a list of recommended model IDs for each provider type
         /// </summary>
         public static Dictionary<AIProviderType, string[]> GetRecommendedModels()

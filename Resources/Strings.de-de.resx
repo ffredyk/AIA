@@ -664,4 +664,118 @@
 	<data name="Status_CouldNotOpenFolder" xml:space="preserve">
     <value>Ordner konnte nicht geöffnet werden:</value>
   </data>
+	<!-- Chat Templates -->
+	<data name="Chat_QuickPrompts" xml:space="preserve">
+  <value>Schnellbefehle</value>
+</data>
+	<data name="Chat_SelectTemplate" xml:space="preserve">
+  <value>Klicken Sie auf eine Vorlage zum Senden</value>
+</data>
+	<data name="Chat_NoTemplates" xml:space="preserve">
+  <value>Keine Vorlagen verfügbar</value>
+</data>
+
+	<!-- Settings - Chat Templates Tab -->
+	<data name="Settings_ChatTemplates" xml:space="preserve">
+  <value>Chat-Vorlagen</value>
+</data>
+	<data name="Settings_ManageChatTemplates" xml:space="preserve">
+  <value>Chat-Vorlagen verwalten</value>
+</data>
+	<data name="Settings_ChatTemplatesDescription" xml:space="preserve">
+  <value>Erstellen und anpassen Sie Schnellvorlagen für häufige KI-Anfragen</value>
+</data>
+	<data name="Settings_NoTemplates" xml:space="preserve">
+  <value>Keine Vorlagen erstellt</value>
+</data>
+	<data name="Settings_Predefined" xml:space="preserve">
+  <value>Integriert</value>
+</data>
+
+	<!-- Chat Template Editor -->
+	<data name="ChatTemplate_EditorTitle" xml:space="preserve">
+  <value>Chat-Vorlagen-Editor</value>
+</data>
+	<data name="ChatTemplate_EditorDescription" xml:space="preserve">
+  <value>Chat-Nachrichtenvorlage erstellen oder bearbeiten</value>
+</data>
+	<data name="ChatTemplate_NewTemplate" xml:space="preserve">
+  <value>Neue Vorlage</value>
+</data>
+	<data name="ChatTemplate_EditTemplate" xml:space="preserve">
+  <value>Vorlage bearbeiten</value>
+</data>
+	<data name="ChatTemplate_Title" xml:space="preserve">
+  <value>Titel</value>
+</data>
+	<data name="ChatTemplate_Description" xml:space="preserve">
+  <value>Beschreibung (auf Schaltfläche angezeigt)</value>
+</data>
+	<data name="ChatTemplate_Message" xml:space="preserve">
+  <value>Nachricht (an KI gesendet)</value>
+</data>
+	<data name="ChatTemplate_Icon" xml:space="preserve">
+  <value>Symbol</value>
+</data>
+	<data name="ChatTemplate_Color" xml:space="preserve">
+  <value>Farbe</value>
+</data>
+	<data name="ChatTemplate_Preview" xml:space="preserve">
+  <value>Vorschau</value>
+</data>
+	<data name="ChatTemplate_TitleRequired" xml:space="preserve">
+  <value>Bitte geben Sie einen Titel für die Vorlage ein.</value>
+</data>
+	<data name="ChatTemplate_MessageRequired" xml:space="preserve">
+  <value>Bitte geben Sie eine Nachricht für die Vorlage ein.</value>
+</data>
+	<data name="ChatTemplate_DeleteConfirm" xml:space="preserve">
+  <value>Möchten Sie die Vorlage '{0}' wirklich löschen?</value>
+</data>
+
+	<!-- Common Actions -->
+	<data name="Common_Add" xml:space="preserve">
+  <value>Hinzufügen</value>
+</data>
+	<data name="Common_Edit" xml:space="preserve">
+  <value>Bearbeiten</value>
+</data>
+	<data name="Common_Delete" xml:space="preserve">
+  <value>Löschen</value>
+</data>
+	<data name="Common_Save" xml:space="preserve">
+  <value>Speichern</value>
+</data>
+	<data name="Common_Cancel" xml:space="preserve">
+  <value>Abbrechen</value>
+</data>
+	<data name="Common_Close" xml:space="preserve">
+  <value>Schließen</value>
+</data>
+	<data name="Common_Confirm" xml:space="preserve">
+  <value>Bestätigen</value>
+</data>
+	<data name="Common_Validation" xml:space="preserve">
+  <value>Validierung</value>
+</data>
+	<data name="Common_MoveUp" xml:space="preserve">
+  <value>Nach oben</value>
+</data>
+	<data name="Common_MoveDown" xml:space="preserve">
+  <value>Nach unten</value>
+</data>
+	<data name="Common_Refresh" xml:space="preserve">
+  <value>Aktualisieren</value>
+</data>
+
+	<!-- Status Messages -->
+	<data name="Status_TemplateAdded" xml:space="preserve">
+  <value>Vorlage erfolgreich hinzugefügt</value>
+</data>
+	<data name="Status_TemplateUpdated" xml:space="preserve">
+  <value>Vorlage erfolgreich aktualisiert</value>
+</data>
+	<data name="Status_TemplateDeleted" xml:space="preserve">
+  <value>Vorlage erfolgreich gelöscht</value>
+</data>
 </root>
