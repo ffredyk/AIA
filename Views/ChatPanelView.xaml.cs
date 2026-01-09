@@ -149,7 +149,7 @@ namespace AIA.Views
             try
             {
                 ViewModel.IsAiProcessing = true;
-                ViewModel.AiStatusMessage = "Streaming response...";
+                ViewModel.AiStatusMessage = "Processing...";
 
                 // Build conversation history for AI
                 var conversationHistory = new List<AIMessage>();
@@ -165,40 +165,21 @@ namespace AIA.Views
                     }
                 }
 
-                // Check if tool use is enabled - if so, use non-streaming for tool support
-                if (ViewModel.AIOrchestration.Settings.EnableToolUse)
+                // Use streaming with tool support
+                var contentBuilder = new System.Text.StringBuilder();
+
+                await foreach (var (chunk, status) in ViewModel.AIOrchestration.GenerateStreamWithToolsAsync(
+                    userMessage,
+                    conversationHistory.Take(conversationHistory.Count - 1).ToList()))
                 {
-                    // Use non-streaming for tool support
-                    assistantMessage.Content = "Thinking...";
-
-                    var response = await ViewModel.AIOrchestration.GenerateAsync(
-                        userMessage,
-                        conversationHistory.Take(conversationHistory.Count - 1).ToList()
-                    );
-
-                    if (response.Success)
+                    // Update status message
+                    if (!string.IsNullOrEmpty(status) && status != "Streaming")
                     {
-                        assistantMessage.Content = response.Content;
-
-                        if (response.UsedProvider != null)
-                        {
-                            ViewModel.AiStatusMessage = $"Response from {response.UsedProvider.Name} ({response.PromptTokens + response.CompletionTokens} tokens)";
-                        }
+                        ViewModel.AiStatusMessage = status;
                     }
-                    else
-                    {
-                        assistantMessage.Content = $"Error: {response.Error}";
-                        ViewModel.AiStatusMessage = "Error occurred";
-                    }
-                }
-                else
-                {
-                    // Use streaming for faster feedback
-                    var contentBuilder = new System.Text.StringBuilder();
-
-                    await foreach (var chunk in ViewModel.AIOrchestration.GenerateStreamAsync(
-                        userMessage,
-                        conversationHistory.Take(conversationHistory.Count - 1).ToList()))
+                    
+                    // Append content chunk
+                    if (!string.IsNullOrEmpty(chunk))
                     {
                         contentBuilder.Append(chunk);
                         assistantMessage.Content = contentBuilder.ToString();
@@ -206,9 +187,9 @@ namespace AIA.Views
                         // Scroll to bottom as content updates
                         ChatScrollViewer.ScrollToEnd();
                     }
-
-                    ViewModel.AiStatusMessage = "Response complete";
                 }
+
+                ViewModel.AiStatusMessage = "Response complete";
 
                 MessageSent?.Invoke(this, userMessage);
             }

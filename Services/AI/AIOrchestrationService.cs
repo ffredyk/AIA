@@ -346,6 +346,150 @@ namespace AIA.Services.AI
         }
 
         /// <summary>
+        /// Generate a streaming response from the AI with tool use support
+        /// </summary>
+        public async IAsyncEnumerable<(string Content, string Status)> GenerateStreamWithToolsAsync(string userMessage, List<AIMessage>? conversationHistory = null, AIProvider? specificProvider = null)
+        {
+            var provider = specificProvider ?? GetBestProvider(userMessage);
+            if (provider == null)
+            {
+                yield return ("Error: No AI providers configured. Please configure at least one provider in Orchestration settings.", "Error");
+                yield break;
+            }
+
+            if (!_clients.TryGetValue(provider.ProviderType, out var client))
+            {
+                yield return ($"Error: No client available for provider type: {provider.ProviderType}", "Error");
+                yield break;
+            }
+
+            if (!client.ValidateConfiguration(provider))
+            {
+                yield return ($"Error: Provider '{provider.Name}' is not properly configured.", "Error");
+                yield break;
+            }
+
+            // Build the request
+            var request = new AIRequest
+            {
+                Temperature = Settings.DefaultTemperature,
+                MaxTokens = Settings.DefaultMaxTokens,
+                SystemPrompt = BuildSystemPrompt()
+            };
+
+            // Add conversation history
+            if (conversationHistory != null)
+            {
+                request.Messages.AddRange(conversationHistory);
+            }
+
+            // Add user message
+            request.Messages.Add(new AIMessage { Role = "user", Content = userMessage });
+
+            // Add tools if enabled
+            if (Settings.EnableToolUse)
+            {
+                request.Tools = _toolsService.GetAllTools().ToList();
+            }
+
+            // First, get response (potentially with tool calls)
+            yield return ("", "Analyzing request...");
+            
+            var response = await client.GenerateAsync(provider, request);
+
+            if (!response.Success)
+            {
+                yield return ($"Error: {response.Error}", "Error");
+                yield break;
+            }
+
+            // Handle tool calls if present
+            if (response.RequiresToolExecution && Settings.EnableToolUse)
+            {
+                const int maxIterations = 5;
+                int iteration = 0;
+
+                while (response.RequiresToolExecution && iteration < maxIterations)
+                {
+                    iteration++;
+                    
+                    yield return ("", $"Executing tools ({iteration}/{maxIterations})...");
+
+                    // Add assistant message with tool calls
+                    request.Messages.Add(new AIMessage
+                    {
+                        Role = "assistant",
+                        Content = response.Content,
+                        ToolCalls = response.ToolCalls
+                    });
+
+                    // Execute each tool call
+                    foreach (var toolCall in response.ToolCalls!)
+                    {
+                        yield return ("", $"Calling {toolCall.Name}...");
+                        
+                        var result = _toolsService.ExecuteTool(toolCall.Name, toolCall.Arguments);
+                        
+                        request.Messages.Add(new AIMessage
+                        {
+                            Role = "tool",
+                            Content = result,
+                            ToolCallId = toolCall.Id,
+                            Name = toolCall.Name
+                        });
+                    }
+
+                    // Get next response - stream this one if it's the final response
+                    if (iteration == maxIterations || Settings.EnableToolUse == false)
+                    {
+                        yield return ("", "Generating response...");
+                        
+                        // Stream the final response
+                        await foreach (var chunk in client.GenerateStreamAsync(provider, request))
+                        {
+                            yield return (chunk, "Streaming");
+                        }
+                        yield break;
+                    }
+                    else
+                    {
+                        response = await client.GenerateAsync(provider, request);
+                        
+                        if (!response.Success)
+                        {
+                            yield return ($"Error: {response.Error}", "Error");
+                            yield break;
+                        }
+                    }
+                }
+
+                // If we got here, stream the final content
+                if (!string.IsNullOrEmpty(response.Content))
+                {
+                    // Simulate streaming character by character for immediate feedback
+                    foreach (var c in response.Content)
+                    {
+                        yield return (c.ToString(), "Streaming");
+                        await Task.Delay(5); // Small delay for smooth streaming effect
+                    }
+                }
+            }
+            else
+            {
+                // No tools needed, stream the response directly
+                if (!string.IsNullOrEmpty(response.Content))
+                {
+                    // Already have the content, simulate streaming for consistency
+                    foreach (var c in response.Content)
+                    {
+                        yield return (c.ToString(), "Streaming");
+                        await Task.Delay(5);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Handle tool calls and continue the conversation
         /// </summary>
         private async Task<AIResponse> HandleToolCallsAsync(AIProvider provider, IAIProviderClient client, AIRequest request, AIResponse response)
