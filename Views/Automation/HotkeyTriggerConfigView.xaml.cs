@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using AIA.Models.Automation;
+using AIA.Services;
 using WpfUserControl = System.Windows.Controls.UserControl;
 using WpfColor = System.Windows.Media.Color;
 using WpfKeyEventArgs = System.Windows.Input.KeyEventArgs;
@@ -15,6 +16,7 @@ namespace AIA.Views.Automation
     public partial class HotkeyTriggerConfigView : WpfUserControl
     {
         private bool _isCapturing;
+        private ModifierKeys _currentModifiers = ModifierKeys.None;
 
         public HotkeyTriggerConfigView()
         {
@@ -30,31 +32,52 @@ namespace AIA.Views.Automation
             // Get the actual key (handle system keys)
             var key = e.Key == Key.System ? e.SystemKey : e.Key;
 
-            // Ignore modifier-only presses
-            if (key == Key.LeftCtrl || key == Key.RightCtrl ||
-                key == Key.LeftAlt || key == Key.RightAlt ||
-                key == Key.LeftShift || key == Key.RightShift ||
-                key == Key.LWin || key == Key.RWin)
+            // Update current modifiers
+            _currentModifiers = HotkeyService.GetModifiersFromKeyboard();
+
+            // If it's a modifier key, show current modifiers being held
+            if (HotkeyService.IsModifierKey(key))
             {
+                if (_currentModifiers != ModifierKeys.None)
+                {
+                    HotkeyTextBox.Text = HotkeyService.FormatHotkey(_currentModifiers, Key.None) + " + ...";
+                }
                 return;
             }
 
-            // Get modifiers
-            var modifiers = Keyboard.Modifiers;
-
-            // Update the trigger
+            // Non-modifier key pressed - complete the capture
             if (DataContext is HotkeyTrigger trigger)
             {
                 trigger.Key = key;
-                trigger.Modifiers = modifiers;
+                trigger.Modifiers = _currentModifiers;
 
                 UpdateStatus($"Hotkey set: {trigger.HotkeyString}", true);
+            }
+        }
+
+        private void HotkeyTextBox_PreviewKeyUp(object sender, WpfKeyEventArgs e)
+        {
+            if (!_isCapturing) return;
+
+            e.Handled = true;
+
+            // Update current modifiers
+            _currentModifiers = HotkeyService.GetModifiersFromKeyboard();
+
+            // If all modifiers released and no key was captured, reset display
+            if (_currentModifiers == ModifierKeys.None && DataContext is HotkeyTrigger trigger)
+            {
+                if (trigger.Key == Key.None)
+                {
+                    HotkeyTextBox.Text = string.Empty;
+                }
             }
         }
 
         private void HotkeyTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             _isCapturing = true;
+            _currentModifiers = ModifierKeys.None;
             HotkeyTextBox.Background = new SolidColorBrush(WpfColor.FromRgb(0x40, 0x40, 0x45));
             UpdateStatus("Press your desired key combination...", false);
         }
@@ -62,6 +85,7 @@ namespace AIA.Views.Automation
         private void HotkeyTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             _isCapturing = false;
+            _currentModifiers = ModifierKeys.None;
             HotkeyTextBox.Background = new SolidColorBrush(WpfColor.FromRgb(0x2D, 0x2D, 0x30));
             StatusBorder.Visibility = Visibility.Collapsed;
         }

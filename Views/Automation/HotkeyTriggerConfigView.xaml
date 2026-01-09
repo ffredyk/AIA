@@ -20,6 +20,7 @@
                      IsReadOnly="True"
                      Background="#2D2D30" Foreground="White" BorderBrush="#555555" Padding="8"
                      PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                     PreviewKeyUp="HotkeyTextBox_PreviewKeyUp"
                      GotFocus="HotkeyTextBox_GotFocus"
                      LostFocus="HotkeyTextBox_LostFocus"
                      ToolTip="Click and press your desired hotkey combination"/>

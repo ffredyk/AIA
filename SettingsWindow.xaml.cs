@@ -27,8 +27,10 @@ namespace AIA
         private bool _isCapturingHotkey;
         private ModifierKeys _capturedModifiers = ModifierKeys.None;
         private Key _capturedKey = Key.None;
-        private ModifierKeys _pendingModifiers = ModifierKeys.Windows;
+        private ModifierKeys _pendingModifiers = ModifierKeys.Alt;
         private Key _pendingKey = Key.Q;
+
+        private const string DefaultHotkeyString = "Alt+Q";
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -163,44 +165,58 @@ namespace AIA
         {
             if (_pendingKey == Key.None && _pendingModifiers == ModifierKeys.None)
             {
-                TxtHotkeyDisplay.Visibility = Visibility.Collapsed;
-                TxtHotkeyPlaceholder.Text = "No hotkey set";
-                TxtHotkeyPlaceholder.Visibility = Visibility.Visible;
+                HotkeyTextBox.Text = LocalizationService.Instance.GetString("Settings_NoHotkeySet");
+                HotkeyTextBox.FontStyle = FontStyles.Italic;
+                HotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0x66, 0x66, 0x66));
             }
             else
             {
                 var displayText = HotkeyService.FormatHotkey(_pendingModifiers, _pendingKey);
-                TxtHotkeyDisplay.Text = displayText;
-                TxtHotkeyDisplay.Visibility = Visibility.Visible;
-                TxtHotkeyPlaceholder.Visibility = Visibility.Collapsed;
+                HotkeyTextBox.Text = displayText;
+                HotkeyTextBox.FontStyle = FontStyles.Normal;
+                HotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0xFF, 0xFF, 0xFF));
             }
         }
 
-        private void HotkeyCaptureBorder_MouseDown(object sender, MouseButtonEventArgs e)
+        private void HotkeyTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             // Start capturing hotkey
             _isCapturingHotkey = true;
             _capturedModifiers = ModifierKeys.None;
             _capturedKey = Key.None;
 
-            TxtHotkeyDisplay.Visibility = Visibility.Collapsed;
-            TxtHotkeyPlaceholder.Text = LocalizationService.Instance.GetString("Settings_PressKeys");
-            TxtHotkeyPlaceholder.Visibility = Visibility.Visible;
+            // Temporarily unregister the global hotkey to prevent overlay from showing
+            App.Current.HotkeyService?.UnregisterHotkey();
+
+            // Change background to indicate capture mode
+            HotkeyTextBox.Background = new SolidColorBrush(WpfColor.FromRgb(0x40, 0x40, 0x45));
+            HotkeyTextBox.Text = LocalizationService.Instance.GetString("Settings_PressKeys");
+            HotkeyTextBox.FontStyle = FontStyles.Italic;
+            HotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0x66, 0x66, 0x66));
             
-            HotkeyCaptureBorder.Focus();
-            TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_PressKeysCombination");
-            TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(153, 153, 153));
+            UpdateHotkeyStatus(LocalizationService.Instance.GetString("Status_PressKeysCombination"), false);
         }
 
-        private void HotkeyCaptureBorder_KeyDown(object sender, WpfKeyEventArgs e)
+        private void HotkeyTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (!_isCapturingHotkey)
+            _isCapturingHotkey = false;
+            
+            // Re-register the current hotkey (not the pending one)
+            if (_appSettings.OverlayShortcut != null)
             {
-                // If not capturing, start capturing on any key
-                _isCapturingHotkey = true;
-                _capturedModifiers = ModifierKeys.None;
-                _capturedKey = Key.None;
+                App.Current.HotkeyService?.RegisterHotkey(_appSettings.OverlayShortcut);
             }
+            
+            // Restore normal background
+            HotkeyTextBox.Background = new SolidColorBrush(WpfColor.FromRgb(0x3E, 0x3E, 0x42));
+            
+            // Restore pending hotkey display
+            UpdateHotkeyDisplay();
+        }
+
+        private void HotkeyTextBox_PreviewKeyDown(object sender, WpfKeyEventArgs e)
+        {
+            if (!_isCapturingHotkey) return;
 
             e.Handled = true;
 
@@ -210,15 +226,14 @@ namespace AIA
             // Update modifiers
             _capturedModifiers = HotkeyService.GetModifiersFromKeyboard();
 
-            // If it's a modifier key, just show current modifiers
+            // If it's a modifier key, show current modifiers being held
             if (HotkeyService.IsModifierKey(key))
             {
-                // Show modifiers being held
                 if (_capturedModifiers != ModifierKeys.None)
                 {
-                    TxtHotkeyDisplay.Text = HotkeyService.FormatHotkey(_capturedModifiers, Key.None) + " + ...";
-                    TxtHotkeyDisplay.Visibility = Visibility.Visible;
-                    TxtHotkeyPlaceholder.Visibility = Visibility.Collapsed;
+                    HotkeyTextBox.Text = HotkeyService.FormatHotkey(_capturedModifiers, Key.None) + " + ...";
+                    HotkeyTextBox.FontStyle = FontStyles.Normal;
+                    HotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0xFF, 0xFF, 0xFF));
                 }
                 return;
             }
@@ -233,42 +248,29 @@ namespace AIA
 
             UpdateHotkeyDisplay();
             
-            // Test if the hotkey can be registered
-            var hotkeyService = App.Current.HotkeyService;
-            if (hotkeyService != null && hotkeyService.TestHotkey(_pendingModifiers, _pendingKey))
-            {
-                TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_HotkeyValid");
-                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(30, 183, 95));
-            }
-            else
-            {
-                TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_HotkeyConflict");
-                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 165, 0));
-            }
+            // Show success message but don't apply yet
+            var hotkeyString = HotkeyService.FormatHotkey(_pendingModifiers, _pendingKey);
+            UpdateHotkeyStatus($"Hotkey set to {hotkeyString}. Click Save to apply.", true);
+            
+            // Remove focus to exit capture mode
+            HotkeyTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
 
-        private void HotkeyCaptureBorder_KeyUp(object sender, WpfKeyEventArgs e)
+        private void HotkeyTextBox_PreviewKeyUp(object sender, WpfKeyEventArgs e)
         {
-            if (!_isCapturingHotkey)
-                return;
+            if (!_isCapturingHotkey) return;
 
             e.Handled = true;
 
             // Update current modifiers
             _capturedModifiers = HotkeyService.GetModifiersFromKeyboard();
 
-            // If all keys are released and we have a valid key, complete capture
-            if (_capturedKey != Key.None)
+            // If no key captured yet and all modifiers released, reset display
+            if (_capturedKey == Key.None && _capturedModifiers == ModifierKeys.None)
             {
-                _isCapturingHotkey = false;
-                UpdateHotkeyDisplay();
-            }
-            else if (_capturedModifiers == ModifierKeys.None)
-            {
-                // All modifiers released without pressing a non-modifier key
-                TxtHotkeyDisplay.Visibility = Visibility.Collapsed;
-                TxtHotkeyPlaceholder.Text = "Press keys...";
-                TxtHotkeyPlaceholder.Visibility = Visibility.Visible;
+                HotkeyTextBox.Text = LocalizationService.Instance.GetString("Settings_PressKeys");
+                HotkeyTextBox.FontStyle = FontStyles.Italic;
+                HotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0x66, 0x66, 0x66));
             }
         }
 
@@ -279,8 +281,68 @@ namespace AIA
             _isCapturingHotkey = false;
             
             UpdateHotkeyDisplay();
-            TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_HotkeyCleared");
-            TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(153, 153, 153));
+            UpdateHotkeyStatus(LocalizationService.Instance.GetString("Status_HotkeyCleared"), true);
+        }
+
+        private void BtnResetHotkey_Click(object sender, RoutedEventArgs e)
+        {
+            var (modifiers, key) = HotkeyService.ParseHotkeyString(DefaultHotkeyString);
+            _pendingModifiers = modifiers;
+            _pendingKey = key;
+            _isCapturingHotkey = false;
+            
+            UpdateHotkeyDisplay();
+            
+            // Show message but don't apply yet
+            UpdateHotkeyStatus($"Hotkey reset to {DefaultHotkeyString}. Click Save to apply.", true);
+        }
+
+        private void BtnApplyShortcut_Click(object sender, RoutedEventArgs e)
+        {
+            ApplyHotkey();
+        }
+
+        private void ApplyHotkey()
+        {
+            if (_pendingKey == Key.None)
+            {
+                UpdateHotkeyStatus(LocalizationService.Instance.GetString("Status_SetValidHotkey"), false, true);
+                return;
+            }
+
+            // Format the hotkey string for storage
+            var hotkeyString = HotkeyService.FormatHotkey(_pendingModifiers, _pendingKey);
+            
+            // Try to apply the hotkey
+            var success = App.Current.UpdateHotkey(hotkeyString);
+            
+            if (success)
+            {
+                _appSettings.OverlayShortcut = hotkeyString;
+                UpdateHotkeyStatus($"{LocalizationService.Instance.GetString("Status_HotkeyApplied")} {hotkeyString}", true);
+            }
+            else
+            {
+                UpdateHotkeyStatus(LocalizationService.Instance.GetString("Status_HotkeyRegisterFailed"), false, true);
+            }
+        }
+
+        private void UpdateHotkeyStatus(string message, bool success, bool isError = false)
+        {
+            TxtShortcutStatus.Text = message;
+            
+            if (isError)
+            {
+                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 102, 102));
+            }
+            else if (success)
+            {
+                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(30, 183, 95));
+            }
+            else
+            {
+                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(0, 120, 212));
+            }
         }
 
         #endregion
@@ -316,36 +378,6 @@ namespace AIA
                 StatusText.Text = isChecked 
                     ? LocalizationService.Instance.GetString("Status_AddedToStartup")
                     : LocalizationService.Instance.GetString("Status_RemovedFromStartup");
-            }
-        }
-
-        private void BtnApplyShortcut_Click(object sender, RoutedEventArgs e)
-        {
-            if (_pendingKey == Key.None)
-            {
-                TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_SetValidHotkey");
-                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 102, 102));
-                return;
-            }
-
-            // Format the hotkey string for storage
-            var hotkeyString = HotkeyService.FormatHotkey(_pendingModifiers, _pendingKey);
-            
-            // Try to apply the hotkey immediately
-            var success = App.Current.UpdateHotkey(hotkeyString);
-            
-            if (success)
-            {
-                _appSettings.OverlayShortcut = hotkeyString;
-                TxtShortcutStatus.Text = $"{LocalizationService.Instance.GetString("Status_HotkeyApplied")} {hotkeyString}";
-                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(30, 183, 95));
-                StatusText.Text = LocalizationService.Instance.GetString("Status_HotkeyUpdated");
-            }
-            else
-            {
-                TxtShortcutStatus.Text = LocalizationService.Instance.GetString("Status_HotkeyRegisterFailed");
-                TxtShortcutStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 102, 102));
-                StatusText.Text = LocalizationService.Instance.GetString("Status_HotkeyFailed");
             }
         }
 
@@ -447,6 +479,9 @@ namespace AIA
 
         private async void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            // Apply hotkey changes first
+            ApplyHotkey();
+            
             // Collect settings from UI - hotkey is already stored in _appSettings when applied
             _appSettings.MinimizeToTrayOnClose = ChkMinimizeToTray.IsChecked ?? true;
             _appSettings.CheckForUpdatesOnStartup = ChkCheckUpdates.IsChecked ?? true;

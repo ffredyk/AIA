@@ -600,5 +600,18 @@
 	<data name="Automation_Trigger_Plugin" xml:space="preserve"><value>Plugin</value></data>
 	<data name="Automation_Trigger_PluginTrigger" xml:space="preserve"><value>Plugin Trigger</value></data>
 	<data name="Automation_Trigger_NoPluginTriggers" xml:space="preserve"><value>No plugins with automation triggers are installed.</value></data>
+	
+  <data name="Settings_ResetToDefault" xml:space="preserve">
+    <value>Reset to Default (Win+Q)</value>
+  </data>
+  <data name="Status_SetValidHotkey" xml:space="preserve">
+    <value>Please set a valid hotkey</value>
+  </data>
+  <data name="Status_HotkeyRegisterFailed" xml:space="preserve">
+    <value>Failed to register hotkey. It may be in use by another application.</value>
+  </data>
+  <data name="Status_CouldNotOpenFolder" xml:space="preserve">
+    <value>Could not open folder:</value>
+  </data>
 
 </root>
