@@ -530,6 +530,7 @@ namespace AIA.Services.AI
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 vm.Tasks.Add(task);
+                vm.ApplyTaskFilter();
             });
             _ = vm.SaveTasksAndRemindersAsync();
 

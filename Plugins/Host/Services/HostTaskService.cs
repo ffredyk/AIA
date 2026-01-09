@@ -45,6 +45,7 @@ namespace AIA.Plugins.Host.Services
             };
 
             ViewModel.Tasks.Add(task);
+            ViewModel.ApplyTaskFilter();
             TasksChanged?.Invoke(this, new TasksChangedEventArgs(TaskChangeType.Added, new TaskItemAdapter(task, this)));
 
             return new TaskItemAdapter(task, this);

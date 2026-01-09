@@ -96,6 +96,7 @@ namespace AIA.Services.Automation
             await WpfApplication.Current.Dispatcher.InvokeAsync(() =>
             {
                 vm.Tasks.Add(task);
+                vm.ApplyTaskFilter();
             });
             await vm.SaveTasksAndRemindersAsync();
 
