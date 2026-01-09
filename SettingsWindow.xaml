@@ -106,23 +106,27 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     
-                                    <!-- Hotkey Display Box -->
-                                    <Border x:Name="HotkeyCaptureBorder" 
-                                            Background="#3E3E42" 
-                                            BorderBrush="#555555" 
-                                            BorderThickness="1" 
-                                            CornerRadius="4"
-                                            Padding="12,8"
-                                            Cursor="Hand"
-                                            MouseLeftButtonDown="HotkeyCaptureBorder_MouseDown"
-                                            KeyDown="HotkeyCaptureBorder_KeyDown"
-                                            KeyUp="HotkeyCaptureBorder_KeyUp"
-                                            Focusable="True"
-                                            FocusVisualStyle="{x:Null}">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
+                                    <!-- Hotkey Display Box (using TextBox like automation trigger) -->
+                                    <TextBox x:Name="HotkeyTextBox" 
+                                             IsReadOnly="True"
+                                             Background="#3E3E42" 
+                                             Foreground="White"
+                                             BorderBrush="#555555" 
+                                             BorderThickness="1" 
+                                             Padding="12,8"
+                                             FontSize="14"
+                                             FontWeight="SemiBold"
+                                             Cursor="Hand"
+                                             PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+                                             PreviewKeyUp="HotkeyTextBox_PreviewKeyUp"
+                                             GotFocus="HotkeyTextBox_GotFocus"
+                                             LostFocus="HotkeyTextBox_LostFocus"
+                                             ToolTip="{local:Localize Settings_ClickToCapture}">
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox">
                                                 <Style.Triggers>
                                                     <Trigger Property="IsFocused" Value="True">
                                                         <Setter Property="BorderBrush" Value="#0078D4"/>
@@ -130,23 +134,8 @@
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </Border.Style>
-                                        <Grid>
-                                            <TextBlock x:Name="TxtHotkeyDisplay" 
-                                                       Text="Win + Q" 
-                                                       Foreground="White" 
-                                                       FontSize="14"
-                                                       FontWeight="SemiBold"
-                                                       VerticalAlignment="Center"/>
-                                            <TextBlock x:Name="TxtHotkeyPlaceholder"
-                                                       Text="{local:Localize Settings_PressKeys}"
-                                                       Foreground="#666666"
-                                                       FontSize="14"
-                                                       FontStyle="Italic"
-                                                       VerticalAlignment="Center"
-                                                       Visibility="Collapsed"/>
-                                        </Grid>
-                                    </Border>
+                                        </TextBox.Style>
+                                    </TextBox>
                                     
                                     <!-- Clear Button -->
                                     <ui:Button Grid.Column="1" 
@@ -157,12 +146,22 @@
                                         <ui:SymbolIcon Symbol="Dismiss20" Foreground="White" FontSize="14"/>
                                     </ui:Button>
                                     
-                                    <!-- Apply Button -->
+                                    <!-- Reset to Default Button -->
                                     <ui:Button Grid.Column="2" 
+                                               Margin="4,0,0,0" 
+                                               Padding="10,6" 
+                                               ToolTip="{local:Localize Settings_ResetToDefault}"
+                                               Click="BtnResetHotkey_Click">
+                                        <ui:SymbolIcon Symbol="ArrowReset20" Foreground="White" FontSize="14"/>
+                                    </ui:Button>
+                                    
+                                    <!-- Apply Button (Hidden but kept for manual apply if needed) -->
+                                    <ui:Button Grid.Column="3" 
                                                Margin="4,0,0,0" 
                                                Padding="12,6" 
                                                Click="BtnApplyShortcut_Click"
-                                               x:Name="BtnApplyHotkey">
+                                               x:Name="BtnApplyHotkey"
+                                               Visibility="Collapsed">
                                         <StackPanel Orientation="Horizontal">
                                             <ui:SymbolIcon Symbol="Checkmark20" Foreground="White" FontSize="14"/>
                                             <TextBlock Text="{local:Localize Settings_Apply}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
