@@ -11,8 +11,8 @@
     <Version>1.0.0</Version>
     <Description>Teams integration plugin for AIA</Description>
     <EnableDynamicLoading>true</EnableDynamicLoading>
-    <AssemblyVersion>1.0.7.25974</AssemblyVersion>
-    <FileVersion>1.0.7.25974</FileVersion>
+    <AssemblyVersion>1.0.9.18264</AssemblyVersion>
+    <FileVersion>1.0.9.18264</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
