@@ -210,10 +210,26 @@ namespace AIA.Views
 
         private void MessageInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && !Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.RightShift))
+            if (e.Key == Key.Enter)
             {
-                e.Handled = true;
-                _ = SendMessageAsync();
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                {
+                    // Shift+Enter: Insert new line manually
+                    e.Handled = true;
+                    var textBox = sender as System.Windows.Controls.TextBox;
+                    if (textBox != null)
+                    {
+                        int caretIndex = textBox.CaretIndex;
+                        textBox.Text = textBox.Text.Insert(caretIndex, Environment.NewLine);
+                        textBox.CaretIndex = caretIndex + Environment.NewLine.Length;
+                    }
+                }
+                else
+                {
+                    // Enter alone: Send message
+                    e.Handled = true;
+                    _ = SendMessageAsync();
+                }
             }
         }
 
