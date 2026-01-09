@@ -103,6 +103,12 @@ namespace AIA.Models.AI
         private int _maxContextItems = 10;
         private double _defaultTemperature = 0.7;
         private int _defaultMaxTokens = 4096;
+        
+        // Auto-naming settings
+        private bool _enableAutoNaming = true;
+        private Guid? _autoNamingProviderId;
+        private double _autoNamingTemperature = 0.3;
+        private int _autoNamingMaxTokens = 30;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -185,6 +191,42 @@ namespace AIA.Models.AI
         {
             get => _defaultMaxTokens;
             set { _defaultMaxTokens = value; OnPropertyChanged(nameof(DefaultMaxTokens)); }
+        }
+
+        /// <summary>
+        /// Whether to automatically generate chat titles after first message
+        /// </summary>
+        public bool EnableAutoNaming
+        {
+            get => _enableAutoNaming;
+            set { _enableAutoNaming = value; OnPropertyChanged(nameof(EnableAutoNaming)); }
+        }
+
+        /// <summary>
+        /// Provider ID to use for auto-naming (null = use first available)
+        /// </summary>
+        public Guid? AutoNamingProviderId
+        {
+            get => _autoNamingProviderId;
+            set { _autoNamingProviderId = value; OnPropertyChanged(nameof(AutoNamingProviderId)); }
+        }
+
+        /// <summary>
+        /// Temperature for auto-naming (lower = more consistent names)
+        /// </summary>
+        public double AutoNamingTemperature
+        {
+            get => _autoNamingTemperature;
+            set { _autoNamingTemperature = value; OnPropertyChanged(nameof(AutoNamingTemperature)); }
+        }
+
+        /// <summary>
+        /// Max tokens for auto-naming responses
+        /// </summary>
+        public int AutoNamingMaxTokens
+        {
+            get => _autoNamingMaxTokens;
+            set { _autoNamingMaxTokens = value; OnPropertyChanged(nameof(AutoNamingMaxTokens)); }
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

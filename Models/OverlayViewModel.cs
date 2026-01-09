@@ -432,7 +432,7 @@ namespace AIA.Models
 
         private void OnPluginToastRequested(object? sender, ToastEventArgs e)
         {
-            // Forward to main window via event or direct call
+            // Forward to main window via event
             // The MainWindow will handle this
         }
 
@@ -553,7 +553,8 @@ namespace AIA.Models
             var chatSession = new ChatSession
             {
                 ChatTitle = title ?? $"Chat {chatNumber}",
-                ChatSummary = "New conversation"
+                ChatSummary = "New conversation",
+                IsRenaming = true // Start in rename mode
             };
 
             ActiveChats.Add(chatSession);
@@ -672,6 +673,87 @@ namespace AIA.Models
             {
                 ClearChatSession(SelectedChatSession);
             }
+        }
+
+        /// <summary>
+        /// Deletes all chat sessions and creates a new empty one
+        /// </summary>
+        public void DeleteAllChatSessions()
+        {
+            ActiveChats.Clear();
+            CreateNewChatSession();
+        }
+
+        /// <summary>
+        /// Deletes all chat sessions except the currently selected one
+        /// </summary>
+        public void DeleteAllChatSessionsExceptCurrent()
+        {
+            if (SelectedChatSession == null) return;
+
+            var currentChat = SelectedChatSession;
+            var chatsToRemove = ActiveChats.Where(c => c != currentChat).ToList();
+            
+            foreach (var chat in chatsToRemove)
+            {
+                ActiveChats.Remove(chat);
+            }
+
+            _ = SaveChatsAsync();
+        }
+
+        /// <summary>
+        /// Generates a title for the chat using AI based on the first user message
+        /// </summary>
+        public async Task<bool> AutoNameChatSessionAsync(ChatSession? chatSession = null)
+        {
+            var session = chatSession ?? SelectedChatSession;
+            if (session == null)
+            {
+                System.Diagnostics.Debug.WriteLine("AutoNameChatSessionAsync: No session provided");
+                return false;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"AutoNameChatSessionAsync: Session has {session.Messages.Count} messages");
+
+            // Find first user message
+            var firstUserMessage = session.Messages.FirstOrDefault(m => m.Role == "user");
+            if (firstUserMessage == null || string.IsNullOrWhiteSpace(firstUserMessage.Content))
+            {
+                System.Diagnostics.Debug.WriteLine("AutoNameChatSessionAsync: No user message found");
+                return false;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"AutoNameChatSessionAsync: Found first user message, calling GenerateChatTitleAsync");
+
+            try
+            {
+                var title = await AIOrchestration.GenerateChatTitleAsync(firstUserMessage.Content);
+                if (!string.IsNullOrWhiteSpace(title))
+                {
+                    System.Diagnostics.Debug.WriteLine($"AutoNameChatSessionAsync: Setting chat title to: {title}");
+                    
+                    // Update the title directly - ChatSession.ChatTitle already has PropertyChanged notification
+                    session.ChatTitle = title;
+                    System.Diagnostics.Debug.WriteLine($"AutoNameChatSessionAsync: Chat title updated");
+                    
+                    await SaveChatsAsync();
+                    System.Diagnostics.Debug.WriteLine("AutoNameChatSessionAsync: Chats saved");
+                    return true;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("AutoNameChatSessionAsync: GenerateChatTitleAsync returned null or empty");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"AutoNameChatSessionAsync: Exception: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"AutoNameChatSessionAsync: Exception StackTrace: {ex.StackTrace}");
+                // Silently fail - will keep existing name
+            }
+
+            return false;
         }
 
         #endregion

@@ -319,6 +319,58 @@
                             </Grid>
                         </Border>
                         
+                        <!-- Chat Auto-Naming Settings -->
+                        <TextBlock Text="Chat Auto-Naming" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Enable automatic chat naming" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Generate chat titles automatically after first message is sent" 
+                                               Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" IsChecked="{Binding Settings.EnableAutoNaming}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Auto-naming Provider" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBlock Text="Select which provider to use for generating chat names" 
+                                       Foreground="#666666" FontSize="10" Margin="0,0,0,8"/>
+                            <ComboBox x:Name="AutoNamingProviderCombo" 
+                                      Background="#3E3E42" Foreground="White" BorderBrush="#555555"
+                                      SelectionChanged="AutoNamingProvider_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" FontSize="12"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Margin="0,0,8,0">
+                                <TextBlock Text="Temperature" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Settings.AutoNamingTemperature, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Max Tokens" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Settings.AutoNamingMaxTokens, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                        </Grid>
+                        
                         <!-- Tool Settings -->
                         <TextBlock Text="{local:Localize Orchestration_ToolsMcp}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         
