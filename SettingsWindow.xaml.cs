@@ -58,6 +58,9 @@ namespace AIA
             // Load plugins list
             RefreshPluginsList();
 
+            // Load chat templates list
+            RefreshChatTemplatesList();
+
             // Load backup list
             RefreshBackupsList();
 
@@ -157,6 +160,13 @@ namespace AIA
         {
             var backups = AppSettingsService.GetBackupList();
             BackupsList.ItemsSource = backups;
+        }
+
+        private void RefreshChatTemplatesList()
+        {
+            var templates = OverlayViewModel.Singleton.ChatMessageTemplates;
+            ChatTemplatesControl.ItemsSource = templates;
+            ChatTemplatesEmptyState.Visibility = templates.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
         #region Hotkey Capture
@@ -525,6 +535,88 @@ namespace AIA
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        #endregion
+
+        #region Chat Templates Management
+
+        private void BtnAddTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            var editorWindow = new ChatTemplateEditorWindow();
+            editorWindow.Owner = this;
+            
+            if (editorWindow.ShowDialog() == true && editorWindow.Template != null)
+            {
+                OverlayViewModel.Singleton.AddChatTemplate(editorWindow.Template);
+                RefreshChatTemplatesList();
+                StatusText.Text = Services.LocalizationService.Instance.GetString("Status_TemplateAdded");
+            }
+        }
+
+        private void BtnEditTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is ChatMessageTemplate template)
+            {
+                var editorWindow = new ChatTemplateEditorWindow(template);
+                editorWindow.Owner = this;
+                
+                if (editorWindow.ShowDialog() == true)
+                {
+                    OverlayViewModel.Singleton.UpdateChatTemplate(template);
+                    RefreshChatTemplatesList();
+                    StatusText.Text = Services.LocalizationService.Instance.GetString("Status_TemplateUpdated");
+                }
+            }
+        }
+
+        private void BtnDeleteTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is ChatMessageTemplate template)
+            {
+                var result = System.Windows.MessageBox.Show(
+                    Services.LocalizationService.Instance.GetString("ChatTemplate_DeleteConfirm", template.Title),
+                    Services.LocalizationService.Instance.GetString("Common_Confirm"),
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    OverlayViewModel.Singleton.DeleteChatTemplate(template);
+                    RefreshChatTemplatesList();
+                    StatusText.Text = Services.LocalizationService.Instance.GetString("Status_TemplateDeleted");
+                }
+            }
+        }
+
+        private void BtnMoveTemplateUp_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is ChatMessageTemplate template)
+            {
+                var templates = OverlayViewModel.Singleton.ChatMessageTemplates;
+                var index = templates.IndexOf(template);
+                
+                if (index > 0)
+                {
+                    OverlayViewModel.Singleton.ReorderChatTemplates(template, index - 1);
+                    RefreshChatTemplatesList();
+                }
+            }
+        }
+
+        private void BtnMoveTemplateDown_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is ChatMessageTemplate template)
+            {
+                var templates = OverlayViewModel.Singleton.ChatMessageTemplates;
+                var index = templates.IndexOf(template);
+                
+                if (index < templates.Count - 1)
+                {
+                    OverlayViewModel.Singleton.ReorderChatTemplates(template, index + 1);
+                    RefreshChatTemplatesList();
+                }
+            }
         }
 
         #endregion

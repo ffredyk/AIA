@@ -100,5 +100,8 @@
 
         <!-- Chat Panel -->
         <views:ChatPanelView x:Name="ChatPanel" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Stretch" Margin="10"/>
+
+        <!-- Chat Templates -->
+        <views:ChatTemplatesView x:Name="ChatTemplates" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" Margin="10,0,10,10"/>
     </Grid>
 </Window>

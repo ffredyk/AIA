@@ -665,4 +665,119 @@
 	<data name="Status_CouldNotOpenFolder" xml:space="preserve">
     <value>Nelze otevřít složku:</value>
   </data>
+
+	<!-- Chat Templates -->
+	<data name="Chat_QuickPrompts" xml:space="preserve">
+  <value>Rychlé příkazy</value>
+</data>
+	<data name="Chat_SelectTemplate" xml:space="preserve">
+  <value>Klikněte na šablonu pro odeslání</value>
+</data>
+	<data name="Chat_NoTemplates" xml:space="preserve">
+  <value>Žádné dostupné šablony</value>
+</data>
+
+	<!-- Settings - Chat Templates Tab -->
+	<data name="Settings_ChatTemplates" xml:space="preserve">
+  <value>Šablony chatu</value>
+</data>
+	<data name="Settings_ManageChatTemplates" xml:space="preserve">
+  <value>Spravovat šablony chatu</value>
+</data>
+	<data name="Settings_ChatTemplatesDescription" xml:space="preserve">
+  <value>Vytvářejte a přizpůsobujte rychlé šablony pro běžné požadavky AI</value>
+</data>
+	<data name="Settings_NoTemplates" xml:space="preserve">
+  <value>Žádné vytvořené šablony</value>
+</data>
+	<data name="Settings_Predefined" xml:space="preserve">
+  <value>Vestavěný</value>
+</data>
+
+	<!-- Chat Template Editor -->
+	<data name="ChatTemplate_EditorTitle" xml:space="preserve">
+  <value>Editor šablon chatu</value>
+</data>
+	<data name="ChatTemplate_EditorDescription" xml:space="preserve">
+  <value>Vytvořit nebo upravit šablonu zprávy chatu</value>
+</data>
+	<data name="ChatTemplate_NewTemplate" xml:space="preserve">
+  <value>Nová šablona</value>
+</data>
+	<data name="ChatTemplate_EditTemplate" xml:space="preserve">
+  <value>Upravit šablonu</value>
+</data>
+	<data name="ChatTemplate_Title" xml:space="preserve">
+  <value>Název</value>
+</data>
+	<data name="ChatTemplate_Description" xml:space="preserve">
+  <value>Popis (zobrazený na tlačítku)</value>
+</data>
+	<data name="ChatTemplate_Message" xml:space="preserve">
+  <value>Zpráva (odeslaná AI)</value>
+</data>
+	<data name="ChatTemplate_Icon" xml:space="preserve">
+  <value>Ikona</value>
+</data>
+	<data name="ChatTemplate_Color" xml:space="preserve">
+  <value>Barva</value>
+</data>
+	<data name="ChatTemplate_Preview" xml:space="preserve">
+  <value>Náhled</value>
+</data>
+	<data name="ChatTemplate_TitleRequired" xml:space="preserve">
+  <value>Zadejte prosím název šablony.</value>
+</data>
+	<data name="ChatTemplate_MessageRequired" xml:space="preserve">
+  <value>Zadejte prosím zprávu pro šablonu.</value>
+</data>
+	<data name="ChatTemplate_DeleteConfirm" xml:space="preserve">
+  <value>Opravdu chcete odstranit šablonu '{0}'?</value>
+</data>
+
+	<!-- Common Actions -->
+	<data name="Common_Add" xml:space="preserve">
+  <value>Přidat</value>
+</data>
+	<data name="Common_Edit" xml:space="preserve">
+  <value>Upravit</value>
+</data>
+	<data name="Common_Delete" xml:space="preserve">
+  <value>Smazat</value>
+</data>
+	<data name="Common_Save" xml:space="preserve">
+  <value>Uložit</value>
+</data>
+	<data name="Common_Cancel" xml:space="preserve">
+  <value>Zrušit</value>
+</data>
+	<data name="Common_Close" xml:space="preserve">
+  <value>Zavřít</value>
+</data>
+	<data name="Common_Confirm" xml:space="preserve">
+  <value>Potvrdit</value>
+</data>
+	<data name="Common_Validation" xml:space="preserve">
+  <value>Ověření</value>
+</data>
+	<data name="Common_MoveUp" xml:space="preserve">
+  <value>Přesunout nahoru</value>
+</data>
+	<data name="Common_MoveDown" xml:space="preserve">
+  <value>Přesunout dolů</value>
+</data>
+	<data name="Common_Refresh" xml:space="preserve">
+  <value>Obnovit</value>
+</data>
+
+	<!-- Status Messages -->
+	<data name="Status_TemplateAdded" xml:space="preserve">
+  <value>Šablona byla úspěšně přidána</value>
+</data>
+	<data name="Status_TemplateUpdated" xml:space="preserve">
+  <value>Šablona byla úspěšně aktualizována</value>
+</data>
+	<data name="Status_TemplateDeleted" xml:space="preserve">
+  <value>Šablona byla úspěšně odstraněna</value>
+</data>
 </root>

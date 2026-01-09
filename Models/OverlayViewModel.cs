@@ -48,6 +48,9 @@ namespace AIA.Models
         private bool _isRenamingChat;
         private string _renameChatTitle = string.Empty;
 
+        // Chat message templates
+        private ObservableCollection<ChatMessageTemplate> _chatMessageTemplates = new ObservableCollection<ChatMessageTemplate>();
+
         // Screen capture service
         private readonly ScreenCaptureService _screenCaptureService = new();
 
@@ -153,6 +156,20 @@ namespace AIA.Models
         public ObservableCollection<TaskItem> Tasks { get; set; } = new ObservableCollection<TaskItem>();
 
         public ObservableCollection<ReminderItem> Reminders { get; set; } = new ObservableCollection<ReminderItem>();
+
+        // Chat message templates collection
+        public ObservableCollection<ChatMessageTemplate> ChatMessageTemplates
+        {
+            get => _chatMessageTemplates;
+            set
+            {
+                if (_chatMessageTemplates != value)
+                {
+                    _chatMessageTemplates = value;
+                    OnPropertyChanged(nameof(ChatMessageTemplates));
+                }
+            }
+        }
 
         // Data Bank collections
         public ObservableCollection<DataBankCategory> DataBankCategories { get; set; } = new ObservableCollection<DataBankCategory>();
@@ -401,6 +418,9 @@ namespace AIA.Models
 
             // Load tasks and reminders from disk (or initialize with samples if first run)
             _ = LoadTasksAndRemindersAsync();
+
+            // Load chat message templates
+            _ = LoadChatTemplatesAsync();
 
             // Start timer to refresh reminder time displays
             StartReminderRefreshTimer();
@@ -754,6 +774,88 @@ namespace AIA.Models
             }
 
             return false;
+        }
+
+        #endregion
+
+        #region Chat Message Templates
+
+        private async Task LoadChatTemplatesAsync()
+        {
+            var templates = await ChatTemplateService.LoadTemplatesAsync();
+
+            ChatMessageTemplates.Clear();
+            foreach (var template in templates.Where(t => t.IsEnabled).OrderBy(t => t.Order))
+            {
+                ChatMessageTemplates.Add(template);
+            }
+        }
+
+        /// <summary>
+        /// Saves all chat message templates to disk
+        /// </summary>
+        public async Task SaveChatTemplatesAsync()
+        {
+            // Include both enabled and disabled templates when saving
+            var allTemplates = ChatMessageTemplates.ToList();
+            await ChatTemplateService.SaveTemplatesAsync(allTemplates);
+        }
+
+        /// <summary>
+        /// Adds a new chat message template
+        /// </summary>
+        public void AddChatTemplate(ChatMessageTemplate template)
+        {
+            if (template == null) return;
+
+            // Set order to be last
+            template.Order = ChatMessageTemplates.Count > 0 
+                ? ChatMessageTemplates.Max(t => t.Order) + 1 
+                : 0;
+
+            ChatMessageTemplates.Add(template);
+            _ = SaveChatTemplatesAsync();
+        }
+
+        /// <summary>
+        /// Updates an existing chat message template
+        /// </summary>
+        public void UpdateChatTemplate(ChatMessageTemplate template)
+        {
+            _ = SaveChatTemplatesAsync();
+        }
+
+        /// <summary>
+        /// Deletes a chat message template
+        /// </summary>
+        public void DeleteChatTemplate(ChatMessageTemplate template)
+        {
+            if (template == null) return;
+
+            ChatMessageTemplates.Remove(template);
+            _ = SaveChatTemplatesAsync();
+        }
+
+        /// <summary>
+        /// Reorders chat templates
+        /// </summary>
+        public void ReorderChatTemplates(ChatMessageTemplate template, int newIndex)
+        {
+            if (template == null || newIndex < 0 || newIndex >= ChatMessageTemplates.Count)
+                return;
+
+            var oldIndex = ChatMessageTemplates.IndexOf(template);
+            if (oldIndex == newIndex) return;
+
+            ChatMessageTemplates.Move(oldIndex, newIndex);
+
+            // Update order values
+            for (int i = 0; i < ChatMessageTemplates.Count; i++)
+            {
+                ChatMessageTemplates[i].Order = i;
+            }
+
+            _ = SaveChatTemplatesAsync();
         }
 
         #endregion

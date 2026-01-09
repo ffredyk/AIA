@@ -5,6 +5,10 @@ using System.Windows.Data;
 using System.Windows.Markup;
 using AIA.Models;
 
+// Resolve ambiguous references
+using WpfColor = System.Windows.Media.Color;
+using WpfColorConverter = System.Windows.Media.ColorConverter;
+
 namespace AIA
 {
     /// <summary>
@@ -168,6 +172,41 @@ namespace AIA
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider) => this;
+    }
+
+    /// <summary>
+    /// Converts a hex color string (e.g., "#0078D4") to a Color object
+    /// </summary>
+    public class HexColorConverter : MarkupExtension, IValueConverter
+    {
+        public static HexColorConverter Instance { get; } = new HexColorConverter();
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string hexColor && !string.IsNullOrWhiteSpace(hexColor))
+            {
+                try
+                {
+                    return (WpfColor)WpfColorConverter.ConvertFromString(hexColor);
+                }
+                catch
+                {
+                    return WpfColor.FromRgb(128, 128, 128);
+                }
+            }
+            return WpfColor.FromRgb(128, 128, 128);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is WpfColor color)
+            {
+                return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+            }
+            return "#808080";
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider) => this;

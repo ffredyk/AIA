@@ -52,6 +52,7 @@ namespace AIA
             TasksTab.DataContext = Models.OverlayViewModel.Singleton;
             RemindersTab.DataContext = Models.OverlayViewModel.Singleton;
             ChatPanel.DataContext = Models.OverlayViewModel.Singleton;
+            ChatTemplates.DataContext = Models.OverlayViewModel.Singleton;
             DataAssets.DataContext = Models.OverlayViewModel.Singleton;
             DataBanksTab.DataContext = Models.OverlayViewModel.Singleton;
 
@@ -66,6 +67,9 @@ namespace AIA
 
             // Wire up toast events from all child views
             DataAssets.ToastRequested += OnToastRequested;
+
+            // Wire up chat template events
+            ChatTemplates.TemplateClicked += OnChatTemplateClicked;
 
             // Subscribe to reminder notifications
             Models.OverlayViewModel.Singleton.ReminderNotificationTriggered += OnReminderNotificationTriggered;
@@ -760,6 +764,22 @@ namespace AIA
         {
             var viewModel = Models.OverlayViewModel.Singleton;
             viewModel.SnoozeReminder(reminder);
+        }
+
+        #endregion
+
+        #region Chat Templates
+
+        private void OnChatTemplateClicked(object? sender, ChatMessageTemplate template)
+        {
+            if (template == null) return;
+
+            // Set the message in the chat panel and send it
+            var viewModel = Models.OverlayViewModel.Singleton;
+            viewModel.MessageInput = template.Message;
+
+            // Trigger the send message in ChatPanel
+            ChatPanel.SendTemplateMessage(template.Message);
         }
 
         #endregion

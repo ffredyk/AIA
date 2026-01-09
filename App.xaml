@@ -12,6 +12,9 @@
                 <ResourceDictionary Source="Resources/SharedStyles.xaml"/>
                 <ResourceDictionary Source="Resources/PluginTemplates.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Global Converters -->
+            <local:HexColorConverter x:Key="ColorConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -614,4 +614,119 @@
     <value>Could not open folder:</value>
   </data>
 
+	<!-- Chat Templates -->
+	<data name="Chat_QuickPrompts" xml:space="preserve">
+  <value>Quick Prompts</value>
+</data>
+	<data name="Chat_SelectTemplate" xml:space="preserve">
+  <value>Click a template to send</value>
+</data>
+	<data name="Chat_NoTemplates" xml:space="preserve">
+  <value>No templates available</value>
+</data>
+
+	<!-- Settings - Chat Templates Tab -->
+	<data name="Settings_ChatTemplates" xml:space="preserve">
+  <value>Chat Templates</value>
+</data>
+	<data name="Settings_ManageChatTemplates" xml:space="preserve">
+  <value>Manage Chat Templates</value>
+</data>
+	<data name="Settings_ChatTemplatesDescription" xml:space="preserve">
+  <value>Create and customize quick prompt templates for common AI requests</value>
+</data>
+	<data name="Settings_NoTemplates" xml:space="preserve">
+  <value>No templates created</value>
+</data>
+	<data name="Settings_Predefined" xml:space="preserve">
+  <value>Built-in</value>
+</data>
+
+	<!-- Chat Template Editor -->
+	<data name="ChatTemplate_EditorTitle" xml:space="preserve">
+  <value>Chat Template Editor</value>
+</data>
+	<data name="ChatTemplate_EditorDescription" xml:space="preserve">
+  <value>Create or edit a chat message template</value>
+</data>
+	<data name="ChatTemplate_NewTemplate" xml:space="preserve">
+  <value>New Template</value>
+</data>
+	<data name="ChatTemplate_EditTemplate" xml:space="preserve">
+  <value>Edit Template</value>
+</data>
+	<data name="ChatTemplate_Title" xml:space="preserve">
+  <value>Title</value>
+</data>
+	<data name="ChatTemplate_Description" xml:space="preserve">
+  <value>Description (shown on button)</value>
+</data>
+	<data name="ChatTemplate_Message" xml:space="preserve">
+  <value>Message (sent to AI)</value>
+</data>
+	<data name="ChatTemplate_Icon" xml:space="preserve">
+  <value>Icon</value>
+</data>
+	<data name="ChatTemplate_Color" xml:space="preserve">
+  <value>Color</value>
+</data>
+	<data name="ChatTemplate_Preview" xml:space="preserve">
+  <value>Preview</value>
+</data>
+	<data name="ChatTemplate_TitleRequired" xml:space="preserve">
+  <value>Please enter a title for the template.</value>
+</data>
+	<data name="ChatTemplate_MessageRequired" xml:space="preserve">
+  <value>Please enter a message for the template.</value>
+</data>
+	<data name="ChatTemplate_DeleteConfirm" xml:space="preserve">
+  <value>Are you sure you want to delete the template '{0}'?</value>
+</data>
+
+	<!-- Common Actions -->
+	<data name="Common_Add" xml:space="preserve">
+  <value>Add</value>
+</data>
+	<data name="Common_Edit" xml:space="preserve">
+  <value>Edit</value>
+</data>
+	<data name="Common_Delete" xml:space="preserve">
+  <value>Delete</value>
+</data>
+	<data name="Common_Save" xml:space="preserve">
+  <value>Save</value>
+</data>
+	<data name="Common_Cancel" xml:space="preserve">
+  <value>Cancel</value>
+</data>
+	<data name="Common_Close" xml:space="preserve">
+  <value>Close</value>
+</data>
+	<data name="Common_Confirm" xml:space="preserve">
+  <value>Confirm</value>
+</data>
+	<data name="Common_Validation" xml:space="preserve">
+  <value>Validation</value>
+</data>
+	<data name="Common_MoveUp" xml:space="preserve">
+  <value>Move Up</value>
+</data>
+	<data name="Common_MoveDown" xml:space="preserve">
+  <value>Move Down</value>
+</data>
+	<data name="Common_Refresh" xml:space="preserve">
+  <value>Refresh</value>
+</data>
+
+	<!-- Status Messages -->
+	<data name="Status_TemplateAdded" xml:space="preserve">
+  <value>Template added successfully</value>
+</data>
+	<data name="Status_TemplateUpdated" xml:space="preserve">
+  <value>Template updated successfully</value>
+</data>
+	<data name="Status_TemplateDeleted" xml:space="preserve">
+  <value>Template deleted successfully</value>
+</data>
+
 </root>

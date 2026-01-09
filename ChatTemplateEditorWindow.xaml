@@ -1,0 +1,154 @@
+<Window x:Class="AIA.ChatTemplateEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:local="clr-namespace:AIA"
+        Title="{local:Localize ChatTemplate_EditorTitle}"
+        Height="600" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#1E1E1E">
+    <Window.Resources>
+        <local:HexColorConverter x:Key="ColorConverter"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2D2D30" BorderBrush="#3E3E42" BorderThickness="0,0,0,1" Padding="16,12">
+            <StackPanel Orientation="Horizontal">
+                <ui:SymbolIcon Symbol="Edit20" FontSize="24" Foreground="#0078D4" Margin="0,0,12,0"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="TitleText" Text="{local:Localize ChatTemplate_EditTemplate}" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="{local:Localize ChatTemplate_EditorDescription}" Foreground="#999999" FontSize="12"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="16">
+            <StackPanel>
+                
+                <!-- Title -->
+                <TextBlock Text="{local:Localize ChatTemplate_Title}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                <TextBox x:Name="TxtTitle" Padding="10,8" FontSize="14"
+                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Margin="0,0,0,16"/>
+                
+                <!-- Description -->
+                <TextBlock Text="{local:Localize ChatTemplate_Description}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                <TextBox x:Name="TxtDescription" Padding="10,8" FontSize="14"
+                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Margin="0,0,0,16"
+                         TextWrapping="Wrap" MaxLength="100"/>
+                
+                <!-- Message -->
+                <TextBlock Text="{local:Localize ChatTemplate_Message}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                <TextBox x:Name="TxtMessage" Padding="10,8" FontSize="14" Height="120"
+                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Margin="0,0,0,16"
+                         TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                
+                <!-- Icon Selection -->
+                <TextBlock Text="{local:Localize ChatTemplate_Icon}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <ComboBox x:Name="CmbIcon" Height="36" Padding="10,8" FontSize="14"
+                              Background="#3E3E42" Foreground="White" BorderBrush="#555555"
+                              SelectionChanged="CmbIcon_SelectionChanged">
+                        <ComboBoxItem Content="Chat" Tag="Chat12"/>
+                        <ComboBoxItem Content="Chat Sparkle" Tag="ChatSparkle20"/>
+                        <ComboBoxItem Content="Calendar" Tag="Calendar20"/>
+                        <ComboBoxItem Content="Calendar Week" Tag="CalendarWeekNumbers20"/>
+                        <ComboBoxItem Content="Calendar LTR" Tag="CalendarLtr20"/>
+                        <ComboBoxItem Content="Alert" Tag="Alert20"/>
+                        <ComboBoxItem Content="Checkmark Circle" Tag="CheckmarkCircle20"/>
+                        <ComboBoxItem Content="Arrow Sort" Tag="ArrowSort20"/>
+                        <ComboBoxItem Content="Document List" Tag="DocumentBulletList20"/>
+                        <ComboBoxItem Content="Target" Tag="Target20"/>
+                        <ComboBoxItem Content="Lightbulb" Tag="Lightbulb20"/>
+                        <ComboBoxItem Content="Clock" Tag="Clock20"/>
+                        <ComboBoxItem Content="Star" Tag="Star20"/>
+                        <ComboBoxItem Content="Trophy" Tag="Trophy20"/>
+                    </ComboBox>
+                    
+                    <!-- Icon Preview -->
+                    <Border Grid.Column="1" Width="36" Height="36" CornerRadius="8" Margin="8,0,0,0" x:Name="IconPreviewBorder">
+                        <ui:SymbolIcon x:Name="IconPreview" Symbol="Chat12" FontSize="18"/>
+                    </Border>
+                </Grid>
+                
+                <!-- Color Selection -->
+                <TextBlock Text="{local:Localize ChatTemplate_Color}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <ComboBox x:Name="CmbColor" Height="36" Padding="10,8" FontSize="14"
+                              Background="#3E3E42" Foreground="White" BorderBrush="#555555"
+                              SelectionChanged="CmbColor_SelectionChanged">
+                        <ComboBoxItem Content="Blue" Tag="#0078D4"/>
+                        <ComboBoxItem Content="Green" Tag="#1EB75F"/>
+                        <ComboBoxItem Content="Orange" Tag="#FFA500"/>
+                        <ComboBoxItem Content="Red" Tag="#FF4444"/>
+                        <ComboBoxItem Content="Purple" Tag="#9B59B6"/>
+                        <ComboBoxItem Content="Teal" Tag="#3498DB"/>
+                        <ComboBoxItem Content="Pink" Tag="#E74C3C"/>
+                        <ComboBoxItem Content="Lime" Tag="#2ECC71"/>
+                        <ComboBoxItem Content="Yellow" Tag="#F1C40F"/>
+                        <ComboBoxItem Content="Magenta" Tag="#E91E63"/>
+                    </ComboBox>
+                    
+                    <!-- Color Preview -->
+                    <Border Grid.Column="1" Width="36" Height="36" CornerRadius="8" Margin="8,0,0,0" x:Name="ColorPreviewBorder"/>
+                </Grid>
+                
+                <!-- Preview -->
+                <TextBlock Text="{local:Localize ChatTemplate_Preview}" Foreground="#999999" FontSize="11" Margin="0,0,0,8"/>
+                <Border Padding="12" CornerRadius="8" Background="#2D2D30" BorderBrush="#3E3E42" BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Preview Icon -->
+                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Margin="0,0,8,0" x:Name="PreviewIconBorder">
+                            <ui:SymbolIcon x:Name="PreviewIcon" Symbol="Chat12" FontSize="18"/>
+                        </Border>
+                        
+                        <!-- Preview Text -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock x:Name="PreviewTitle" Text="Template Title" Foreground="White" FontWeight="SemiBold" FontSize="11"/>
+                            <TextBlock x:Name="PreviewDescription" Text="Template description" Foreground="#AAAAAA" FontSize="9" Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#2D2D30" BorderBrush="#3E3E42" BorderThickness="0,1,0,0" Padding="16,12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <ui:Button Padding="16,8" Margin="0,0,8,0" Click="BtnCancel_Click">
+                    <TextBlock Text="{local:Localize Common_Cancel}" Foreground="White"/>
+                </ui:Button>
+                <ui:Button Padding="16,8" Click="BtnSave_Click" Background="#FF0078D4">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Save16" Foreground="White" FontSize="14"/>
+                        <TextBlock Text="{local:Localize Common_Save}" Foreground="White" FontWeight="SemiBold" Margin="6,0,0,0"/>
+                    </StackPanel>
+                </ui:Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

@@ -203,6 +203,22 @@ namespace AIA.Views
 
         #region Message Sending
 
+        /// <summary>
+        /// Sends a template message programmatically
+        /// </summary>
+        public void SendTemplateMessage(string message)
+        {
+            if (ViewModel == null || ViewModel.SelectedChatSession == null)
+                return;
+
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+
+            // Set the message and send it
+            ViewModel.MessageInput = message;
+            _ = SendMessageAsync();
+        }
+
         private void BtnSendMessage(object sender, RoutedEventArgs e)
         {
             _ = SendMessageAsync();
