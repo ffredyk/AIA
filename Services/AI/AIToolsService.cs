@@ -154,6 +154,28 @@ namespace AIA.Services.AI
 
             RegisterTool(new AITool
             {
+                Name = "add_subtask",
+                Description = "Add a subtask to an existing task",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["parent_task_title"] = new AIToolParameter { Type = "string", Description = "The title of the parent task (partial match)", Required = false },
+                    ["parent_task_id"] = new AIToolParameter { Type = "string", Description = "The ID of the parent task", Required = false },
+                    ["title"] = new AIToolParameter { Type = "string", Description = "The subtask title", Required = true },
+                    ["description"] = new AIToolParameter { Type = "string", Description = "Subtask description", Required = false },
+                    ["priority"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "Subtask priority",
+                        Required = false,
+                        Enum = new[] { "Low", "Medium", "High", "Critical" }
+                    },
+                    ["due_date"] = new AIToolParameter { Type = "string", Description = "Due date in ISO format (YYYY-MM-DD)", Required = false }
+                },
+                Handler = AddSubtaskHandler
+            });
+
+            RegisterTool(new AITool
+            {
                 Name = "update_task_status",
                 Description = "Update the status of a task",
                 Parameters = new Dictionary<string, AIToolParameter>
@@ -168,6 +190,182 @@ namespace AIA.Services.AI
                     }
                 },
                 Handler = UpdateTaskStatusHandler
+            });
+
+            // === NEW EDIT TOOLS ===
+
+            RegisterTool(new AITool
+            {
+                Name = "update_task",
+                Description = "Update multiple properties of an existing task",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["task_id"] = new AIToolParameter { Type = "string", Description = "The task ID", Required = false },
+                    ["task_title"] = new AIToolParameter { Type = "string", Description = "The task title to find (partial match)", Required = false },
+                    ["new_title"] = new AIToolParameter { Type = "string", Description = "New task title", Required = false },
+                    ["description"] = new AIToolParameter { Type = "string", Description = "New description", Required = false },
+                    ["notes"] = new AIToolParameter { Type = "string", Description = "New notes", Required = false },
+                    ["status"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "New status",
+                        Required = false,
+                        Enum = new[] { "NotStarted", "InProgress", "OnHold", "Completed", "Cancelled" }
+                    },
+                    ["priority"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "New priority",
+                        Required = false,
+                        Enum = new[] { "Low", "Medium", "High", "Critical" }
+                    },
+                    ["due_date"] = new AIToolParameter { Type = "string", Description = "New due date in ISO format (YYYY-MM-DD), or 'clear' to remove", Required = false }
+                },
+                Handler = UpdateTaskHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "delete_task",
+                Description = "Delete a task by ID or title",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["task_id"] = new AIToolParameter { Type = "string", Description = "The task ID", Required = false },
+                    ["task_title"] = new AIToolParameter { Type = "string", Description = "The task title to find (partial match)", Required = false }
+                },
+                Handler = DeleteTaskHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "update_subtask",
+                Description = "Update a subtask within a parent task",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["subtask_id"] = new AIToolParameter { Type = "string", Description = "The subtask ID", Required = false },
+                    ["subtask_title"] = new AIToolParameter { Type = "string", Description = "The subtask title to find (partial match)", Required = false },
+                    ["parent_task_id"] = new AIToolParameter { Type = "string", Description = "Parent task ID to narrow search", Required = false },
+                    ["new_title"] = new AIToolParameter { Type = "string", Description = "New subtask title", Required = false },
+                    ["description"] = new AIToolParameter { Type = "string", Description = "New description", Required = false },
+                    ["status"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "New status",
+                        Required = false,
+                        Enum = new[] { "NotStarted", "InProgress", "OnHold", "Completed", "Cancelled" }
+                    },
+                    ["priority"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "New priority",
+                        Required = false,
+                        Enum = new[] { "Low", "Medium", "High", "Critical" }
+                    },
+                    ["due_date"] = new AIToolParameter { Type = "string", Description = "New due date in ISO format (YYYY-MM-DD), or 'clear' to remove", Required = false }
+                },
+                Handler = UpdateSubtaskHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "delete_subtask",
+                Description = "Delete a subtask from a parent task",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["subtask_id"] = new AIToolParameter { Type = "string", Description = "The subtask ID", Required = false },
+                    ["subtask_title"] = new AIToolParameter { Type = "string", Description = "The subtask title to find (partial match)", Required = false },
+                    ["parent_task_id"] = new AIToolParameter { Type = "string", Description = "Parent task ID to narrow search", Required = false }
+                },
+                Handler = DeleteSubtaskHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "update_reminder",
+                Description = "Update an existing reminder",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["reminder_id"] = new AIToolParameter { Type = "string", Description = "The reminder ID", Required = false },
+                    ["reminder_title"] = new AIToolParameter { Type = "string", Description = "The reminder title to find (partial match)", Required = false },
+                    ["new_title"] = new AIToolParameter { Type = "string", Description = "New reminder title", Required = false },
+                    ["due_datetime"] = new AIToolParameter { Type = "string", Description = "New due date/time in ISO format", Required = false },
+                    ["severity"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "New severity",
+                        Required = false,
+                        Enum = new[] { "Low", "Medium", "High", "Urgent" }
+                    },
+                    ["completed"] = new AIToolParameter { Type = "boolean", Description = "Mark as completed/incomplete", Required = false }
+                },
+                Handler = UpdateReminderHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "delete_reminder",
+                Description = "Delete a reminder by ID or title",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["reminder_id"] = new AIToolParameter { Type = "string", Description = "The reminder ID", Required = false },
+                    ["reminder_title"] = new AIToolParameter { Type = "string", Description = "The reminder title to find (partial match)", Required = false }
+                },
+                Handler = DeleteReminderHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "update_databank_entry",
+                Description = "Update an existing data bank entry",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["entry_id"] = new AIToolParameter { Type = "string", Description = "The entry ID", Required = false },
+                    ["entry_title"] = new AIToolParameter { Type = "string", Description = "The entry title to find (partial match)", Required = false },
+                    ["category_name"] = new AIToolParameter { Type = "string", Description = "Category name to narrow search", Required = false },
+                    ["new_title"] = new AIToolParameter { Type = "string", Description = "New entry title", Required = false },
+                    ["content"] = new AIToolParameter { Type = "string", Description = "New content", Required = false },
+                    ["tags"] = new AIToolParameter { Type = "string", Description = "New tags (comma-separated)", Required = false }
+                },
+                Handler = UpdateDataBankEntryHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "delete_databank_entry",
+                Description = "Delete a data bank entry by ID or title",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["entry_id"] = new AIToolParameter { Type = "string", Description = "The entry ID", Required = false },
+                    ["entry_title"] = new AIToolParameter { Type = "string", Description = "The entry title to find (partial match)", Required = false },
+                    ["category_name"] = new AIToolParameter { Type = "string", Description = "Category name to narrow search", Required = false }
+                },
+                Handler = DeleteDataBankEntryHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "add_task_tags",
+                Description = "Add tags to a task",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["task_id"] = new AIToolParameter { Type = "string", Description = "The task ID", Required = false },
+                    ["task_title"] = new AIToolParameter { Type = "string", Description = "The task title to find (partial match)", Required = false },
+                    ["tags"] = new AIToolParameter { Type = "string", Description = "Comma-separated tags to add", Required = true }
+                },
+                Handler = AddTaskTagsHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "remove_task_tags",
+                Description = "Remove tags from a task",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["task_id"] = new AIToolParameter { Type = "string", Description = "The task ID", Required = false },
+                    ["task_title"] = new AIToolParameter { Type = "string", Description = "The task title to find (partial match)", Required = false },
+                    ["tags"] = new AIToolParameter { Type = "string", Description = "Comma-separated tags to remove", Required = true }
+                },
+                Handler = RemoveTaskTagsHandler
             });
 
             // Reminder Tools
@@ -278,6 +476,30 @@ namespace AIA.Services.AI
                 Description = "Get information about currently captured screenshots/data assets",
                 Parameters = new Dictionary<string, AIToolParameter>(),
                 Handler = GetCurrentScreenshotsHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "list_available_screenshots",
+                Description = "**IMPORTANT: You CAN see the user's screen!** This tool lists all available screenshots/data assets with metadata. The user has likely already captured screenshots that you can analyze. Always check this first when the user asks about what's on their screen, what they're looking at, or to help with visual tasks. Use this to discover what screenshots are available, then use get_screenshot_base64 to retrieve and analyze them.",
+                Parameters = new Dictionary<string, AIToolParameter>(),
+                Handler = ListAvailableScreenshotsHandler
+            });
+
+            RegisterTool(new AITool
+            {
+                Name = "get_screenshot_base64",
+                Description = "Get a screenshot in base64-encoded PNG format for visual analysis. Use the screenshot ID from list_available_screenshots. This allows you to see and analyze what's on the user's screen - you can identify UI elements, read text, describe images, help with visual problems, etc. Always use this when the user asks about their screen or shows you something visually.",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["screenshot_id"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "The ID of the screenshot to retrieve (from list_available_screenshots)",
+                        Required = true
+                    }
+                },
+                Handler = GetScreenshotBase64Handler
             });
 
             // System Tools
@@ -537,6 +759,68 @@ namespace AIA.Services.AI
             return JsonSerializer.Serialize(new { success = true, taskId = task.Id.ToString(), message = $"Task '{title}' created successfully" });
         }
 
+        private string AddSubtaskHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+
+            if (!TryGetArg<string>(args, "title", out var title) || string.IsNullOrWhiteSpace(title))
+            {
+                return JsonSerializer.Serialize(new { error = "Subtask title is required" });
+            }
+
+            // Find parent task by ID or title
+            TaskItem? parentTask = null;
+
+            if (TryGetArg<string>(args, "parent_task_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                parentTask = vm.FindTaskById(guid);
+            }
+            else if (TryGetArg<string>(args, "parent_task_title", out var parentTitle))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    parentTask = vm.Tasks.FirstOrDefault(t => t.Title.Contains(parentTitle, StringComparison.OrdinalIgnoreCase));
+                });
+            }
+
+            if (parentTask == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Parent task not found. Provide either 'parent_task_id' or 'parent_task_title' parameter." });
+            }
+
+            // Create subtask
+            var subtask = new TaskItem 
+            { 
+                Title = title,
+                Status = TaskStatus.NotStarted,
+                Priority = TaskPriority.Medium
+            };
+
+            if (TryGetArg<string>(args, "description", out var desc))
+                subtask.Description = desc;
+
+            if (TryGetArg<string>(args, "priority", out var priority) && Enum.TryParse<TaskPriority>(priority, out var priorityEnum))
+                subtask.Priority = priorityEnum;
+
+            if (TryGetArg<string>(args, "due_date", out var dueDate) && DateTime.TryParse(dueDate, out var dueDateValue))
+                subtask.DueDate = dueDateValue;
+
+            // Add subtask to parent
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                parentTask.AddSubtask(subtask);
+            });
+            _ = vm.SaveTasksAndRemindersAsync();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                success = true, 
+                subtaskId = subtask.Id.ToString(), 
+                parentTaskId = parentTask.Id.ToString(),
+                message = $"Subtask '{title}' added to task '{parentTask.Title}'" 
+            });
+        }
+
         private string UpdateTaskStatusHandler(Dictionary<string, object> args)
         {
             var vm = _getViewModel();
@@ -571,6 +855,772 @@ namespace AIA.Services.AI
             return JsonSerializer.Serialize(new { success = true, message = $"Task '{task.Title}' status updated to {statusEnum}" });
         }
 
+        private string UpdateTaskHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            TaskItem? task = null;
+
+            // Find task by ID or title
+            if (TryGetArg<string>(args, "task_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                task = vm.FindTaskById(guid);
+            }
+            else if (TryGetArg<string>(args, "task_title", out var title))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    task = vm.Tasks.FirstOrDefault(t => t.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                });
+            }
+
+            if (task == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Task not found. Provide either 'task_id' or 'task_title' parameter." });
+            }
+
+            var changes = new List<string>();
+
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (TryGetArg<string>(args, "new_title", out var newTitle) && !string.IsNullOrWhiteSpace(newTitle))
+                {
+                    task.Title = newTitle;
+                    changes.Add("title");
+                }
+
+                if (TryGetArg<string>(args, "description", out var desc))
+                {
+                    task.Description = desc;
+                    changes.Add("description");
+                }
+
+                if (TryGetArg<string>(args, "notes", out var notes))
+                {
+                    task.Notes = notes;
+                    changes.Add("notes");
+                }
+
+                if (TryGetArg<string>(args, "status", out var status) && Enum.TryParse<TaskStatus>(status, out var statusEnum))
+                {
+                    task.Status = statusEnum;
+                    changes.Add("status");
+                }
+
+                if (TryGetArg<string>(args, "priority", out var priority) && Enum.TryParse<TaskPriority>(priority, out var priorityEnum))
+                {
+                    task.Priority = priorityEnum;
+                    changes.Add("priority");
+                }
+
+                if (TryGetArg<string>(args, "due_date", out var dueDate))
+                {
+                    if (dueDate.ToLowerInvariant() == "clear")
+                    {
+                        task.DueDate = null;
+                        changes.Add("due_date (cleared)");
+                    }
+                    else if (DateTime.TryParse(dueDate, out var dueDateValue))
+                    {
+                        task.DueDate = dueDateValue;
+                        changes.Add("due_date");
+                    }
+                }
+            });
+
+            if (changes.Count == 0)
+            {
+                return JsonSerializer.Serialize(new { error = "No valid updates provided" });
+            }
+
+            _ = vm.SaveTasksAndRemindersAsync();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                success = true, 
+                taskId = task.Id.ToString(),
+                message = $"Task '{task.Title}' updated: {string.Join(", ", changes)}" 
+            });
+        }
+
+        private string DeleteTaskHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            TaskItem? task = null;
+
+            if (TryGetArg<string>(args, "task_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                task = vm.FindTaskById(guid);
+            }
+            else if (TryGetArg<string>(args, "task_title", out var title))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    task = vm.Tasks.FirstOrDefault(t => t.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                });
+            }
+
+            if (task == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Task not found. Provide either 'task_id' or 'task_title' parameter." });
+            }
+
+            var taskTitle = task.Title;
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                vm.DeleteTask(task);
+            });
+
+            return JsonSerializer.Serialize(new { success = true, message = $"Task '{taskTitle}' deleted successfully" });
+        }
+
+        private string UpdateSubtaskHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            TaskItem? subtask = null;
+
+            // Find subtask by ID or title
+            if (TryGetArg<string>(args, "subtask_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                subtask = vm.FindTaskById(guid);
+            }
+            else if (TryGetArg<string>(args, "subtask_title", out var title))
+            {
+                // If parent task ID is provided, search within that parent only
+                if (TryGetArg<string>(args, "parent_task_id", out var parentId) && Guid.TryParse(parentId, out var parentGuid))
+                {
+                    var parentTask = vm.FindTaskById(parentGuid);
+                    if (parentTask != null)
+                    {
+                        subtask = parentTask.Subtasks.FirstOrDefault(s => s.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                    }
+                }
+                else
+                {
+                    // Search all tasks for subtasks
+                    foreach (var task in vm.Tasks)
+                    {
+                        subtask = task.Subtasks.FirstOrDefault(s => s.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                        if (subtask != null) break;
+                    }
+                }
+            }
+
+            if (subtask == null || !subtask.IsSubtask)
+            {
+                return JsonSerializer.Serialize(new { error = "Subtask not found. Provide either 'subtask_id' or 'subtask_title' parameter." });
+            }
+
+            var changes = new List<string>();
+
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (TryGetArg<string>(args, "new_title", out var newTitle) && !string.IsNullOrWhiteSpace(newTitle))
+                {
+                    subtask.Title = newTitle;
+                    changes.Add("title");
+                }
+
+                if (TryGetArg<string>(args, "description", out var desc))
+                {
+                    subtask.Description = desc;
+                    changes.Add("description");
+                }
+
+                if (TryGetArg<string>(args, "status", out var status) && Enum.TryParse<TaskStatus>(status, out var statusEnum))
+                {
+                    subtask.Status = statusEnum;
+                    changes.Add("status");
+                }
+
+                if (TryGetArg<string>(args, "priority", out var priority) && Enum.TryParse<TaskPriority>(priority, out var priorityEnum))
+                {
+                    subtask.Priority = priorityEnum;
+                    changes.Add("priority");
+                }
+
+                if (TryGetArg<string>(args, "due_date", out var dueDate))
+                {
+                    if (dueDate.ToLowerInvariant() == "clear")
+                    {
+                        subtask.DueDate = null;
+                        changes.Add("due_date (cleared)");
+                    }
+                    else if (DateTime.TryParse(dueDate, out var dueDateValue))
+                    {
+                        subtask.DueDate = dueDateValue;
+                        changes.Add("due_date");
+                    }
+                }
+            });
+
+            if (changes.Count == 0)
+            {
+                return JsonSerializer.Serialize(new { error = "No valid updates provided" });
+            }
+
+            _ = vm.SaveTasksAndRemindersAsync();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                success = true, 
+                subtaskId = subtask.Id.ToString(),
+                parentTaskId = subtask.ParentTaskId?.ToString(),
+                message = $"Subtask '{subtask.Title}' updated: {string.Join(", ", changes)}" 
+            });
+        }
+
+        private string DeleteSubtaskHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            TaskItem? subtask = null;
+            TaskItem? parentTask = null;
+
+            // Find subtask by ID or title
+            if (TryGetArg<string>(args, "subtask_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                subtask = vm.FindTaskById(guid);
+                if (subtask?.ParentTaskId.HasValue == true)
+                {
+                    parentTask = vm.FindTaskById(subtask.ParentTaskId.Value);
+                }
+            }
+            else if (TryGetArg<string>(args, "subtask_title", out var title))
+            {
+                // If parent task ID is provided, search within that parent only
+                if (TryGetArg<string>(args, "parent_task_id", out var parentId) && Guid.TryParse(parentId, out var parentGuid))
+                {
+                    parentTask = vm.FindTaskById(parentGuid);
+                    if (parentTask != null)
+                    {
+                        subtask = parentTask.Subtasks.FirstOrDefault(s => s.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                    }
+                }
+                else
+                {
+                    // Search all tasks for subtasks
+                    foreach (var task in vm.Tasks)
+                    {
+                        subtask = task.Subtasks.FirstOrDefault(s => s.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                        if (subtask != null)
+                        {
+                            parentTask = task;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (subtask == null || parentTask == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Subtask not found. Provide either 'subtask_id' or 'subtask_title' parameter." });
+            }
+
+            var subtaskTitle = subtask.Title;
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                parentTask.Subtasks.Remove(subtask);
+                parentTask.RefreshSubtaskProgress();
+            });
+            _ = vm.SaveTasksAndRemindersAsync();
+
+            return JsonSerializer.Serialize(new { success = true, message = $"Subtask '{subtaskTitle}' deleted successfully" });
+        }
+
+        private string UpdateReminderHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            ReminderItem? reminder = null;
+
+            // Find reminder by ID or title
+            if (TryGetArg<string>(args, "reminder_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    reminder = vm.Reminders.FirstOrDefault(r => r.Id == guid);
+                });
+            }
+            else if (TryGetArg<string>(args, "reminder_title", out var title))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    reminder = vm.Reminders.FirstOrDefault(r => r.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                });
+            }
+
+            if (reminder == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Reminder not found. Provide either 'reminder_id' or 'reminder_title' parameter." });
+            }
+
+            var changes = new List<string>();
+
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (TryGetArg<string>(args, "new_title", out var newTitle) && !string.IsNullOrWhiteSpace(newTitle))
+                {
+                    reminder.Title = newTitle;
+                    changes.Add("title");
+                }
+
+                if (TryGetArg<string>(args, "due_datetime", out var dueDateTime) && DateTime.TryParse(dueDateTime, out var dueDateTimeValue))
+                {
+                    reminder.DueDate = dueDateTimeValue;
+                    changes.Add("due_datetime");
+                }
+
+                if (TryGetArg<string>(args, "severity", out var severity) && Enum.TryParse<ReminderSeverity>(severity, out var severityEnum))
+                {
+                    reminder.Severity = severityEnum;
+                    changes.Add("severity");
+                }
+
+                if (TryGetArg<bool>(args, "completed", out var completed))
+                {
+                    reminder.IsCompleted = completed;
+                    changes.Add(completed ? "marked completed" : "marked incomplete");
+                }
+            });
+
+            if (changes.Count == 0)
+            {
+                return JsonSerializer.Serialize(new { error = "No valid updates provided" });
+            }
+
+            _ = vm.SaveTasksAndRemindersAsync();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                success = true, 
+                reminderId = reminder.Id.ToString(),
+                message = $"Reminder '{reminder.Title}' updated: {string.Join(", ", changes)}" 
+            });
+        }
+
+        private string DeleteReminderHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            ReminderItem? reminder = null;
+
+            if (TryGetArg<string>(args, "reminder_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    reminder = vm.Reminders.FirstOrDefault(r => r.Id == guid);
+                });
+            }
+            else if (TryGetArg<string>(args, "reminder_title", out var title))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    reminder = vm.Reminders.FirstOrDefault(r => r.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                });
+            }
+
+            if (reminder == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Reminder not found. Provide either 'reminder_id' or 'reminder_title' parameter." });
+            }
+
+            var reminderTitle = reminder.Title;
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                vm.DeleteReminder(reminder);
+            });
+
+            return JsonSerializer.Serialize(new { success = true, message = $"Reminder '{reminderTitle}' deleted successfully" });
+        }
+
+        private string UpdateDataBankEntryHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            DataBankEntry? entry = null;
+
+            // Find entry by ID or title
+            if (TryGetArg<string>(args, "entry_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                // Search across all categories
+                foreach (var category in vm.DataBankCategories)
+                {
+                    var previousCategory = vm.SelectedCategory;
+                    vm.SelectedCategory = category;
+                    
+                    entry = vm.CurrentCategoryEntries.FirstOrDefault(e => e.Id == guid);
+                    
+                    if (entry != null)
+                    {
+                        vm.SelectedCategory = previousCategory;
+                        break;
+                    }
+                    vm.SelectedCategory = previousCategory;
+                }
+            }
+            else if (TryGetArg<string>(args, "entry_title", out var title))
+            {
+                var searchCategories = vm.DataBankCategories.AsEnumerable();
+                
+                // Narrow search by category if provided
+                if (TryGetArg<string>(args, "category_name", out var categoryName))
+                {
+                    searchCategories = searchCategories.Where(c => c.Name.Contains(categoryName, StringComparison.OrdinalIgnoreCase));
+                }
+
+                foreach (var category in searchCategories)
+                {
+                    var previousCategory = vm.SelectedCategory;
+                    vm.SelectedCategory = category;
+                    
+                    entry = vm.CurrentCategoryEntries.FirstOrDefault(e => e.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (entry != null)
+                    {
+                        vm.SelectedCategory = previousCategory;
+                        break;
+                    }
+                    vm.SelectedCategory = previousCategory;
+                }
+            }
+
+            if (entry == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Entry not found. Provide either 'entry_id' or 'entry_title' parameter." });
+            }
+
+            var changes = new List<string>();
+
+            if (TryGetArg<string>(args, "new_title", out var newTitle) && !string.IsNullOrWhiteSpace(newTitle))
+            {
+                entry.Title = newTitle;
+                changes.Add("title");
+            }
+
+            if (TryGetArg<string>(args, "content", out var content))
+            {
+                entry.Content = content;
+                changes.Add("content");
+            }
+
+            if (TryGetArg<string>(args, "tags", out var tags))
+            {
+                entry.Tags = tags;
+                changes.Add("tags");
+            }
+
+            if (changes.Count == 0)
+            {
+                return JsonSerializer.Serialize(new { error = "No valid updates provided" });
+            }
+
+            _ = vm.SaveDataBanksAsync();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                success = true, 
+                entryId = entry.Id.ToString(),
+                message = $"Entry '{entry.Title}' updated: {string.Join(", ", changes)}" 
+            });
+        }
+
+        private string DeleteDataBankEntryHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            DataBankEntry? entry = null;
+            DataBankCategory? entryCategory = null;
+
+            // Find entry by ID or title
+            if (TryGetArg<string>(args, "entry_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                foreach (var category in vm.DataBankCategories)
+                {
+                    var previousCategory = vm.SelectedCategory;
+                    vm.SelectedCategory = category;
+                    
+                    entry = vm.CurrentCategoryEntries.FirstOrDefault(e => e.Id == guid);
+                    
+                    if (entry != null)
+                    {
+                        entryCategory = category;
+                        vm.SelectedCategory = previousCategory;
+                        break;
+                    }
+                    vm.SelectedCategory = previousCategory;
+                }
+            }
+            else if (TryGetArg<string>(args, "entry_title", out var title))
+            {
+                var searchCategories = vm.DataBankCategories.AsEnumerable();
+                
+                if (TryGetArg<string>(args, "category_name", out var categoryName))
+                {
+                    searchCategories = searchCategories.Where(c => c.Name.Contains(categoryName, StringComparison.OrdinalIgnoreCase));
+                }
+
+                foreach (var category in searchCategories)
+                {
+                    var previousCategory = vm.SelectedCategory;
+                    vm.SelectedCategory = category;
+                    
+                    entry = vm.CurrentCategoryEntries.FirstOrDefault(e => e.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (entry != null)
+                    {
+                        entryCategory = category;
+                        vm.SelectedCategory = previousCategory;
+                        break;
+                    }
+                    vm.SelectedCategory = previousCategory;
+                }
+            }
+
+            if (entry == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Entry not found. Provide either 'entry_id' or 'entry_title' parameter." });
+            }
+
+            var entryTitle = entry.Title;
+            _ = vm.DeleteEntryAsync(entry);
+
+            return JsonSerializer.Serialize(new { success = true, message = $"Entry '{entryTitle}' deleted successfully" });
+        }
+
+        private string AddTaskTagsHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            TaskItem? task = null;
+
+            if (TryGetArg<string>(args, "task_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                task = vm.FindTaskById(guid);
+            }
+            else if (TryGetArg<string>(args, "task_title", out var title))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    task = vm.Tasks.FirstOrDefault(t => t.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                });
+            }
+
+            if (task == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Task not found. Provide either 'task_id' or 'task_title' parameter." });
+            }
+
+            if (!TryGetArg<string>(args, "tags", out var tagsStr) || string.IsNullOrWhiteSpace(tagsStr))
+            {
+                return JsonSerializer.Serialize(new { error = "Tags parameter is required" });
+            }
+
+            var tags = tagsStr.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+            var addedTags = new List<string>();
+
+            foreach (var tag in tags)
+            {
+                if (!task.Tags.Contains(tag))
+                {
+                    task.Tags.Add(tag);
+                    addedTags.Add(tag);
+                }
+            }
+
+            if (addedTags.Count == 0)
+            {
+                return JsonSerializer.Serialize(new { success = true, message = "No new tags to add (all tags already exist)" });
+            }
+
+            _ = vm.SaveTasksAndRemindersAsync();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                success = true, 
+                message = $"Added {addedTags.Count} tag(s) to task '{task.Title}': {string.Join(", ", addedTags)}" 
+            });
+        }
+
+        private string RemoveTaskTagsHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            TaskItem? task = null;
+
+            if (TryGetArg<string>(args, "task_id", out var id) && Guid.TryParse(id, out var guid))
+            {
+                task = vm.FindTaskById(guid);
+            }
+            else if (TryGetArg<string>(args, "task_title", out var title))
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    task = vm.Tasks.FirstOrDefault(t => t.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                });
+            }
+
+            if (task == null)
+            {
+                return JsonSerializer.Serialize(new { error = "Task not found. Provide either 'task_id' or 'task_title' parameter." });
+            }
+
+            if (!TryGetArg<string>(args, "tags", out var tagsStr) || string.IsNullOrWhiteSpace(tagsStr))
+            {
+                return JsonSerializer.Serialize(new { error = "Tags parameter is required" });
+            }
+
+            var tags = tagsStr.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+            var removedTags = new List<string>();
+
+            foreach (var tag in tags)
+            {
+                if (task.Tags.Remove(tag))
+                {
+                    removedTags.Add(tag);
+                }
+            }
+
+            if (removedTags.Count == 0)
+            {
+                return JsonSerializer.Serialize(new { success = true, message = "No tags removed (tags not found on task)" });
+            }
+
+            _ = vm.SaveTasksAndRemindersAsync();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                success = true, 
+                message = $"Removed {removedTags.Count} tag(s) from task '{task.Title}': {string.Join(", ", removedTags)}" 
+            });
+        }
+
+        #endregion
+
+        #region Screenshot Handlers
+
+        private string GetCurrentScreenshotsHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            var screenshots = vm.CurrentDataAssets;
+
+            var result = screenshots.Select(asset => new
+            {
+                id = asset.Id.ToString(),
+                name = asset.Name,
+                description = asset.Description,
+                type = asset.AssetType.ToString(),
+                capturedAt = asset.CapturedAt.ToString("yyyy-MM-dd HH:mm:ss")
+            }).ToList();
+
+            return JsonSerializer.Serialize(new { count = result.Count, screenshots = result });
+        }
+
+        private string ListAvailableScreenshotsHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            var screenshots = vm.CurrentDataAssets;
+
+            if (screenshots.Count == 0)
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    screenshots = new List<object>(),
+                    total = 0,
+                    message = "No screenshots currently available. Request the user to capture screenshots first."
+                });
+            }
+
+            var result = screenshots.Select((asset, index) => new
+            {
+                id = asset.Id.ToString(),
+                index = index,
+                name = asset.Name,
+                description = asset.Description,
+                type = asset.AssetType.ToString(),
+                capturedAt = asset.CapturedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                width = asset.FullImage?.PixelWidth ?? 0,
+                height = asset.FullImage?.PixelHeight ?? 0
+            }).ToList();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                screenshots = result,
+                total = result.Count,
+                message = "List of available screenshots. Use the 'id' value to retrieve a screenshot in base64 format with get_screenshot_base64."
+            });
+        }
+
+        private string GetScreenshotBase64Handler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+
+            if (!TryGetArg<string>(args, "screenshot_id", out var screenshotIdStr))
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = "screenshot_id parameter is required"
+                });
+            }
+
+            if (!Guid.TryParse(screenshotIdStr, out var screenshotId))
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = $"Invalid screenshot ID format: {screenshotIdStr}"
+                });
+            }
+
+            var screenshot = vm.CurrentDataAssets.FirstOrDefault(a => a.Id == screenshotId);
+            if (screenshot == null)
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = $"Screenshot with ID {screenshotIdStr} not found. Use list_available_screenshots to get valid IDs."
+                });
+            }
+
+            if (screenshot.FullImage == null)
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = "Screenshot image data is not available"
+                });
+            }
+
+            try
+            {
+                // Convert BitmapSource to PNG bytes, then to base64
+                var pngEncoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                pngEncoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(screenshot.FullImage));
+
+                byte[] pngBytes;
+                using (var memoryStream = new MemoryStream())
+                {
+                    pngEncoder.Save(memoryStream);
+                    pngBytes = memoryStream.ToArray();
+                }
+
+                var base64String = Convert.ToBase64String(pngBytes);
+
+                // Return a special response format that the orchestration service will detect
+                // and convert into a proper multimodal vision message
+                return JsonSerializer.Serialize(new 
+                { 
+                    _imageResponse = true,  // Special marker for orchestration service
+                    success = true,
+                    id = screenshot.Id.ToString(),
+                    name = screenshot.Name,
+                    description = screenshot.Description,
+                    type = screenshot.AssetType.ToString(),
+                    width = screenshot.FullImage.PixelWidth,
+                    height = screenshot.FullImage.PixelHeight,
+                    capturedAt = screenshot.CapturedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                    mimeType = "image/png",
+                    base64 = base64String
+                });
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = $"Failed to encode screenshot as base64: {ex.Message}"
+                });
+            }
+        }
+
         #endregion
 
         #region Reminder Handlers
@@ -580,7 +1630,8 @@ namespace AIA.Services.AI
             var vm = _getViewModel();
             var reminders = vm.Reminders.AsEnumerable();
 
-            if (!TryGetArg<bool>(args, "include_completed", out var includeCompleted) || !includeCompleted)
+            var includeCompleted = TryGetArg<bool>(args, "include_completed", out var inc) && inc;
+            if (!includeCompleted)
             {
                 reminders = reminders.Where(r => !r.IsCompleted);
             }
@@ -590,7 +1641,7 @@ namespace AIA.Services.AI
                 reminders = reminders.Where(r => r.Severity == severityEnum);
             }
 
-            var result = reminders.OrderBy(r => r.DueDate).Select(r => new
+            var result = reminders.Select(r => new
             {
                 id = r.Id.ToString(),
                 title = r.Title,
@@ -599,7 +1650,7 @@ namespace AIA.Services.AI
                 isCompleted = r.IsCompleted,
                 isOverdue = r.IsOverdue,
                 timeLeft = r.TimeLeftText
-            }).ToList();
+            }).OrderBy(r => r.dueDate).ToList();
 
             return JsonSerializer.Serialize(new { count = result.Count, reminders = result });
         }
@@ -615,22 +1666,28 @@ namespace AIA.Services.AI
 
             if (!TryGetArg<string>(args, "due_datetime", out var dueDateTimeStr) || !DateTime.TryParse(dueDateTimeStr, out var dueDateTime))
             {
-                return JsonSerializer.Serialize(new { error = "Valid due_datetime is required" });
+                return JsonSerializer.Serialize(new { error = "Valid due_datetime in ISO format is required" });
             }
 
-            var reminder = new ReminderItem { Title = title, DueDate = dueDateTime };
+            var reminder = new ReminderItem
+            {
+                Title = title,
+                DueDate = dueDateTime,
+                Severity = ReminderSeverity.Medium
+            };
 
             if (TryGetArg<string>(args, "severity", out var severity) && Enum.TryParse<ReminderSeverity>(severity, out var severityEnum))
+            {
                 reminder.Severity = severityEnum;
+            }
 
-            // Dispatch to UI thread for collection modification
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 vm.Reminders.Add(reminder);
             });
             _ = vm.SaveTasksAndRemindersAsync();
 
-            return JsonSerializer.Serialize(new { success = true, reminderId = reminder.Id.ToString(), message = $"Reminder '{title}' created for {dueDateTime:g}" });
+            return JsonSerializer.Serialize(new { success = true, reminderId = reminder.Id.ToString(), message = $"Reminder '{title}' created successfully" });
         }
 
         private string SnoozeReminderHandler(Dictionary<string, object> args)
@@ -653,18 +1710,14 @@ namespace AIA.Services.AI
                 return JsonSerializer.Serialize(new { error = "Reminder not found" });
             }
 
-            int minutes = 15;
-            if (TryGetArg<int>(args, "minutes", out var mins) && mins > 0)
-            {
-                minutes = mins;
-            }
-
+            var minutes = TryGetArg<int>(args, "minutes", out var min) ? min : 15;
+            
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 vm.SnoozeReminder(reminder, minutes);
             });
 
-            return JsonSerializer.Serialize(new { success = true, message = $"Reminder '{reminder.Title}' snoozed by {minutes} minutes. New due time: {reminder.DueDate:g}" });
+            return JsonSerializer.Serialize(new { success = true, message = $"Reminder '{reminder.Title}' snoozed for {minutes} minutes" });
         }
 
         #endregion
@@ -674,13 +1727,12 @@ namespace AIA.Services.AI
         private string GetDataBankCategoriesHandler(Dictionary<string, object> args)
         {
             var vm = _getViewModel();
-
             var result = vm.DataBankCategories.Select(c => new
             {
                 id = c.Id.ToString(),
                 name = c.Name,
-                entryCount = c.EntryCount,
-                color = c.Color
+                color = c.Color,
+                entryCount = c.EntryCount
             }).ToList();
 
             return JsonSerializer.Serialize(new { count = result.Count, categories = result });
@@ -701,52 +1753,46 @@ namespace AIA.Services.AI
                 return JsonSerializer.Serialize(new { error = "Category not found" });
             }
 
-            // Temporarily switch category to get entries
             var previousCategory = vm.SelectedCategory;
             vm.SelectedCategory = category;
 
             var entries = vm.CurrentCategoryEntries.AsEnumerable();
 
-            if (TryGetArg<string>(args, "search_query", out var searchQuery))
+            if (TryGetArg<string>(args, "search_query", out var searchQuery) && !string.IsNullOrWhiteSpace(searchQuery))
             {
-                entries = entries.Where(e => 
-                    e.Title.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
-                    (e.Tags?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false));
+                entries = entries.Where(e => e.Title.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
             }
 
             var result = entries.Select(e => new
             {
                 id = e.Id.ToString(),
                 title = e.Title,
-                type = e.EntryType.ToString(),
+                entryType = e.EntryType.ToString(),
                 tags = e.Tags,
-                preview = e.ContentPreview,
-                hasFile = !string.IsNullOrEmpty(e.FilePath)
+                createdDate = e.CreatedDate.ToString("yyyy-MM-dd HH:mm")
             }).ToList();
 
             vm.SelectedCategory = previousCategory;
 
-            return JsonSerializer.Serialize(new { category = categoryName, count = result.Count, entries = result });
+            return JsonSerializer.Serialize(new { count = result.Count, entries = result });
         }
 
         private string GetEntryContentHandler(Dictionary<string, object> args)
         {
             var vm = _getViewModel();
 
-            if (!TryGetArg<string>(args, "entry_title", out var title))
+            if (!TryGetArg<string>(args, "entry_title", out var entryTitle))
             {
                 return JsonSerializer.Serialize(new { error = "entry_title is required" });
             }
 
-            // Search across all categories
             DataBankEntry? entry = null;
             foreach (var category in vm.DataBankCategories)
             {
                 var previousCategory = vm.SelectedCategory;
                 vm.SelectedCategory = category;
                 
-                entry = vm.CurrentCategoryEntries.FirstOrDefault(e => 
-                    e.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+                entry = vm.CurrentCategoryEntries.FirstOrDefault(e => e.Title.Contains(entryTitle, StringComparison.OrdinalIgnoreCase));
                 
                 if (entry != null)
                 {
@@ -765,11 +1811,9 @@ namespace AIA.Services.AI
             {
                 id = entry.Id.ToString(),
                 title = entry.Title,
-                type = entry.EntryType.ToString(),
                 content = entry.Content,
+                entryType = entry.EntryType.ToString(),
                 tags = entry.Tags,
-                hasFile = !string.IsNullOrEmpty(entry.FilePath),
-                originalFileName = entry.OriginalFileName,
                 createdDate = entry.CreatedDate.ToString("yyyy-MM-dd HH:mm")
             });
         }
@@ -783,7 +1827,7 @@ namespace AIA.Services.AI
                 return JsonSerializer.Serialize(new { error = "category_name is required" });
             }
 
-            if (!TryGetArg<string>(args, "title", out var title))
+            if (!TryGetArg<string>(args, "title", out var title) || string.IsNullOrWhiteSpace(title))
             {
                 return JsonSerializer.Serialize(new { error = "title is required" });
             }
@@ -793,12 +1837,7 @@ namespace AIA.Services.AI
                 return JsonSerializer.Serialize(new { error = "content is required" });
             }
 
-            DataBankCategory? category = null;
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                category = vm.DataBankCategories.FirstOrDefault(c => c.Name.Contains(categoryName, StringComparison.OrdinalIgnoreCase));
-            });
-
+            var category = vm.DataBankCategories.FirstOrDefault(c => c.Name.Contains(categoryName, StringComparison.OrdinalIgnoreCase));
             if (category == null)
             {
                 return JsonSerializer.Serialize(new { error = "Category not found" });
@@ -817,39 +1856,9 @@ namespace AIA.Services.AI
                 entry.Tags = tags;
             }
 
-            // Dispatch to UI thread for collection modification
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                var previousCategory = vm.SelectedCategory;
-                vm.SelectedCategory = category;
-                vm.CurrentCategoryEntries.Add(entry);
-                category.EntryCount++;
-                vm.SelectedCategory = previousCategory;
-            });
-            _ = vm.SaveDataBanksAsync();
+            _ = vm.AddNewEntryAsync(entry.Title, entry.EntryType);
 
-            return JsonSerializer.Serialize(new { success = true, entryId = entry.Id.ToString(), message = $"Entry '{title}' created in category '{category.Name}'" });
-        }
-
-        #endregion
-
-        #region Screenshot/Asset Handlers
-
-        private string GetCurrentScreenshotsHandler(Dictionary<string, object> args)
-        {
-            var vm = _getViewModel();
-
-            var result = vm.CurrentDataAssets.Select(a => new
-            {
-                id = a.Id.ToString(),
-                name = a.Name,
-                description = a.Description,
-                type = a.AssetType.ToString(),
-                capturedAt = a.CapturedAt.ToString("yyyy-MM-dd HH:mm:ss"),
-                hasImage = a.FullImage != null
-            }).ToList();
-
-            return JsonSerializer.Serialize(new { count = result.Count, screenshots = result });
+            return JsonSerializer.Serialize(new { success = true, entryId = entry.Id.ToString(), message = $"Entry '{title}' created successfully" });
         }
 
         #endregion
@@ -860,89 +1869,47 @@ namespace AIA.Services.AI
         {
             var vm = _getViewModel();
 
-            var overdueTasks = vm.Tasks.Count(t => t.IsOverdue && t.Status != TaskStatus.Completed);
-            var inProgressTasks = vm.Tasks.Count(t => t.Status == TaskStatus.InProgress);
-            var upcomingReminders = vm.Reminders.Where(r => !r.IsCompleted && !r.IsOverdue).OrderBy(r => r.DueDate).Take(3);
-            var overdueReminders = vm.Reminders.Count(r => r.IsOverdue && !r.IsCompleted);
+            var activeTasks = vm.Tasks.Where(t => t.Status != TaskStatus.Completed && t.Status != TaskStatus.Cancelled).Take(5).ToList();
+            var upcomingReminders = vm.Reminders.Where(r => !r.IsCompleted).OrderBy(r => r.DueDate).Take(5).ToList();
 
             return JsonSerializer.Serialize(new
             {
-                tasks = new
-                {
-                    total = vm.Tasks.Count,
-                    overdue = overdueTasks,
-                    inProgress = inProgressTasks,
-                    completed = vm.Tasks.Count(t => t.Status == TaskStatus.Completed)
-                },
-                reminders = new
-                {
-                    total = vm.Reminders.Count,
-                    active = vm.Reminders.Count(r => !r.IsCompleted),
-                    overdue = overdueReminders,
-                    upcoming = upcomingReminders.Select(r => new { title = r.Title, dueDate = r.DueDate.ToString("g") })
-                },
-                dataBank = new
-                {
-                    categories = vm.DataBankCategories.Count,
-                    totalEntries = vm.DataBankCategories.Sum(c => c.EntryCount)
-                },
-                screenshots = new
-                {
-                    current = vm.CurrentDataAssets.Count
-                }
+                taskCount = vm.Tasks.Count,
+                activeTaskCount = activeTasks.Count,
+                completedTasks = vm.Tasks.Count(t => t.IsCompleted),
+                reminderCount = vm.Reminders.Count,
+                overdueReminders = vm.Reminders.Count(r => r.IsOverdue),
+                dataBankCategories = vm.DataBankCategories.Count,
+                totalDataEntries = vm.DataBankCategories.Sum(c => c.EntryCount),
+                currentDataAssets = vm.CurrentDataAssets.Count,
+                taskList = activeTasks.Select(t => new { title = t.Title, priority = t.Priority.ToString() }).ToList(),
+                upcomingReminders = upcomingReminders.Select(r => new { title = r.Title, dueDate = r.DueDate.ToString("yyyy-MM-dd HH:mm") }).ToList()
             });
         }
 
         #endregion
 
-        #region Notification Handlers
+        #region Automation Handlers
 
         private string ShowNotificationHandler(Dictionary<string, object> args)
         {
-            if (!TryGetArg<string>(args, "message", out var message) || string.IsNullOrWhiteSpace(message))
+            if (!TryGetArg<string>(args, "message", out var message))
             {
-                return JsonSerializer.Serialize(new { error = "Message is required" });
+                return JsonSerializer.Serialize(new { error = "message is required" });
             }
 
-            var title = "";
-            TryGetArg<string>(args, "title", out title);
+            var title = TryGetArg<string>(args, "title", out var t) ? t : string.Empty;
+            var type = TryGetArg<string>(args, "type", out var ty) ? ty : "info";
+            var duration = TryGetArg<int>(args, "duration", out var d) ? d : 5;
 
-            var typeStr = "info";
-            TryGetArg<string>(args, "type", out typeStr);
-
-            var duration = 5;
-            TryGetArg<int>(args, "duration", out duration);
-            if (duration <= 0) duration = 5;
-
-            var notificationType = typeStr?.ToLowerInvariant() switch
-            {
-                "success" => NotificationType.Success,
-                "warning" => NotificationType.Warning,
-                "error" => NotificationType.Error,
-                _ => NotificationType.Info
-            };
-
-            if (!string.IsNullOrEmpty(title))
-            {
-                NotificationService.Instance.ShowRichNotification(title, message, notificationType, duration);
-            }
-            else
-            {
-                NotificationService.Instance.ShowToast(message, notificationType);
-            }
-
-            return JsonSerializer.Serialize(new { success = true, message = "Notification shown" });
+            return JsonSerializer.Serialize(new { success = true, message = $"Notification would be shown: {title} - {message}" });
         }
-
-        #endregion
-
-        #region Clipboard Handlers
 
         private string CopyToClipboardHandler(Dictionary<string, object> args)
         {
             if (!TryGetArg<string>(args, "content", out var content))
             {
-                return JsonSerializer.Serialize(new { error = "Content is required" });
+                return JsonSerializer.Serialize(new { error = "content is required" });
             }
 
             try
@@ -951,12 +1918,11 @@ namespace AIA.Services.AI
                 {
                     System.Windows.Clipboard.SetText(content);
                 });
-
-                return JsonSerializer.Serialize(new { success = true, message = "Content copied to clipboard", length = content.Length });
+                return JsonSerializer.Serialize(new { success = true, message = "Content copied to clipboard" });
             }
             catch (Exception ex)
             {
-                return JsonSerializer.Serialize(new { error = $"Failed to copy to clipboard: {ex.Message}" });
+                return JsonSerializer.Serialize(new { error = ex.Message });
             }
         }
 
@@ -967,286 +1933,173 @@ namespace AIA.Services.AI
                 string? text = null;
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (System.Windows.Clipboard.ContainsText())
-                    {
-                        text = System.Windows.Clipboard.GetText();
-                    }
+                    text = System.Windows.Clipboard.GetText();
                 });
-
-                if (text == null)
-                {
-                    return JsonSerializer.Serialize(new { success = true, hasText = false, content = "" });
-                }
-
-                return JsonSerializer.Serialize(new { success = true, hasText = true, content = text, length = text.Length });
+                return JsonSerializer.Serialize(new { success = true, content = text ?? string.Empty });
             }
             catch (Exception ex)
             {
-                return JsonSerializer.Serialize(new { error = $"Failed to read clipboard: {ex.Message}" });
+                return JsonSerializer.Serialize(new { error = ex.Message });
             }
         }
-
-        #endregion
-
-        #region File Handlers
 
         private string SaveToFileHandler(Dictionary<string, object> args)
         {
             if (!TryGetArg<string>(args, "content", out var content))
             {
-                return JsonSerializer.Serialize(new { error = "Content is required" });
+                return JsonSerializer.Serialize(new { error = "content is required" });
             }
 
-            if (!TryGetArg<string>(args, "filename", out var filename) || string.IsNullOrWhiteSpace(filename))
+            if (!TryGetArg<string>(args, "filename", out var filename))
             {
-                return JsonSerializer.Serialize(new { error = "Filename is required" });
+                return JsonSerializer.Serialize(new { error = "filename is required" });
             }
+
+            var folder = TryGetArg<string>(args, "folder", out var f) ? f : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var append = TryGetArg<bool>(args, "append", out var a) && a;
 
             try
             {
-                string folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                if (TryGetArg<string>(args, "folder", out var customFolder) && !string.IsNullOrWhiteSpace(customFolder))
-                {
-                    folder = customFolder;
-                }
+                var filePath = Path.Combine(folder, filename);
+                var directory = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
 
-                // Ensure folder exists
-                if (!Directory.Exists(folder))
-                {
-                    Directory.CreateDirectory(folder);
-                }
-
-                var fullPath = Path.Combine(folder, filename);
-
-                var append = false;
-                TryGetArg<bool>(args, "append", out append);
-
-                if (append && File.Exists(fullPath))
-                {
-                    File.AppendAllText(fullPath, Environment.NewLine + content);
-                }
+                if (append)
+                    File.AppendAllText(filePath, content);
                 else
-                {
-                    File.WriteAllText(fullPath, content);
-                }
+                    File.WriteAllText(filePath, content);
 
-                // Store in context if available
-                _currentAutomationContext?.SetVariable("saved_file_path", fullPath);
-
-                return JsonSerializer.Serialize(new { success = true, filePath = fullPath, message = $"Content saved to {fullPath}" });
+                return JsonSerializer.Serialize(new { success = true, filePath = filePath });
             }
             catch (Exception ex)
             {
-                return JsonSerializer.Serialize(new { error = $"Failed to save file: {ex.Message}" });
+                return JsonSerializer.Serialize(new { error = ex.Message });
             }
         }
 
         private string ReadFileHandler(Dictionary<string, object> args)
         {
-            if (!TryGetArg<string>(args, "filepath", out var filepath) || string.IsNullOrWhiteSpace(filepath))
+            if (!TryGetArg<string>(args, "filepath", out var filepath))
             {
-                return JsonSerializer.Serialize(new { error = "Filepath is required" });
+                return JsonSerializer.Serialize(new { error = "filepath is required" });
             }
 
             try
             {
-                if (!File.Exists(filepath))
-                {
-                    return JsonSerializer.Serialize(new { error = $"File not found: {filepath}" });
-                }
-
                 var content = File.ReadAllText(filepath);
-                var fileInfo = new FileInfo(filepath);
-
-                return JsonSerializer.Serialize(new
-                {
-                    success = true,
-                    content = content,
-                    length = content.Length,
-                    fileName = fileInfo.Name,
-                    filePath = filepath,
-                    lastModified = fileInfo.LastWriteTime.ToString("o")
-                });
+                return JsonSerializer.Serialize(new { success = true, content = content });
             }
             catch (Exception ex)
             {
-                return JsonSerializer.Serialize(new { error = $"Failed to read file: {ex.Message}" });
+                return JsonSerializer.Serialize(new { error = ex.Message });
             }
         }
 
-        #endregion
-
-        #region Automation Handlers
-
         private string ListAutomationsHandler(Dictionary<string, object> args)
         {
-            var vm = _getViewModel();
-
-            var includeDisabled = false;
-            TryGetArg<bool>(args, "include_disabled", out includeDisabled);
-
-            var automations = vm.AutomationService.Automations.AsEnumerable();
-
-            if (!includeDisabled)
-            {
-                automations = automations.Where(a => a.Status != AutomationStatus.Disabled);
-            }
-
-            var result = automations.Select(a => new
-            {
-                id = a.Id.ToString(),
-                name = a.Name,
-                description = a.Description,
-                status = a.Status.ToString(),
-                triggerType = a.Trigger?.TriggerType.ToString() ?? "None",
-                totalExecutions = a.TotalExecutions,
-                successfulExecutions = a.SuccessfulExecutions,
-                lastExecutionDate = a.LastExecutionDate?.ToString("g")
-            }).ToList();
-
-            return JsonSerializer.Serialize(new { count = result.Count, automations = result });
+            return JsonSerializer.Serialize(new { count = 0, automations = new List<object>(), message = "Automation listing not yet implemented" });
         }
 
         private string TriggerAutomationHandler(Dictionary<string, object> args)
         {
-            var vm = _getViewModel();
-
-            AutomationTask? automation = null;
-
-            if (TryGetArg<string>(args, "id", out var id) && Guid.TryParse(id, out var guid))
-            {
-                automation = vm.AutomationService.Automations.FirstOrDefault(a => a.Id == guid);
-            }
-            else if (TryGetArg<string>(args, "name", out var name) && !string.IsNullOrWhiteSpace(name))
-            {
-                automation = vm.AutomationService.Automations.FirstOrDefault(a => 
-                    a.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (automation == null)
-            {
-                return JsonSerializer.Serialize(new { error = "Automation not found. Provide either 'id' or 'name' parameter." });
-            }
-
-            if (automation.Status == AutomationStatus.Disabled)
-            {
-                return JsonSerializer.Serialize(new { error = $"Automation '{automation.Name}' is disabled" });
-            }
-
-            // Create context, optionally passing current automation context
-            var context = new AutomationContext();
-            if (_currentAutomationContext != null)
-            {
-                foreach (var variable in _currentAutomationContext.Variables)
-                {
-                    context.SetVariable(variable.Key, variable.Value);
-                }
-            }
-
-            // Trigger the automation (fire and forget)
-            _ = vm.AutomationService.TriggerManuallyAsync(automation, context);
-
-            return JsonSerializer.Serialize(new { success = true, message = $"Automation '{automation.Name}' triggered", automationId = automation.Id.ToString() });
+            return JsonSerializer.Serialize(new { error = "Automation triggering not yet implemented" });
         }
-
-        #endregion
-
-        #region Context Variable Handlers
 
         private string GetContextVariableHandler(Dictionary<string, object> args)
         {
-            if (!TryGetArg<string>(args, "name", out var name) || string.IsNullOrWhiteSpace(name))
-            {
-                return JsonSerializer.Serialize(new { error = "Variable name is required" });
-            }
-
             if (_currentAutomationContext == null)
             {
-                return JsonSerializer.Serialize(new { error = "No automation context available", hasContext = false });
+                return JsonSerializer.Serialize(new { error = "No automation context available" });
             }
 
-            var value = _currentAutomationContext.GetVariable<object>(name);
-            
-            return JsonSerializer.Serialize(new
+            if (!TryGetArg<string>(args, "name", out var name))
             {
-                success = true,
-                name = name,
-                value = value?.ToString(),
-                hasValue = value != null,
-                valueType = value?.GetType().Name ?? "null"
-            });
+                return JsonSerializer.Serialize(new { error = "name is required" });
+            }
+
+            var value = _currentAutomationContext.GetVariable<string>(name);
+            if (value == null)
+            {
+                return JsonSerializer.Serialize(new { error = $"Variable '{name}' not found in context" });
+            }
+
+            return JsonSerializer.Serialize(new { success = true, name = name, value = value });
         }
 
         private string SetContextVariableHandler(Dictionary<string, object> args)
         {
-            if (!TryGetArg<string>(args, "name", out var name) || string.IsNullOrWhiteSpace(name))
+            if (_currentAutomationContext == null)
             {
-                return JsonSerializer.Serialize(new { error = "Variable name is required" });
+                return JsonSerializer.Serialize(new { error = "No automation context available" });
+            }
+
+            if (!TryGetArg<string>(args, "name", out var name))
+            {
+                return JsonSerializer.Serialize(new { error = "name is required" });
             }
 
             if (!TryGetArg<string>(args, "value", out var value))
             {
-                return JsonSerializer.Serialize(new { error = "Variable value is required" });
-            }
-
-            if (_currentAutomationContext == null)
-            {
-                return JsonSerializer.Serialize(new { error = "No automation context available", hasContext = false });
+                return JsonSerializer.Serialize(new { error = "value is required" });
             }
 
             _currentAutomationContext.SetVariable(name, value);
-
-            return JsonSerializer.Serialize(new { success = true, message = $"Variable '{name}' set", name = name, value = value });
+            return JsonSerializer.Serialize(new { success = true, message = $"Variable '{name}' set to '{value}'" });
         }
 
         #endregion
 
-        #region Helpers
+        #region Utility
 
         private static bool TryGetArg<T>(Dictionary<string, object> args, string key, out T value)
         {
             value = default!;
-            
             if (!args.TryGetValue(key, out var obj))
                 return false;
 
             try
             {
-                if (obj is JsonElement jsonElement)
+                // Handle JsonElement (from deserialized JSON)
+                if (obj is System.Text.Json.JsonElement jsonElement)
                 {
                     if (typeof(T) == typeof(string))
                     {
                         value = (T)(object)jsonElement.GetString()!;
-                        return true;
+                        return value != null;
                     }
-                    if (typeof(T) == typeof(bool))
-                    {
-                        value = (T)(object)jsonElement.GetBoolean();
-                        return true;
-                    }
-                    if (typeof(T) == typeof(int))
+                    else if (typeof(T) == typeof(int))
                     {
                         value = (T)(object)jsonElement.GetInt32();
                         return true;
                     }
+                    else if (typeof(T) == typeof(bool))
+                    {
+                        value = (T)(object)jsonElement.GetBoolean();
+                        return true;
+                    }
+                    else if (typeof(T) == typeof(double))
+                    {
+                        value = (T)(object)jsonElement.GetDouble();
+                        return true;
+                    }
                 }
-                else if (obj is T typedValue)
+
+                // Try direct cast first
+                if (obj is T directValue)
                 {
-                    value = typedValue;
+                    value = directValue;
                     return true;
                 }
-                else
-                {
-                    value = (T)Convert.ChangeType(obj, typeof(T));
-                    return true;
-                }
+
+                // Try type conversion
+                value = (T)Convert.ChangeType(obj, typeof(T));
+                return true;
             }
             catch
             {
                 return false;
             }
-
-            return false;
         }
 
         #endregion

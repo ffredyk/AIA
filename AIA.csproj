@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>1.0.83.27528</AssemblyVersion>
-    <FileVersion>1.0.83.27528</FileVersion>
+    <AssemblyVersion>1.0.97.42973</AssemblyVersion>
+    <FileVersion>1.0.97.42973</FileVersion>
 	<UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Icons\AIA.ico</ApplicationIcon>
   </PropertyGroup>

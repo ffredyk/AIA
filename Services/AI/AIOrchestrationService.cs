@@ -179,49 +179,49 @@ namespace AIA.Services.AI
             var lowerPrompt = prompt.ToLowerInvariant();
 
             // Coding keywords
-            if (ContainsAny(lowerPrompt, "code", "programming", "function", "class", "debug", "error", "compile", "syntax", 
+            if (ContainsAny(lowerPrompt, "code", "programming", "function", "class", "debug", "error", "compile", "syntax",
                 "algorithm", "api", "database", "sql", "javascript", "python", "c#", "java", "typescript", "react", "implement"))
             {
                 return AIRouterCategories.Coding;
             }
 
             // Math keywords
-            if (ContainsAny(lowerPrompt, "calculate", "equation", "math", "formula", "solve", "derivative", "integral", 
+            if (ContainsAny(lowerPrompt, "calculate", "equation", "math", "formula", "solve", "derivative", "integral",
                 "probability", "statistics", "algebra", "geometry", "trigonometry", "calculus"))
             {
                 return AIRouterCategories.Math;
             }
 
             // Analysis keywords
-            if (ContainsAny(lowerPrompt, "analyze", "analysis", "compare", "evaluate", "assess", "review", "examine", 
+            if (ContainsAny(lowerPrompt, "analyze", "analysis", "compare", "evaluate", "assess", "review", "examine",
                 "investigate", "study", "research", "data", "trend", "pattern", "insight"))
             {
                 return AIRouterCategories.Analysis;
             }
 
             // Creative keywords
-            if (ContainsAny(lowerPrompt, "write", "story", "poem", "creative", "imagine", "design", "brainstorm", 
+            if (ContainsAny(lowerPrompt, "write", "story", "poem", "creative", "imagine", "design", "brainstorm",
                 "idea", "novel", "fiction", "art", "music", "compose", "create"))
             {
                 return AIRouterCategories.Creative;
             }
 
             // Task management keywords
-            if (ContainsAny(lowerPrompt, "task", "todo", "reminder", "schedule", "deadline", "organize", "plan", 
+            if (ContainsAny(lowerPrompt, "task", "todo", "reminder", "schedule", "deadline", "organize", "plan",
                 "priority", "project", "workflow", "productivity"))
             {
                 return AIRouterCategories.TaskManagement;
             }
 
             // Summarization keywords
-            if (ContainsAny(lowerPrompt, "summarize", "summary", "tldr", "brief", "overview", "key points", "main ideas", 
+            if (ContainsAny(lowerPrompt, "summarize", "summary", "tldr", "brief", "overview", "key points", "main ideas",
                 "condense", "shorten", "abstract"))
             {
                 return AIRouterCategories.Summarization;
             }
 
             // Research keywords
-            if (ContainsAny(lowerPrompt, "research", "find", "search", "look up", "what is", "explain", "how does", 
+            if (ContainsAny(lowerPrompt, "research", "find", "search", "look up", "what is", "explain", "how does",
                 "why", "history", "background", "learn", "understand"))
             {
                 return AIRouterCategories.Research;
@@ -394,7 +394,7 @@ namespace AIA.Services.AI
 
             // First, get response (potentially with tool calls)
             yield return ("", "Analyzing request...");
-            
+
             var response = await client.GenerateAsync(provider, request);
 
             if (!response.Success)
@@ -408,12 +408,16 @@ namespace AIA.Services.AI
             {
                 const int maxIterations = 5;
                 int iteration = 0;
+                bool hasInjectedImage = false;
 
                 while (response.RequiresToolExecution && iteration < maxIterations)
                 {
                     iteration++;
-                    
+
                     yield return ("", $"Executing tools ({iteration}/{maxIterations})...");
+
+                    System.Diagnostics.Debug.WriteLine($"=== Tool execution iteration {iteration} ===");
+                    System.Diagnostics.Debug.WriteLine($"Tool calls count: {response.ToolCalls?.Count ?? 0}");
 
                     // Add assistant message with tool calls
                     request.Messages.Add(new AIMessage
@@ -423,54 +427,122 @@ namespace AIA.Services.AI
                         ToolCalls = response.ToolCalls
                     });
 
-                    // Execute each tool call
+                    // Execute each tool call and check for image responses
                     foreach (var toolCall in response.ToolCalls!)
                     {
                         yield return ("", $"Calling {toolCall.Name}...");
-                        
+
                         var result = _toolsService.ExecuteTool(toolCall.Name, toolCall.Arguments);
-                        
-                        request.Messages.Add(new AIMessage
+
+                        System.Diagnostics.Debug.WriteLine($"Tool {toolCall.Name} result length: {result.Length}");
+
+                        // Check if this is an image response that needs special handling
+                        var imageData = TryExtractImageFromToolResult(result);
+
+                        if (imageData != null)
                         {
-                            Role = "tool",
-                            Content = result,
-                            ToolCallId = toolCall.Id,
-                            Name = toolCall.Name
-                        });
+                            System.Diagnostics.Debug.WriteLine($"? Detected image response from {toolCall.Name}, injecting vision message");
+                            hasInjectedImage = true;
+
+                            // Add a simple tool result acknowledgment
+                            request.Messages.Add(new AIMessage
+                            {
+                                Role = "tool",
+                                Content = JsonSerializer.Serialize(new {
+                                    success = true,
+                                    message = "Screenshot retrieved successfully. Analyzing image..."
+                                }),
+                                ToolCallId = toolCall.Id,
+                                Name = toolCall.Name
+                            });
+
+                            // Add a user message with the image for vision analysis
+                            request.Messages.Add(new AIMessage
+                            {
+                                Role = "user",
+                                Content = "Here is the screenshot. Please describe what you see in detail.",
+                                Images = new List<AIImageContent>
+                                {
+                                    new AIImageContent
+                                    {
+                                        Base64Data = imageData.Base64,
+                                        MimeType = imageData.MimeType,
+                                        Description = imageData.Description
+                                    }
+                                }
+                            });
+
+                            System.Diagnostics.Debug.WriteLine($"Image injected: {imageData.Width}x{imageData.Height}, {imageData.Base64.Length} chars");
+                        }
+                        else
+                        {
+                            // Regular tool result
+                            request.Messages.Add(new AIMessage
+                            {
+                                Role = "tool",
+                                Content = result,
+                                ToolCallId = toolCall.Id,
+                                Name = toolCall.Name
+                            });
+                        }
                     }
 
-                    // Get next response - stream this one if it's the final response
-                    if (iteration == maxIterations || Settings.EnableToolUse == false)
+                    // Get next response
+                    yield return ("", "Generating response...");
+
+                    // If we just injected an image, disable tools for the next call
+                    // to prevent the AI from calling more tools instead of analyzing the image
+                    if (hasInjectedImage)
                     {
-                        yield return ("", "Generating response...");
-                        
-                        // Stream the final response
-                        await foreach (var chunk in client.GenerateStreamAsync(provider, request))
-                        {
-                            yield return (chunk, "Streaming");
-                        }
-                        yield break;
+                        System.Diagnostics.Debug.WriteLine("Temporarily disabling tools for vision response");
+                        var originalTools = request.Tools;
+                        request.Tools = null;
+
+                        response = await client.GenerateAsync(provider, request);
+
+                        request.Tools = originalTools;
+                        hasInjectedImage = false; // Reset flag
                     }
                     else
                     {
                         response = await client.GenerateAsync(provider, request);
-                        
-                        if (!response.Success)
-                        {
-                            yield return ($"Error: {response.Error}", "Error");
-                            yield break;
-                        }
+                      }
+
+                    System.Diagnostics.Debug.WriteLine($"Next response - Success: {response.Success}, HasContent: {!string.IsNullOrEmpty(response.Content)}, HasToolCalls: {response.RequiresToolExecution}");
+
+                    if (!response.Success)
+                    {
+                        yield return ($"Error: {response.Error}", "Error");
+                        yield break;
                     }
                 }
 
-                // If we got here, stream the final content
+                // Stream the final content (either after tool execution or when max iterations reached)
                 if (!string.IsNullOrEmpty(response.Content))
                 {
-                    // Simulate streaming character by character for immediate feedback
+                    yield return ("", "Streaming response...");
+
+                    System.Diagnostics.Debug.WriteLine($"Streaming final content: {response.Content.Length} chars");
+
+                    // If the AI provided content in the response, stream it character by character
                     foreach (var c in response.Content)
                     {
                         yield return (c.ToString(), "Streaming");
                         await Task.Delay(5); // Small delay for smooth streaming effect
+                    }
+                }
+                else
+                {
+                    // No content in response, might be another tool call or empty response
+                    System.Diagnostics.Debug.WriteLine($"?? No content in final response. Iterations: {iteration}, RequiresToolExecution: {response.RequiresToolExecution}, FinishReason: {response.FinishReason}");
+
+                    if (response.RequiresToolExecution)
+                    {
+                        yield return ("I reached the maximum number of tool calls. The last tool execution did not produce a final response.", "Streaming");
+                    }
+                    else
+                    {
+                        yield return ("I processed your request but didn't generate a response. Please try rephrasing your question.", "Streaming");
                     }
                 }
             }
@@ -487,6 +559,48 @@ namespace AIA.Services.AI
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Tries to extract image data from a tool result JSON
+        /// </summary>
+        private static ImageToolResult? TryExtractImageFromToolResult(string toolResult)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(toolResult);
+                var root = doc.RootElement;
+
+                // Check for the special _imageResponse marker
+                if (root.TryGetProperty("_imageResponse", out var marker) && marker.GetBoolean())
+                {
+                    return new ImageToolResult
+                    {
+                        Base64 = root.GetProperty("base64").GetString() ?? "",
+                        MimeType = root.TryGetProperty("mimeType", out var mt) ? mt.GetString() ?? "image/png" : "image/png",
+                        Name = root.TryGetProperty("name", out var n) ? n.GetString() : null,
+                        Description = root.TryGetProperty("description", out var d) ? d.GetString() : null,
+                        Width = root.TryGetProperty("width", out var w) ? w.GetInt32() : 0,
+                        Height = root.TryGetProperty("height", out var h) ? h.GetInt32() : 0
+                    };
+                }
+            }
+            catch
+            {
+                // Not a valid JSON or doesn't contain image data
+            }
+
+            return null;
+        }
+
+        private class ImageToolResult
+        {
+            public string Base64 { get; set; } = "";
+            public string MimeType { get; set; } = "image/png";
+            public string? Name { get; set; }
+            public string? Description { get; set; }
+            public int Width { get; set; }
+            public int Height { get; set; }
         }
 
         /// <summary>
@@ -513,14 +627,51 @@ namespace AIA.Services.AI
                 foreach (var toolCall in response.ToolCalls!)
                 {
                     var result = _toolsService.ExecuteTool(toolCall.Name, toolCall.Arguments);
-                    
-                    request.Messages.Add(new AIMessage
+
+                    // Check if this is an image response that needs special handling
+                    var imageData = TryExtractImageFromToolResult(result);
+
+                    if (imageData != null)
                     {
-                        Role = "tool",
-                        Content = result,
-                        ToolCallId = toolCall.Id,
-                        Name = toolCall.Name
-                    });
+                        // Add a simple tool result acknowledgment
+                        request.Messages.Add(new AIMessage
+                        {
+                            Role = "tool",
+                            Content = JsonSerializer.Serialize(new
+                            {
+                                success = true,
+                                message = $"Screenshot retrieved: {imageData.Description ?? imageData.Name}. The image has been provided for your analysis."
+                            }),
+                            ToolCallId = toolCall.Id,
+                            Name = toolCall.Name
+                        });
+
+                        // Add a user message with the image for vision analysis
+                        request.Messages.Add(new AIMessage
+                        {
+                            Role = "user",
+                            Content = "Here is the screenshot from the tool call. Please analyze it and describe what you see.",
+                            Images = new List<AIImageContent>
+                            {
+                                new AIImageContent
+                                {
+                                    Base64Data = imageData.Base64,
+                                    MimeType = imageData.MimeType,
+                                    Description = imageData.Description
+                                }
+                            }
+                        });
+                    }
+                    else
+                    {
+                        request.Messages.Add(new AIMessage
+                        {
+                            Role = "tool",
+                            Content = result,
+                            ToolCallId = toolCall.Id,
+                            Name = toolCall.Name
+                        });
+                    }
                 }
 
                 // Generate next response
@@ -538,6 +689,7 @@ namespace AIA.Services.AI
             var sb = new System.Text.StringBuilder();
             sb.AppendLine("You are AIA, a helpful AI assistant integrated into a personal productivity application.");
             sb.AppendLine("You have access to tools to help manage the user's tasks, reminders, and data bank.");
+            sb.AppendLine("You also have VISION capabilities - you can see and analyze screenshots when the user asks about their screen.");
             sb.AppendLine();
             sb.AppendLine("Current date/time: " + DateTime.Now.ToString("f"));
             sb.AppendLine();
@@ -548,6 +700,7 @@ namespace AIA.Services.AI
                 sb.AppendLine("- Use get_tasks, get_reminders, get_databank_entries to retrieve information");
                 sb.AppendLine("- Use create_task, create_reminder, create_databank_entry to create new items");
                 sb.AppendLine("- Use get_app_summary for a quick overview of the user's data");
+                sb.AppendLine("- Use list_available_screenshots and get_screenshot_base64 to see the user's screen");
                 sb.AppendLine();
             }
 
@@ -610,23 +763,23 @@ namespace AIA.Services.AI
         public async Task<string?> GenerateChatTitleAsync(string firstUserMessage)
         {
             System.Diagnostics.Debug.WriteLine($"GenerateChatTitleAsync called with message: {firstUserMessage?.Substring(0, Math.Min(50, firstUserMessage?.Length ?? 0))}...");
-            
+
             // Find the provider to use for auto-naming
             AIProvider? provider = null;
-            
+
             if (Settings.AutoNamingProviderId.HasValue)
             {
                 provider = Providers.FirstOrDefault(p => p.Id == Settings.AutoNamingProviderId.Value && p.IsEnabled);
                 System.Diagnostics.Debug.WriteLine($"Auto-naming provider ID specified: {Settings.AutoNamingProviderId.Value}, found: {provider != null}");
             }
-            
+
             // Fallback to first enabled provider
             if (provider == null)
             {
                 provider = Providers.FirstOrDefault(p => p.IsEnabled);
                 System.Diagnostics.Debug.WriteLine($"Using fallback provider: {provider?.Name ?? "none"}");
             }
-            
+
             if (provider == null)
             {
                 System.Diagnostics.Debug.WriteLine("No provider available for auto-naming");
@@ -648,7 +801,7 @@ namespace AIA.Services.AI
             try
             {
                 System.Diagnostics.Debug.WriteLine($"Calling AI for title generation with temp={Settings.AutoNamingTemperature}, maxTokens={Settings.AutoNamingMaxTokens}");
-                
+
                 var request = new AIRequest
                 {
                     Messages = new List<AIMessage>
@@ -679,14 +832,14 @@ namespace AIA.Services.AI
                 if (response.Success && !string.IsNullOrWhiteSpace(response.Content))
                 {
                     System.Diagnostics.Debug.WriteLine($"Raw response content: '{response.Content}'");
-                    
+
                     // Clean up the response - remove quotes, trim, and limit length
                     var title = response.Content.Trim().Trim('"', '\'', '.', '!', '?');
-                    
+
                     // Limit to reasonable length
                     if (title.Length > 50)
                         title = title.Substring(0, 47) + "...";
-                    
+
                     System.Diagnostics.Debug.WriteLine($"Generated title (cleaned): '{title}'");
                     return title;
                 }

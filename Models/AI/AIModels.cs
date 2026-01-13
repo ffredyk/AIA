@@ -49,6 +49,27 @@ namespace AIA.Models.AI
     }
 
     /// <summary>
+    /// Represents image content for multimodal AI messages
+    /// </summary>
+    public class AIImageContent
+    {
+        /// <summary>
+        /// Base64-encoded image data (without data URI prefix)
+        /// </summary>
+        public string Base64Data { get; set; } = string.Empty;
+
+        /// <summary>
+        /// MIME type of the image (e.g., "image/png", "image/jpeg")
+        /// </summary>
+        public string MimeType { get; set; } = "image/png";
+
+        /// <summary>
+        /// Optional description or context for the image
+        /// </summary>
+        public string? Description { get; set; }
+    }
+
+    /// <summary>
     /// Represents a message in the AI conversation
     /// </summary>
     public class AIMessage
@@ -58,6 +79,18 @@ namespace AIA.Models.AI
         public List<AIToolCall>? ToolCalls { get; set; }
         public string? ToolCallId { get; set; }
         public string? Name { get; set; }
+
+        /// <summary>
+        /// Optional image content for multimodal/vision requests.
+        /// When set, the message will be formatted as a multimodal message with both text and image.
+        /// </summary>
+        public List<AIImageContent>? Images { get; set; }
+
+        /// <summary>
+        /// Whether this message contains image content
+        /// </summary>
+        [JsonIgnore]
+        public bool HasImages => Images != null && Images.Count > 0;
     }
 
     /// <summary>

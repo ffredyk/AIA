@@ -53,28 +53,7 @@ namespace AIA.Services.AI
 
             foreach (var msg in request.Messages)
             {
-                if (msg.ToolCallId != null)
-                {
-                    messages.Add(new { role = "tool", tool_call_id = msg.ToolCallId, content = msg.Content });
-                }
-                else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
-                {
-                    var toolCalls = new List<object>();
-                    foreach (var tc in msg.ToolCalls)
-                    {
-                        toolCalls.Add(new
-                        {
-                            id = tc.Id,
-                            type = "function",
-                            function = new { name = tc.Name, arguments = JsonSerializer.Serialize(tc.Arguments) }
-                        });
-                    }
-                    messages.Add(new { role = msg.Role, content = msg.Content, tool_calls = toolCalls });
-                }
-                else
-                {
-                    messages.Add(new { role = msg.Role, content = msg.Content });
-                }
+                messages.Add(FormatMessage(msg));
             }
 
             var requestBody = new Dictionary<string, object>
@@ -145,28 +124,7 @@ namespace AIA.Services.AI
 
                 foreach (var msg in request.Messages)
                 {
-                    if (msg.ToolCallId != null)
-                    {
-                        messages.Add(new { role = "tool", tool_call_id = msg.ToolCallId, content = msg.Content });
-                    }
-                    else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
-                    {
-                        var toolCalls = new List<object>();
-                        foreach (var tc in msg.ToolCalls)
-                        {
-                            toolCalls.Add(new
-                            {
-                                id = tc.Id,
-                                type = "function",
-                                function = new { name = tc.Name, arguments = JsonSerializer.Serialize(tc.Arguments) }
-                            });
-                        }
-                        messages.Add(new { role = msg.Role, content = msg.Content, tool_calls = toolCalls });
-                    }
-                    else
-                    {
-                        messages.Add(new { role = msg.Role, content = msg.Content });
-                    }
+                    messages.Add(FormatMessage(msg));
                 }
 
                 var requestBody = new Dictionary<string, object>
@@ -193,7 +151,6 @@ namespace AIA.Services.AI
                                 ["description"] = param.Value.Description
                             };
                             
-                            // Only add enum if it has values
                             if (param.Value.Enum != null && param.Value.Enum.Length > 0)
                             {
                                 paramDef["enum"] = param.Value.Enum;
@@ -281,6 +238,62 @@ namespace AIA.Services.AI
             {
                 return new AIResponse { Error = $"OpenAI request failed: {ex.Message}" };
             }
+        }
+
+        /// <summary>
+        /// Format a message for the OpenAI API, handling multimodal content
+        /// </summary>
+        private static object FormatMessage(AIMessage msg)
+        {
+            if (msg.ToolCallId != null)
+            {
+                return new { role = "tool", tool_call_id = msg.ToolCallId, content = msg.Content };
+            }
+            
+            if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
+            {
+                var toolCalls = new List<object>();
+                foreach (var tc in msg.ToolCalls)
+                {
+                    toolCalls.Add(new
+                    {
+                        id = tc.Id,
+                        type = "function",
+                        function = new { name = tc.Name, arguments = JsonSerializer.Serialize(tc.Arguments) }
+                    });
+                }
+                return new { role = msg.Role, content = msg.Content, tool_calls = toolCalls };
+            }
+            
+            // Handle multimodal messages with images (vision)
+            if (msg.HasImages)
+            {
+                var contentParts = new List<object>();
+                
+                // Add text content first
+                if (!string.IsNullOrEmpty(msg.Content))
+                {
+                    contentParts.Add(new { type = "text", text = msg.Content });
+                }
+                
+                // Add images
+                foreach (var image in msg.Images!)
+                {
+                    contentParts.Add(new
+                    {
+                        type = "image_url",
+                        image_url = new
+                        {
+                            url = $"data:{image.MimeType};base64,{image.Base64Data}"
+                        }
+                    });
+                }
+                
+                return new { role = msg.Role, content = contentParts };
+            }
+            
+            // Standard text message
+            return new { role = msg.Role, content = msg.Content };
         }
 
         #region OpenAI Response Models
@@ -402,28 +415,7 @@ namespace AIA.Services.AI
 
             foreach (var msg in request.Messages)
             {
-                if (msg.ToolCallId != null)
-                {
-                    messages.Add(new { role = "tool", tool_call_id = msg.ToolCallId, content = msg.Content });
-                }
-                else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
-                {
-                    var toolCalls = new List<object>();
-                    foreach (var tc in msg.ToolCalls)
-                    {
-                        toolCalls.Add(new
-                        {
-                            id = tc.Id,
-                            type = "function",
-                            function = new { name = tc.Name, arguments = JsonSerializer.Serialize(tc.Arguments) }
-                        });
-                    }
-                    messages.Add(new { role = msg.Role, content = msg.Content, tool_calls = toolCalls });
-                }
-                else
-                {
-                    messages.Add(new { role = msg.Role, content = msg.Content });
-                }
+                messages.Add(FormatMessage(msg));
             }
 
             var requestBody = new Dictionary<string, object>
@@ -496,28 +488,7 @@ namespace AIA.Services.AI
 
                 foreach (var msg in request.Messages)
                 {
-                    if (msg.ToolCallId != null)
-                    {
-                        messages.Add(new { role = "tool", tool_call_id = msg.ToolCallId, content = msg.Content });
-                    }
-                    else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
-                    {
-                        var toolCalls = new List<object>();
-                        foreach (var tc in msg.ToolCalls)
-                        {
-                            toolCalls.Add(new
-                            {
-                                id = tc.Id,
-                                type = "function",
-                                function = new { name = tc.Name, arguments = JsonSerializer.Serialize(tc.Arguments) }
-                            });
-                        }
-                        messages.Add(new { role = msg.Role, content = msg.Content, tool_calls = toolCalls });
-                    }
-                    else
-                    {
-                        messages.Add(new { role = msg.Role, content = msg.Content });
-                    }
+                    messages.Add(FormatMessage(msg));
                 }
 
                 var requestBody = new Dictionary<string, object>
@@ -543,7 +514,6 @@ namespace AIA.Services.AI
                                 ["description"] = param.Value.Description
                             };
                             
-                            // Only add enum if it has values
                             if (param.Value.Enum != null && param.Value.Enum.Length > 0)
                             {
                                 paramDef["enum"] = param.Value.Enum;
@@ -581,7 +551,6 @@ namespace AIA.Services.AI
                 var json = JsonSerializer.Serialize(requestBody);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                // Azure OpenAI uses a different URL pattern
                 var endpoint = provider.Endpoint.TrimEnd('/');
                 var apiUrl = $"{endpoint}/openai/deployments/{provider.DeploymentName}/chat/completions?api-version=2024-02-15-preview";
 
@@ -597,7 +566,6 @@ namespace AIA.Services.AI
                     return new AIResponse { Error = $"Azure OpenAI API error: {response.StatusCode} - {responseContent}" };
                 }
 
-                // Azure OpenAI uses the same response format as OpenAI
                 var result = JsonSerializer.Deserialize<AzureOpenAIResponse>(responseContent);
                 if (result?.Choices == null || result.Choices.Count == 0)
                 {
@@ -636,6 +604,62 @@ namespace AIA.Services.AI
             {
                 return new AIResponse { Error = $"Azure OpenAI request failed: {ex.Message}" };
             }
+        }
+
+        /// <summary>
+        /// Format a message for the Azure OpenAI API, handling multimodal content
+        /// </summary>
+        private static object FormatMessage(AIMessage msg)
+        {
+            if (msg.ToolCallId != null)
+            {
+                return new { role = "tool", tool_call_id = msg.ToolCallId, content = msg.Content };
+            }
+            
+            if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
+            {
+                var toolCalls = new List<object>();
+                foreach (var tc in msg.ToolCalls)
+                {
+                    toolCalls.Add(new
+                    {
+                        id = tc.Id,
+                        type = "function",
+                        function = new { name = tc.Name, arguments = JsonSerializer.Serialize(tc.Arguments) }
+                    });
+                }
+                return new { role = msg.Role, content = msg.Content, tool_calls = toolCalls };
+            }
+            
+            // Handle multimodal messages with images (vision)
+            if (msg.HasImages)
+            {
+                var contentParts = new List<object>();
+                
+                // Add text content first
+                if (!string.IsNullOrEmpty(msg.Content))
+                {
+                    contentParts.Add(new { type = "text", text = msg.Content });
+                }
+                
+                // Add images
+                foreach (var image in msg.Images!)
+                {
+                    contentParts.Add(new
+                    {
+                        type = "image_url",
+                        image_url = new
+                        {
+                            url = $"data:{image.MimeType};base64,{image.Base64Data}"
+                        }
+                    });
+                }
+                
+                return new { role = msg.Role, content = contentParts };
+            }
+            
+            // Standard text message
+            return new { role = msg.Role, content = msg.Content };
         }
 
         #region Azure OpenAI Response Models
@@ -757,20 +781,7 @@ namespace AIA.Services.AI
 
             foreach (var msg in request.Messages)
             {
-                var role = msg.Role == "assistant" ? "model" : "user";
-
-                if (msg.ToolCallId != null)
-                {
-                    contents.Add(new
-                    {
-                        role = "function",
-                        parts = new[] { new { functionResponse = new { name = msg.Name, response = new { result = msg.Content } } } }
-                    });
-                }
-                else
-                {
-                    contents.Add(new { role, parts = new[] { new { text = msg.Content } } });
-                }
+                contents.Add(FormatMessage(msg));
             }
 
             var requestBody = new Dictionary<string, object>
@@ -840,7 +851,6 @@ namespace AIA.Services.AI
             {
                 var contents = new List<object>();
 
-                // Add system instruction if present
                 object? systemInstruction = null;
                 if (!string.IsNullOrEmpty(request.SystemPrompt))
                 {
@@ -849,20 +859,7 @@ namespace AIA.Services.AI
 
                 foreach (var msg in request.Messages)
                 {
-                    var role = msg.Role == "assistant" ? "model" : "user";
-                    
-                    if (msg.ToolCallId != null)
-                    {
-                        contents.Add(new
-                        {
-                            role = "function",
-                            parts = new[] { new { functionResponse = new { name = msg.Name, response = new { result = msg.Content } } } }
-                        });
-                    }
-                    else
-                    {
-                        contents.Add(new { role, parts = new[] { new { text = msg.Content } } });
-                    }
+                    contents.Add(FormatMessage(msg));
                 }
 
                 var requestBody = new Dictionary<string, object>
@@ -896,7 +893,6 @@ namespace AIA.Services.AI
                                 ["description"] = param.Value.Description
                             };
                             
-                            // Only add enum if it has values
                             if (param.Value.Enum != null && param.Value.Enum.Length > 0)
                             {
                                 paramDef["enum"] = param.Value.Enum;
@@ -954,7 +950,6 @@ namespace AIA.Services.AI
                     UsedProvider = provider
                 };
 
-                // Handle function calls
                 var functionCalls = ExtractFunctionCalls(candidate);
                 if (functionCalls.Count > 0)
                 {
@@ -969,39 +964,48 @@ namespace AIA.Services.AI
             }
         }
 
-        private static string ExtractTextContent(GeminiCandidate candidate)
+        /// <summary>
+        /// Format a message for the Gemini API, handling multimodal content
+        /// </summary>
+        private static object FormatMessage(AIMessage msg)
         {
-            if (candidate.Content?.Parts == null) return string.Empty;
+            var role = msg.Role == "assistant" ? "model" : "user";
             
-            var sb = new StringBuilder();
-            foreach (var part in candidate.Content.Parts)
+            if (msg.ToolCallId != null)
             {
-                if (!string.IsNullOrEmpty(part.Text))
+                return new
                 {
-                    sb.Append(part.Text);
-                }
+                    role = "function",
+                    parts = new[] { new { functionResponse = new { name = msg.Name, response = new { result = msg.Content } } } }
+                };
             }
-            return sb.ToString();
-        }
-
-        private static List<AIToolCall> ExtractFunctionCalls(GeminiCandidate candidate)
-        {
-            var calls = new List<AIToolCall>();
-            if (candidate.Content?.Parts == null) return calls;
-
-            foreach (var part in candidate.Content.Parts)
+            
+            // Handle multimodal messages with images
+            if (msg.HasImages)
             {
-                if (part.FunctionCall != null)
+                var parts = new List<object>();
+                
+                if (!string.IsNullOrEmpty(msg.Content))
                 {
-                    calls.Add(new AIToolCall
+                    parts.Add(new { text = msg.Content });
+                }
+                
+                foreach (var image in msg.Images!)
+                {
+                    parts.Add(new
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        Name = part.FunctionCall.Name ?? string.Empty,
-                        Arguments = part.FunctionCall.Args ?? new Dictionary<string, object>()
+                        inline_data = new
+                        {
+                            mime_type = image.MimeType,
+                            data = image.Base64Data
+                        }
                     });
                 }
+                
+                return new { role, parts };
             }
-            return calls;
+            
+            return new { role, parts = new[] { new { text = msg.Content } } };
         }
 
         #region Gemini Response Models
@@ -1070,6 +1074,41 @@ namespace AIA.Services.AI
             [JsonPropertyName("args")]
             public Dictionary<string, object>? Args { get; set; }
         }
+
+        private static string ExtractTextContent(GeminiCandidate candidate)
+        {
+            if (candidate.Content?.Parts == null) return string.Empty;
+            
+            var sb = new StringBuilder();
+            foreach (var part in candidate.Content.Parts)
+            {
+                if (!string.IsNullOrEmpty(part.Text))
+                {
+                    sb.Append(part.Text);
+                }
+            }
+            return sb.ToString();
+        }
+
+        private static List<AIToolCall> ExtractFunctionCalls(GeminiCandidate candidate)
+        {
+            var calls = new List<AIToolCall>();
+            if (candidate.Content?.Parts == null) return calls;
+
+            foreach (var part in candidate.Content.Parts)
+            {
+                if (part.FunctionCall != null)
+                {
+                    calls.Add(new AIToolCall
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = part.FunctionCall.Name ?? string.Empty,
+                        Arguments = part.FunctionCall.Args ?? new Dictionary<string, object>()
+                    });
+                }
+            }
+            return calls;
+        }
         #endregion
     }
 
@@ -1099,39 +1138,7 @@ namespace AIA.Services.AI
 
             foreach (var msg in request.Messages)
             {
-                if (msg.ToolCallId != null)
-                {
-                    messages.Add(new
-                    {
-                        role = "user",
-                        content = new[]
-                        {
-                            new
-                            {
-                                type = "tool_result",
-                                tool_use_id = msg.ToolCallId,
-                                content = msg.Content
-                            }
-                        }
-                    });
-                }
-                else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
-                {
-                    var contentBlocks = new List<object>();
-                    if (!string.IsNullOrEmpty(msg.Content))
-                    {
-                        contentBlocks.Add(new { type = "text", text = msg.Content });
-                    }
-                    foreach (var tc in msg.ToolCalls)
-                    {
-                        contentBlocks.Add(new { type = "tool_use", id = tc.Id, name = tc.Name, input = tc.Arguments });
-                    }
-                    messages.Add(new { role = "assistant", content = contentBlocks });
-                }
-                else
-                {
-                    messages.Add(new { role = msg.Role, content = msg.Content });
-                }
+                messages.Add(FormatMessage(msg));
             }
 
             var requestBody = new Dictionary<string, object>
@@ -1204,39 +1211,7 @@ namespace AIA.Services.AI
 
                 foreach (var msg in request.Messages)
                 {
-                    if (msg.ToolCallId != null)
-                    {
-                        messages.Add(new
-                        {
-                            role = "user",
-                            content = new[]
-                            {
-                                new
-                                {
-                                    type = "tool_result",
-                                    tool_use_id = msg.ToolCallId,
-                                    content = msg.Content
-                                }
-                            }
-                        });
-                    }
-                    else if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
-                    {
-                        var contentBlocks = new List<object>();
-                        if (!string.IsNullOrEmpty(msg.Content))
-                        {
-                            contentBlocks.Add(new { type = "text", text = msg.Content });
-                        }
-                        foreach (var tc in msg.ToolCalls)
-                        {
-                            contentBlocks.Add(new { type = "tool_use", id = tc.Id, name = tc.Name, input = tc.Arguments });
-                        }
-                        messages.Add(new { role = "assistant", content = contentBlocks });
-                    }
-                    else
-                    {
-                        messages.Add(new { role = msg.Role, content = msg.Content });
-                    }
+                    messages.Add(FormatMessage(msg));
                 }
 
                 var requestBody = new Dictionary<string, object>
@@ -1341,6 +1316,74 @@ namespace AIA.Services.AI
             {
                 return new AIResponse { Error = $"Anthropic request failed: {ex.Message}" };
             }
+        }
+
+        /// <summary>
+        /// Format a message for the Anthropic API, handling multimodal content
+        /// </summary>
+        private static object FormatMessage(AIMessage msg)
+        {
+            if (msg.ToolCallId != null)
+            {
+                return new
+                {
+                    role = "user",
+                    content = new[]
+                    {
+                        new
+                        {
+                            type = "tool_result",
+                            tool_use_id = msg.ToolCallId,
+                            content = msg.Content
+                        }
+                    }
+                };
+            }
+            
+            if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
+            {
+                var contentBlocks = new List<object>();
+                if (!string.IsNullOrEmpty(msg.Content))
+                {
+                    contentBlocks.Add(new { type = "text", text = msg.Content });
+                }
+                foreach (var tc in msg.ToolCalls)
+                {
+                    contentBlocks.Add(new { type = "tool_use", id = tc.Id, name = tc.Name, input = tc.Arguments });
+                }
+                return new { role = "assistant", content = contentBlocks };
+            }
+            
+            // Handle multimodal messages with images
+            if (msg.HasImages)
+            {
+                var contentBlocks = new List<object>();
+                
+                // Add images first (Claude prefers images before text)
+                foreach (var image in msg.Images!)
+                {
+                    contentBlocks.Add(new
+                    {
+                        type = "image",
+                        source = new
+                        {
+                            type = "base64",
+                            media_type = image.MimeType,
+                            data = image.Base64Data
+                        }
+                    });
+                }
+                
+                // Add text content
+                if (!string.IsNullOrEmpty(msg.Content))
+                {
+                    contentBlocks.Add(new { type = "text", text = msg.Content });
+                }
+                
+                return new { role = msg.Role, content = contentBlocks };
+            }
+            
+            return new { role = msg.Role, content = msg.Content };
         }
 
         private static string ExtractTextContent(AnthropicResponse response)

@@ -304,25 +304,49 @@ namespace AIA.Views
                 // Use streaming with tool support
                 var contentBuilder = new System.Text.StringBuilder();
 
+                System.Diagnostics.Debug.WriteLine($"Sending message with tool use enabled: {ViewModel.AIOrchestration.Settings.EnableToolUse}");
+
                 await foreach (var (chunk, status) in ViewModel.AIOrchestration.GenerateStreamWithToolsAsync(
                     userMessage,
                     conversationHistory.Take(conversationHistory.Count - 1).ToList()))
                 {
+                    System.Diagnostics.Debug.WriteLine($"Stream chunk - Status: '{status}', Content: '{chunk}'");
+                    
                     // Update status message
                     if (!string.IsNullOrEmpty(status) && status != "Streaming")
                     {
-                        ViewModel.AiStatusMessage = status;
+                    ViewModel.AiStatusMessage = status;
                     }
                     
-                    // Append content chunk
+                    // Append content chunk - but skip if it looks like raw JSON tool arguments
                     if (!string.IsNullOrEmpty(chunk))
                     {
-                        contentBuilder.Append(chunk);
-                        assistantMessage.Content = contentBuilder.ToString();
+                        // Check if chunk looks like raw JSON (tool arguments being incorrectly returned as content)
+                        var trimmedChunk = chunk.Trim();
+                        bool isLikelyToolJson = (trimmedChunk.StartsWith("{") || trimmedChunk.StartsWith("[")) &&
+                                               (contentBuilder.Length == 0 || contentBuilder.ToString().Trim().Length == 0);
+                        
+                        if (!isLikelyToolJson)
+                        {
+                            contentBuilder.Append(chunk);
+                            assistantMessage.Content = contentBuilder.ToString();
 
-                        // Scroll to bottom as content updates
-                        ChatScrollViewer.ScrollToEnd();
+                            // Scroll to bottom as content updates
+                            ChatScrollViewer.ScrollToEnd();
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"?? Filtered out likely tool JSON: {trimmedChunk}");
+                        }
                     }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Final assistant content: '{assistantMessage.Content}'");
+
+                // If no content was generated, show a helpful message
+                if (string.IsNullOrWhiteSpace(assistantMessage.Content))
+                {
+                    assistantMessage.Content = "[Processing tool calls - waiting for response...]";
                 }
 
                 ViewModel.AiStatusMessage = "Response complete";
