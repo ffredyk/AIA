@@ -495,7 +495,7 @@ namespace AIA
 
         #region Window Lifecycle
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             var helper = new WindowInteropHelper(this);
             Models.OverlayViewModel.Singleton.SetOverlayWindowHandle(helper.Handle);
@@ -504,8 +504,8 @@ namespace AIA
             
             Models.OverlayViewModel.Singleton.PauseWindowTracking();
             
-            // Load and apply overlay opacity to background brush
-            var appSettings = AppSettingsService.LoadAppSettingsAsync().Result;
+            // Load and apply overlay opacity to background brush - ASYNC
+            var appSettings = await AppSettingsService.LoadAppSettingsAsync();
             ApplyBackgroundOpacity(appSettings.OverlayOpacity);
             
             AnimateSlideIn();
@@ -518,13 +518,17 @@ namespace AIA
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
-        private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private async void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (IsVisible)
             {
                 SetFullscreenOverlay();
                 
                 Models.OverlayViewModel.Singleton.PauseWindowTracking();
+                
+                // Reload and apply overlay opacity settings whenever window becomes visible
+                var appSettings = await AppSettingsService.LoadAppSettingsAsync();
+                ApplyBackgroundOpacity(appSettings.OverlayOpacity);
                 
                 AnimateSlideIn();
                 
@@ -576,16 +580,25 @@ namespace AIA
             };
             
             // Top gradient stop - base opacity 0xEE (238/255 ≈ 0.93)
-            var topOpacity = (byte)(0xEE * opacityMultiplier);
+            var topOpacity = (byte)(0xFF * opacityMultiplier);
             gradientBrush.GradientStops.Add(new GradientStop(
                 WpfColor.FromArgb(topOpacity, 0x00, 0x00, 0x00), 0));
             
             // Bottom gradient stop - base opacity 0xAA (170/255 ≈ 0.67)
-            var bottomOpacity = (byte)(0xAA * opacityMultiplier);
+            var bottomOpacity = (byte)(0xDD * opacityMultiplier);
             gradientBrush.GradientStops.Add(new GradientStop(
                 WpfColor.FromArgb(bottomOpacity, 0x00, 0x00, 0x00), 1));
             
             Background = gradientBrush;
+        }
+
+        /// <summary>
+        /// Refreshes the overlay opacity from settings (called when settings are changed)
+        /// </summary>
+        public async void RefreshOpacityFromSettings()
+        {
+            var appSettings = await AppSettingsService.LoadAppSettingsAsync();
+            ApplyBackgroundOpacity(appSettings.OverlayOpacity);
         }
 
         private void AnimateSlideIn()

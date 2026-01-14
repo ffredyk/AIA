@@ -565,6 +565,12 @@ namespace AIA
             await AppSettingsService.SaveAppSettingsAsync(_appSettings);
             await AppSettingsService.SavePluginSettingsAsync(_pluginSettings);
 
+            // Refresh the overlay opacity immediately if the main window is open
+            if (Owner is MainWindow mainWindow)
+            {
+                mainWindow.RefreshOpacityFromSettings();
+            }
+
             StatusText.Text = LocalizationService.Instance.GetString("Status_SettingsSaved");
         }
 
