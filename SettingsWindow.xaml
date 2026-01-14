@@ -183,6 +183,25 @@
                             </StackPanel>
                         </Border>
                         
+                        <!-- Overlay Opacity Section -->
+                        <TextBlock Text="{local:Localize Settings_OverlayOpacity}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Settings_OverlayOpacityDescription}" Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" x:Name="TxtOpacityValue" Text="100%" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                </Grid>
+                                <Slider x:Name="SldrOverlayOpacity" Minimum="0.1" Maximum="1.0" Value="1.0" SmallChange="0.05" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.05" TickPlacement="BottomRight" Height="24" Foreground="#0078D4" ValueChanged="SldrOverlayOpacity_ValueChanged"/>
+                            </StackPanel>
+                        </Border>
+                        
                         <!-- Behavior Section -->
                         <TextBlock Text="{local:Localize Settings_Behavior}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         

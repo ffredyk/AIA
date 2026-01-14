@@ -11,8 +11,8 @@
     <Version>1.0.0</Version>
     <Description>Outlook integration plugin for AIA</Description>
     <EnableDynamicLoading>true</EnableDynamicLoading>
-    <AssemblyVersion>1.0.15.24218</AssemblyVersion>
-    <FileVersion>1.0.15.24218</FileVersion>
+    <AssemblyVersion>1.0.17.28143</AssemblyVersion>
+    <FileVersion>1.0.17.28143</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

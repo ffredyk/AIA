@@ -20,6 +20,7 @@ namespace AIA.Models
         private int _autoBackupIntervalHours = 24;
         private int _maxBackupCount = 5;
         private string _language = string.Empty; // Empty = use system language
+        private double _overlayOpacity = 1.0; // Default: fully opaque
         
         // Clipboard history settings
         private bool _enableClipboardHistory = true;
@@ -131,6 +132,15 @@ namespace AIA.Models
         {
             get => _language;
             set { _language = value; OnPropertyChanged(nameof(Language)); }
+        }
+
+        /// <summary>
+        /// Overlay window opacity (0.0 to 1.0)
+        /// </summary>
+        public double OverlayOpacity
+        {
+            get => _overlayOpacity;
+            set { _overlayOpacity = Math.Max(0.1, Math.Min(1.0, value)); OnPropertyChanged(nameof(OverlayOpacity)); }
         }
 
         #region Clipboard History Settings

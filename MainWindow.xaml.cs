@@ -500,6 +500,10 @@ namespace AIA
             var helper = new WindowInteropHelper(this);
             Models.OverlayViewModel.Singleton.SetOverlayWindowHandle(helper.Handle);
             
+            // Load and apply overlay opacity from settings
+            var appSettings = AppSettingsService.LoadAppSettingsAsync().Result;
+            Opacity = appSettings.OverlayOpacity;
+            
             SetFullscreenOverlay();
             
             Models.OverlayViewModel.Singleton.PauseWindowTracking();

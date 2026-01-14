@@ -98,6 +98,10 @@ namespace AIA
             _pendingKey = key;
             UpdateHotkeyDisplay();
             
+            // Overlay opacity
+            SldrOverlayOpacity.Value = _appSettings.OverlayOpacity;
+            UpdateOpacityDisplay();
+            
             // Clipboard history settings
             ChkEnableClipboardHistory.IsChecked = _appSettings.EnableClipboardHistory;
             ChkTrackClipboardText.IsChecked = _appSettings.TrackClipboardText;
@@ -363,6 +367,12 @@ namespace AIA
             }
         }
 
+        private void UpdateOpacityDisplay()
+        {
+            var opacityPercent = (int)(SldrOverlayOpacity.Value * 100);
+            TxtOpacityValue.Text = $"{opacityPercent}%";
+        }
+
         #endregion
 
         #region Event Handlers
@@ -377,6 +387,11 @@ namespace AIA
                 // Note: Full UI refresh would require reopening the window or refreshing all bindings
                 StatusText.Text = LocalizationService.Instance.GetString("Status_SettingsSaved");
             }
+        }
+
+        private void SldrOverlayOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateOpacityDisplay();
         }
 
         private void ChkRunOnStartup_Changed(object sender, RoutedEventArgs e)
@@ -505,6 +520,7 @@ namespace AIA
             _appSettings.CheckForUpdatesOnStartup = ChkCheckUpdates.IsChecked ?? true;
             _appSettings.AutoInstallUpdates = ChkAutoInstallUpdates.IsChecked ?? false;
             _appSettings.EnableAutoBackup = ChkAutoBackup.IsChecked ?? false;
+            _appSettings.OverlayOpacity = SldrOverlayOpacity.Value;
             
             if (int.TryParse(TxtBackupInterval.Text, out var backupInterval))
                 _appSettings.AutoBackupIntervalHours = backupInterval;
