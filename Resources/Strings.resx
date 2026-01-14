@@ -729,4 +729,47 @@
   <value>Template deleted successfully</value>
 </data>
 
+  <!-- Clipboard History -->
+  <data name="DataAssets_ClipboardHistory" xml:space="preserve">
+    <value>Clipboard History</value>
+  </data>
+  <data name="DataAssets_ClearClipboardHistory" xml:space="preserve">
+    <value>Clear clipboard history</value>
+  </data>
+  <data name="DataAssets_NoClipboardHistory" xml:space="preserve">
+    <value>No clipboard history</value>
+  </data>
+  <data name="DataAssets_RestoreToClipboard" xml:space="preserve">
+    <value>Restore to clipboard</value>
+  </data>
+  <data name="DataAssets_Paste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  
+  <!-- Settings - Clipboard History -->
+  <data name="Settings_ClipboardHistory" xml:space="preserve">
+    <value>Clipboard History</value>
+  </data>
+  <data name="Settings_EnableClipboardHistory" xml:space="preserve">
+    <value>Enable clipboard history</value>
+  </data>
+  <data name="Settings_EnableClipboardHistoryDesc" xml:space="preserve">
+    <value>Track clipboard changes while the app is running</value>
+  </data>
+  <data name="Settings_MaxClipboardItems" xml:space="preserve">
+    <value>Maximum history items</value>
+  </data>
+  <data name="Settings_MaxClipboardItemSize" xml:space="preserve">
+    <value>Maximum item size (KB)</value>
+  </data>
+  <data name="Settings_TrackClipboardText" xml:space="preserve">
+    <value>Track text content</value>
+  </data>
+  <data name="Settings_TrackClipboardImages" xml:space="preserve">
+    <value>Track images</value>
+  </data>
+  <data name="Settings_TrackClipboardFiles" xml:space="preserve">
+    <value>Track file paths</value>
+  </data>
+
 </root>

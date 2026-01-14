@@ -241,6 +241,77 @@
                             </StackPanel>
                         </ui:Button>
                         
+                        <!-- Clipboard History Section -->
+                        <TextBlock Text="{local:Localize Settings_ClipboardHistory}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{local:Localize Settings_EnableClipboardHistory}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_EnableClipboardHistoryDesc}" 
+                                               Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <CheckBox x:Name="ChkEnableClipboardHistory" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
+                            </Grid>
+                        </Border>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{local:Localize Settings_TrackClipboardText}" Foreground="White" VerticalAlignment="Center"/>
+                                <CheckBox x:Name="ChkTrackClipboardText" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
+                            </Grid>
+                        </Border>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{local:Localize Settings_TrackClipboardImages}" Foreground="White" VerticalAlignment="Center"/>
+                                <CheckBox x:Name="ChkTrackClipboardImages" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
+                            </Grid>
+                        </Border>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{local:Localize Settings_TrackClipboardFiles}" Foreground="White" VerticalAlignment="Center"/>
+                                <CheckBox x:Name="ChkTrackClipboardFiles" Grid.Column="1" VerticalAlignment="Center" IsChecked="True"/>
+                            </Grid>
+                        </Border>
+                        
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Margin="0,0,8,0">
+                                <TextBlock Text="{local:Localize Settings_MaxClipboardItems}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtMaxClipboardItems" Text="50"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                            
+
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="{local:Localize Settings_MaxClipboardItemSize}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtMaxClipboardItemSize" Text="1024"
+                                         Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                        </Grid>
+                        
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -651,6 +722,7 @@
                                          Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8"/>
                             </StackPanel>
                             
+
                             <StackPanel Grid.Column="1" Margin="8,0,0,0">
                                 <TextBlock Text="{local:Localize Settings_MaxBackupsToKeep}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
                                 <TextBox x:Name="TxtMaxBackups" Text="5"

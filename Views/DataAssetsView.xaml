@@ -13,8 +13,13 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             
-            <!-- Header -->
+            <!-- Screenshots Header -->
             <Grid Margin="12,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -32,7 +37,33 @@
                 </ui:Button>
             </Grid>
             
-            <!-- Data Assets List -->
+            <!-- Clipboard History Header -->
+            <Grid Grid.Column="2" Margin="12,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="ClipboardPaste20" Foreground="White" Margin="0,0,8,0"/>
+                    <TextBlock FontWeight="SemiBold" Foreground="White" Text="{local:Localize DataAssets_ClipboardHistory}"/>
+                    <Border Background="#33FFFFFF" CornerRadius="8" Padding="6,2" Margin="8,0,0,0"
+                            Visibility="{Binding ClipboardHistory.Count, Converter={StaticResource IntToVisConverter}}">
+                        <TextBlock Text="{Binding ClipboardHistory.Count}" Foreground="#AAAAAA" FontSize="10"/>
+                    </Border>
+                </StackPanel>
+                <ui:Button Grid.Column="1" Padding="6,4" Background="Transparent" Click="BtnClearClipboardHistory"
+                           ToolTip="{local:Localize DataAssets_ClearClipboardHistory}"
+                           Visibility="{Binding ClipboardHistory.Count, Converter={StaticResource IntToVisConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Delete12" Foreground="#FF6666" FontSize="12"/>
+                    </StackPanel>
+                </ui:Button>
+            </Grid>
+            
+            <!-- Vertical Separator -->
+            <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Width="1" Background="#33FFFFFF" Margin="0,8"/>
+            
+            <!-- Data Assets (Screenshots) List -->
             <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Padding="8,0,8,8">
                 <ItemsControl ItemsSource="{Binding CurrentDataAssets}">
                     <ItemsControl.ItemsPanel>
@@ -170,11 +201,124 @@
                 </ItemsControl>
             </ScrollViewer>
             
-            <!-- Empty State -->
+            <!-- Clipboard History List -->
+            <ScrollViewer Grid.Row="1" Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Padding="8,0,8,8">
+                <ItemsControl ItemsSource="{Binding ClipboardHistory}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="4" CornerRadius="8" Background="#19FFFFFF" BorderBrush="#33FFFFFF" BorderThickness="1"
+                                    Width="160" Tag="{Binding}" Cursor="Hand" MouseLeftButtonUp="ClipboardItem_Click">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#33FFFFFF"/>
+                                                <Setter Property="BorderBrush" Value="#66FFFFFF"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- Content Preview -->
+                                    <Border CornerRadius="6,6,0,0" ClipToBounds="True" Height="80" Background="#0C000000">
+                                        <Grid>
+                                            <!-- Text Preview -->
+                                            <TextBlock Text="{Binding PreviewText}" Foreground="#CCCCCC" FontSize="10"
+                                                       TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                                       Padding="8" MaxHeight="80"
+                                                       Visibility="{Binding AssetType, Converter={StaticResource ClipboardTextVisConverter}}"/>
+                                            
+                                            <!-- Image Preview -->
+                                            <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" 
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   Visibility="{Binding AssetType, Converter={StaticResource ClipboardImageVisConverter}}"/>
+                                            
+                                            <!-- Files Preview -->
+                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                        Visibility="{Binding AssetType, Converter={StaticResource ClipboardFilesVisConverter}}">
+                                                <ui:SymbolIcon Symbol="FolderOpen20" Foreground="#666666" FontSize="24"/>
+                                                <TextBlock Text="{Binding Name}" Foreground="#999999" FontSize="10" 
+                                                           HorizontalAlignment="Center" Margin="0,4,0,0"
+                                                           TextTrimming="CharacterEllipsis" MaxWidth="140"/>
+                                            </StackPanel>
+                        
+                                            <!-- Type Badge -->
+                                            <Border HorizontalAlignment="Left" VerticalAlignment="Top" 
+                                                    Margin="6" Padding="4,2" CornerRadius="4">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#991EB75F"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding AssetType}" Value="ClipboardImage">
+                                                                <Setter Property="Background" Value="#990078D4"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding AssetType}" Value="ClipboardFiles">
+                                                                <Setter Property="Background" Value="#99FFA500"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <ui:SymbolIcon FontSize="10" Foreground="White" Symbol="{Binding AssetTypeIcon}"/>
+                                                </StackPanel>
+                                            </Border>
+                                        
+                                            <!-- Timestamp -->
+                                            <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                                                    Margin="6" Padding="4,2" CornerRadius="4" Background="#99000000">
+                                                <TextBlock Text="{Binding CapturedAtText}" FontSize="9" Foreground="#CCCCCC"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Info -->
+                                    <StackPanel Grid.Row="1" Margin="8,6,8,4">
+                                        <TextBlock Text="{Binding Name}" Foreground="White" FontSize="11" 
+                                                   FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Action Button - Restore to Clipboard -->
+                                    <Grid Grid.Row="2" Margin="6,0,6,6">
+                                        <ui:Button Padding="4,3" Background="#191EB75F" 
+                                                   Click="BtnRestoreClipboardItem" Tag="{Binding}"
+                                                   ToolTip="{local:Localize DataAssets_RestoreToClipboard}"
+                                                   HorizontalAlignment="Stretch">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <ui:SymbolIcon Symbol="ClipboardPaste16" Foreground="#1EB75F" FontSize="11"/>
+                                                <TextBlock Text="{local:Localize DataAssets_Paste}" Foreground="#1EB75F" FontSize="10" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </ui:Button>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            
+            <!-- Empty State for Screenshots -->
             <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
                         Visibility="{Binding CurrentDataAssets.Count, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}">
                 <ui:SymbolIcon Symbol="Screenshot20" FontSize="32" Foreground="#666666"/>
                 <TextBlock Text="{local:Localize DataAssets_NoScreenshots}" Foreground="#666666" FontSize="12" Margin="0,8,0,0"/>
+            </StackPanel>
+            
+            <!-- Empty State for Clipboard History -->
+            <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding ClipboardHistory.Count, Converter={StaticResource IntToVisConverter}, ConverterParameter=Inverse}">
+                <ui:SymbolIcon Symbol="ClipboardPaste20" FontSize="32" Foreground="#666666"/>
+                <TextBlock Text="{local:Localize DataAssets_NoClipboardHistory}" Foreground="#666666" FontSize="12" Margin="0,8,0,0" TextAlignment="Center"/>
             </StackPanel>
         </Grid>
     </Border>

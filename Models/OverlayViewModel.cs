@@ -66,6 +66,10 @@ namespace AIA.Models
         // Plugin UI service
         private HostPluginUIService? _pluginUIService;
 
+        // Clipboard history service
+        private ClipboardHistoryService? _clipboardHistoryService;
+        private AppSettings? _appSettings;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
@@ -92,6 +96,17 @@ namespace AIA.Models
         /// Plugin UI service for accessing plugin tabs and toolbar buttons
         /// </summary>
         public HostPluginUIService? PluginUIService => _pluginUIService;
+
+        /// <summary>
+        /// Application settings
+        /// </summary>
+        public AppSettings AppSettings => _appSettings ??= new AppSettings();
+
+        /// <summary>
+        /// Clipboard history collection
+        /// </summary>
+        public ObservableCollection<DataAsset> ClipboardHistory => 
+            _clipboardHistoryService?.ClipboardHistory ?? new ObservableCollection<DataAsset>();
 
         /// <summary>
         /// Collection of plugin tabs for UI binding
@@ -433,6 +448,24 @@ namespace AIA.Models
 
             // Load data banks
             _ = LoadDataBanksAsync();
+
+            // Initialize clipboard history service
+            _ = InitializeClipboardHistoryAsync();
+        }
+
+        /// <summary>
+        /// Initializes the clipboard history service
+        /// </summary>
+        private async Task InitializeClipboardHistoryAsync()
+        {
+            _appSettings = await AppSettingsService.LoadAppSettingsAsync();
+            _clipboardHistoryService = new ClipboardHistoryService(() => _appSettings);
+            
+            OnPropertyChanged(nameof(ClipboardHistory));
+            OnPropertyChanged(nameof(AppSettings));
+            
+            // Start clipboard monitoring (will be paused when overlay is visible)
+            _clipboardHistoryService.Start();
         }
 
         /// <summary>
@@ -509,6 +542,7 @@ namespace AIA.Models
         public void PauseWindowTracking()
         {
             _windowTrackingTimer?.Stop();
+            _clipboardHistoryService?.Pause();
         }
 
         /// <summary>
@@ -517,6 +551,7 @@ namespace AIA.Models
         public void ResumeWindowTracking()
         {
             _windowTrackingTimer?.Start();
+            _clipboardHistoryService?.Resume();
         }
 
         /// <summary>
@@ -1890,6 +1925,37 @@ namespace AIA.Models
         public async Task UpdateEntryAsync()
         {
             await SaveDataBanksAsync();
+        }
+
+        #endregion
+
+        #region Clipboard History Methods
+
+        /// <summary>
+        /// Restores a clipboard history item to the system clipboard
+        /// </summary>
+        public bool RestoreClipboardItem(DataAsset item)
+        {
+            return _clipboardHistoryService?.RestoreToClipboard(item) ?? false;
+        }
+
+        /// <summary>
+        /// Clears all clipboard history
+        /// </summary>
+        public void ClearClipboardHistory()
+        {
+            _clipboardHistoryService?.ClearHistory();
+        }
+
+        /// <summary>
+        /// Saves app settings
+        /// </summary>
+        public async Task SaveAppSettingsAsync()
+        {
+            if (_appSettings != null)
+            {
+                await AppSettingsService.SaveAppSettingsAsync(_appSettings);
+            }
         }
 
         #endregion

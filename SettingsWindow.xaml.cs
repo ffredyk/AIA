@@ -97,6 +97,14 @@ namespace AIA
             _pendingModifiers = modifiers;
             _pendingKey = key;
             UpdateHotkeyDisplay();
+            
+            // Clipboard history settings
+            ChkEnableClipboardHistory.IsChecked = _appSettings.EnableClipboardHistory;
+            ChkTrackClipboardText.IsChecked = _appSettings.TrackClipboardText;
+            ChkTrackClipboardImages.IsChecked = _appSettings.TrackClipboardImages;
+            ChkTrackClipboardFiles.IsChecked = _appSettings.TrackClipboardFiles;
+            TxtMaxClipboardItems.Text = _appSettings.MaxClipboardHistoryItems.ToString();
+            TxtMaxClipboardItemSize.Text = _appSettings.MaxClipboardItemSizeKb.ToString();
 
             // Plugin tab
             ChkEnablePlugins.IsChecked = _pluginSettings.EnablePlugins;
@@ -503,6 +511,18 @@ namespace AIA
             
             if (int.TryParse(TxtMaxBackups.Text, out var maxBackups))
                 _appSettings.MaxBackupCount = maxBackups;
+
+            // Clipboard history settings
+            _appSettings.EnableClipboardHistory = ChkEnableClipboardHistory.IsChecked ?? true;
+            _appSettings.TrackClipboardText = ChkTrackClipboardText.IsChecked ?? true;
+            _appSettings.TrackClipboardImages = ChkTrackClipboardImages.IsChecked ?? true;
+            _appSettings.TrackClipboardFiles = ChkTrackClipboardFiles.IsChecked ?? true;
+            
+            if (int.TryParse(TxtMaxClipboardItems.Text, out var maxClipboardItems))
+                _appSettings.MaxClipboardHistoryItems = maxClipboardItems;
+            
+            if (int.TryParse(TxtMaxClipboardItemSize.Text, out var maxClipboardSize))
+                _appSettings.MaxClipboardItemSizeKb = maxClipboardSize;
 
             _pluginSettings.EnablePlugins = ChkEnablePlugins.IsChecked ?? true;
             _pluginSettings.CheckForPluginUpdates = ChkCheckPluginUpdates.IsChecked ?? true;

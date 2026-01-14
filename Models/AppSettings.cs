@@ -20,6 +20,14 @@ namespace AIA.Models
         private int _autoBackupIntervalHours = 24;
         private int _maxBackupCount = 5;
         private string _language = string.Empty; // Empty = use system language
+        
+        // Clipboard history settings
+        private bool _enableClipboardHistory = true;
+        private int _maxClipboardHistoryItems = 50;
+        private int _maxClipboardItemSizeKb = 1024; // 1MB default
+        private bool _trackClipboardText = true;
+        private bool _trackClipboardImages = true;
+        private bool _trackClipboardFiles = true;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -121,6 +129,64 @@ namespace AIA.Models
             get => _language;
             set { _language = value; OnPropertyChanged(nameof(Language)); }
         }
+
+        #region Clipboard History Settings
+
+        /// <summary>
+        /// Whether to enable clipboard history tracking
+        /// </summary>
+        public bool EnableClipboardHistory
+        {
+            get => _enableClipboardHistory;
+            set { _enableClipboardHistory = value; OnPropertyChanged(nameof(EnableClipboardHistory)); }
+        }
+
+        /// <summary>
+        /// Maximum number of clipboard history items to keep
+        /// </summary>
+        public int MaxClipboardHistoryItems
+        {
+            get => _maxClipboardHistoryItems;
+            set { _maxClipboardHistoryItems = Math.Max(1, Math.Min(200, value)); OnPropertyChanged(nameof(MaxClipboardHistoryItems)); }
+        }
+
+        /// <summary>
+        /// Maximum size per clipboard item in KB (to prevent memory issues)
+        /// </summary>
+        public int MaxClipboardItemSizeKb
+        {
+            get => _maxClipboardItemSizeKb;
+            set { _maxClipboardItemSizeKb = Math.Max(1, value); OnPropertyChanged(nameof(MaxClipboardItemSizeKb)); }
+        }
+
+        /// <summary>
+        /// Whether to track text content in clipboard
+        /// </summary>
+        public bool TrackClipboardText
+        {
+            get => _trackClipboardText;
+            set { _trackClipboardText = value; OnPropertyChanged(nameof(TrackClipboardText)); }
+        }
+
+        /// <summary>
+        /// Whether to track images in clipboard
+        /// </summary>
+        public bool TrackClipboardImages
+        {
+            get => _trackClipboardImages;
+            set { _trackClipboardImages = value; OnPropertyChanged(nameof(TrackClipboardImages)); }
+        }
+
+        /// <summary>
+        /// Whether to track file paths in clipboard
+        /// </summary>
+        public bool TrackClipboardFiles
+        {
+            get => _trackClipboardFiles;
+            set { _trackClipboardFiles = value; OnPropertyChanged(nameof(TrackClipboardFiles)); }
+        }
+
+        #endregion
 
         protected virtual void OnPropertyChanged(string propertyName)
         {

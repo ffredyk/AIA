@@ -211,4 +211,70 @@ namespace AIA
 
         public override object ProvideValue(IServiceProvider serviceProvider) => this;
     }
+
+    /// <summary>
+    /// Converts DataAssetType.ClipboardText to Visibility.Visible, others to Collapsed.
+    /// </summary>
+    public class ClipboardTextVisibilityConverter : MarkupExtension, IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is DataAssetType assetType)
+            {
+                return assetType == DataAssetType.ClipboardText ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider) => this;
+    }
+
+    /// <summary>
+    /// Converts DataAssetType.ClipboardImage to Visibility.Visible, others to Collapsed.
+    /// </summary>
+    public class ClipboardImageVisibilityConverter : MarkupExtension, IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is DataAssetType assetType)
+            {
+                return assetType == DataAssetType.ClipboardImage ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider) => this;
+    }
+
+    /// <summary>
+    /// Converts DataAssetType.ClipboardFiles to Visibility.Visible, others to Collapsed.
+    /// </summary>
+    public class ClipboardFilesVisibilityConverter : MarkupExtension, IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is DataAssetType assetType)
+            {
+                return assetType == DataAssetType.ClipboardFiles ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider) => this;
+    }
 }

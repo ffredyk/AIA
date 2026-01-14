@@ -567,6 +567,47 @@ namespace AIA.Services.AI
                 Handler = GetClipboardTextHandler
             });
 
+            // Clipboard History Tool
+            RegisterTool(new AITool
+            {
+                Name = "get_clipboard_history",
+                Description = "Get the clipboard history - a list of recently copied items including text, images, and file paths. Returns up to the configured maximum number of items.",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["limit"] = new AIToolParameter
+                    {
+                        Type = "integer",
+                        Description = "Maximum number of items to return (default 10)",
+                        Required = false
+                    },
+                    ["type"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "Filter by content type",
+                        Required = false,
+                        Enum = new[] { "text", "image", "files", "all" }
+                    }
+                },
+                Handler = GetClipboardHistoryHandler
+            });
+
+            // New tool to retrieve clipboard image as base64 (similar to screenshot retrieval)
+            RegisterTool(new AITool
+            {
+                Name = "get_clipboard_image_base64",
+                Description = "**IMPORTANT: You CAN see clipboard images!** Get a clipboard image in base64-encoded PNG format for visual analysis. Use the clipboard item ID from get_clipboard_history. This allows you to see and analyze what was copied to the clipboard - you can identify content, read text from images, describe what was copied, etc. Always use this when the user asks about images in their clipboard history.",
+                Parameters = new Dictionary<string, AIToolParameter>
+                {
+                    ["clipboard_id"] = new AIToolParameter
+                    {
+                        Type = "string",
+                        Description = "The ID of the clipboard item to retrieve (from get_clipboard_history)",
+                        Required = true
+                    }
+                },
+                Handler = GetClipboardImageBase64Handler
+            });
+
             // File Tools
             RegisterTool(new AITool
             {
@@ -1940,6 +1981,142 @@ namespace AIA.Services.AI
             catch (Exception ex)
             {
                 return JsonSerializer.Serialize(new { error = ex.Message });
+            }
+        }
+
+        private string GetClipboardHistoryHandler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+            var history = vm.ClipboardHistory.AsEnumerable();
+
+            // Filter by type if specified
+            if (TryGetArg<string>(args, "type", out var typeFilter) && !string.IsNullOrEmpty(typeFilter) && typeFilter != "all")
+            {
+                history = typeFilter.ToLowerInvariant() switch
+                {
+                    "text" => history.Where(h => h.AssetType == DataAssetType.ClipboardText),
+                    "image" => history.Where(h => h.AssetType == DataAssetType.ClipboardImage),
+                    "files" => history.Where(h => h.AssetType == DataAssetType.ClipboardFiles),
+                    _ => history
+                };
+            }
+
+            // Apply limit
+            var limit = TryGetArg<int>(args, "limit", out var l) ? l : 10;
+            history = history.Take(limit);
+
+            var result = history.Select(item => new
+            {
+                id = item.Id.ToString(),
+                type = item.AssetType.ToString(),
+                name = item.Name,
+                capturedAt = item.CapturedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                preview = item.AssetType == DataAssetType.ClipboardText 
+                    ? (item.TextContent?.Length > 200 ? item.TextContent.Substring(0, 200) + "..." : item.TextContent)
+                    : item.AssetType == DataAssetType.ClipboardFiles 
+                        ? string.Join(", ", item.FilePaths ?? new List<string>())
+                        : item.AssetType == DataAssetType.ClipboardImage && item.FullImage != null
+                            ? $"Image ({item.FullImage.PixelWidth}x{item.FullImage.PixelHeight})"
+                            : null,
+                textContent = item.AssetType == DataAssetType.ClipboardText ? item.TextContent : null,
+                filePaths = item.AssetType == DataAssetType.ClipboardFiles ? item.FilePaths : null,
+                imageSize = item.AssetType == DataAssetType.ClipboardImage && item.FullImage != null
+                    ? new { width = item.FullImage.PixelWidth, height = item.FullImage.PixelHeight }
+                    : null
+            }).ToList();
+
+            return JsonSerializer.Serialize(new 
+            { 
+                count = result.Count,
+                totalInHistory = vm.ClipboardHistory.Count,
+                items = result 
+            });
+        }
+
+        private string GetClipboardImageBase64Handler(Dictionary<string, object> args)
+        {
+            var vm = _getViewModel();
+
+            if (!TryGetArg<string>(args, "clipboard_id", out var clipboardIdStr))
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = "clipboard_id parameter is required"
+                });
+            }
+
+            if (!Guid.TryParse(clipboardIdStr, out var clipboardId))
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = $"Invalid clipboard ID format: {clipboardIdStr}"
+                });
+            }
+
+            var clipboardItem = vm.ClipboardHistory.FirstOrDefault(a => a.Id == clipboardId);
+            if (clipboardItem == null)
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = $"Clipboard item with ID {clipboardIdStr} not found. Use get_clipboard_history to get valid IDs."
+                });
+            }
+
+            if (clipboardItem.AssetType != DataAssetType.ClipboardImage)
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = $"Clipboard item is not an image. Type is: {clipboardItem.AssetType}. Use get_clipboard_history with type='image' to find image items."
+                });
+            }
+
+            if (clipboardItem.FullImage == null)
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = "Clipboard image data is not available"
+                });
+            }
+
+            try
+            {
+                // Convert BitmapSource to PNG bytes, then to base64 (same as screenshots)
+                var pngEncoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                pngEncoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(clipboardItem.FullImage));
+
+                byte[] pngBytes;
+                using (var memoryStream = new MemoryStream())
+                {
+                    pngEncoder.Save(memoryStream);
+                    pngBytes = memoryStream.ToArray();
+                }
+
+                var base64String = Convert.ToBase64String(pngBytes);
+
+                // Return a special response format that the orchestration service will detect
+                // and convert into a proper multimodal vision message
+                return JsonSerializer.Serialize(new 
+                { 
+                    _imageResponse = true,  // Special marker for orchestration service
+                    success = true,
+                    id = clipboardItem.Id.ToString(),
+                    name = clipboardItem.Name,
+                    description = clipboardItem.Description,
+                    type = clipboardItem.AssetType.ToString(),
+                    source = "clipboard_history",  // Marker to distinguish from screenshots
+                    width = clipboardItem.FullImage.PixelWidth,
+                    height = clipboardItem.FullImage.PixelHeight,
+                    capturedAt = clipboardItem.CapturedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                    mimeType = "image/png",
+                    base64 = base64String
+                });
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new 
+                { 
+                    error = $"Failed to encode clipboard image as base64: {ex.Message}"
+                });
             }
         }
 

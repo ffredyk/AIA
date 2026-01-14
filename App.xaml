@@ -15,6 +15,12 @@
             
             <!-- Global Converters -->
             <local:HexColorConverter x:Key="ColorConverter"/>
+            <local:IntToVisibilityConverter x:Key="IntToVisConverter"/>
+            <local:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
+            <local:NullToVisibilityConverter x:Key="NullToVisConverter"/>
+            <local:ClipboardTextVisibilityConverter x:Key="ClipboardTextVisConverter"/>
+            <local:ClipboardImageVisibilityConverter x:Key="ClipboardImageVisConverter"/>
+            <local:ClipboardFilesVisibilityConverter x:Key="ClipboardFilesVisConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

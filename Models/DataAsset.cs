@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Media.Imaging;
 
 namespace AIA.Models
 {
     /// <summary>
-    /// Represents a captured data asset (screenshot of screen or window)
+    /// Represents a captured data asset (screenshot of screen or window, or clipboard content)
     /// </summary>
     public class DataAsset : INotifyPropertyChanged
     {
@@ -16,6 +17,10 @@ namespace AIA.Models
         private DateTime _capturedAt;
         private DataAssetType _assetType;
         private IntPtr _windowHandle;
+        
+        // Clipboard-specific fields
+        private string? _textContent;
+        private List<string>? _filePaths;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -99,6 +104,8 @@ namespace AIA.Models
                     _assetType = value;
                     OnPropertyChanged(nameof(AssetType));
                     OnPropertyChanged(nameof(AssetTypeIcon));
+                    OnPropertyChanged(nameof(IsClipboardAsset));
+                    OnPropertyChanged(nameof(IsScreenshotAsset));
                 }
             }
         }
@@ -107,6 +114,9 @@ namespace AIA.Models
         {
             DataAssetType.FullScreen => "DesktopMac20",
             DataAssetType.ActiveWindow => "WindowNew20",
+            DataAssetType.ClipboardText => "ClipboardText20",
+            DataAssetType.ClipboardImage => "Image20",
+            DataAssetType.ClipboardFiles => "FolderOpen20",
             _ => "Image20"
         };
 
@@ -123,6 +133,79 @@ namespace AIA.Models
             }
         }
 
+        /// <summary>
+        /// Text content for clipboard text assets
+        /// </summary>
+        public string? TextContent
+        {
+            get => _textContent;
+            set
+            {
+                if (_textContent != value)
+                {
+                    _textContent = value;
+                    OnPropertyChanged(nameof(TextContent));
+                    OnPropertyChanged(nameof(PreviewText));
+                }
+            }
+        }
+
+        /// <summary>
+        /// File paths for clipboard file assets
+        /// </summary>
+        public List<string>? FilePaths
+        {
+            get => _filePaths;
+            set
+            {
+                if (_filePaths != value)
+                {
+                    _filePaths = value;
+                    OnPropertyChanged(nameof(FilePaths));
+                    OnPropertyChanged(nameof(PreviewText));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Preview text for display (truncated for long content)
+        /// </summary>
+        public string PreviewText
+        {
+            get
+            {
+                if (AssetType == DataAssetType.ClipboardText && !string.IsNullOrEmpty(TextContent))
+                {
+                    var preview = TextContent.Length > 100 
+                        ? TextContent.Substring(0, 100) + "..." 
+                        : TextContent;
+                    return preview.Replace("\r\n", " ").Replace("\n", " ");
+                }
+                
+                if (AssetType == DataAssetType.ClipboardFiles && FilePaths?.Count > 0)
+                {
+                    if (FilePaths.Count == 1)
+                        return System.IO.Path.GetFileName(FilePaths[0]);
+                    return $"{FilePaths.Count} files";
+                }
+
+                return Description;
+            }
+        }
+
+        /// <summary>
+        /// Whether this is a clipboard asset
+        /// </summary>
+        public bool IsClipboardAsset => AssetType is DataAssetType.ClipboardText 
+            or DataAssetType.ClipboardImage 
+            or DataAssetType.ClipboardFiles;
+
+        /// <summary>
+        /// Whether this is a screenshot asset
+        /// </summary>
+        public bool IsScreenshotAsset => AssetType is DataAssetType.FullScreen 
+            or DataAssetType.ActiveWindow;
+
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -132,6 +215,9 @@ namespace AIA.Models
     public enum DataAssetType
     {
         FullScreen,
-        ActiveWindow
+        ActiveWindow,
+        ClipboardText,
+        ClipboardImage,
+        ClipboardFiles
     }
 }

@@ -137,5 +137,56 @@ namespace AIA.Views
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        #region Clipboard History
+
+        private void ClipboardItem_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is DataAsset asset)
+            {
+                // For images, show preview; for text/files, restore to clipboard
+                if (asset.AssetType == DataAssetType.ClipboardImage && asset.FullImage != null)
+                {
+                    ShowDataAssetPreview(asset);
+                }
+                else
+                {
+                    RestoreClipboardItem(asset);
+                }
+            }
+        }
+
+        private void BtnRestoreClipboardItem(object sender, RoutedEventArgs e)
+        {
+            if (sender is not FrameworkElement element || element.Tag is not DataAsset asset)
+                return;
+
+            RestoreClipboardItem(asset);
+        }
+
+        private void RestoreClipboardItem(DataAsset asset)
+        {
+            if (ViewModel == null) return;
+
+            if (ViewModel.RestoreClipboardItem(asset))
+            {
+                ToastRequested?.Invoke(this, "Restored to clipboard!");
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Failed to restore to clipboard.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void BtnClearClipboardHistory(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel == null) return;
+
+            ViewModel.ClearClipboardHistory();
+            ToastRequested?.Invoke(this, "Clipboard history cleared");
+        }
+
+        #endregion
     }
 }
