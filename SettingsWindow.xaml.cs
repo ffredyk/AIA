@@ -110,6 +110,10 @@ namespace AIA
             TxtMaxClipboardItems.Text = _appSettings.MaxClipboardHistoryItems.ToString();
             TxtMaxClipboardItemSize.Text = _appSettings.MaxClipboardItemSizeKb.ToString();
 
+            // Screenshot history settings
+            ChkCaptureAllDisplays.IsChecked = _appSettings.EnableAllDisplayCapture;
+            TxtMaxScreenshotItems.Text = _appSettings.MaxScreenshotHistoryItems.ToString();
+
             // Plugin tab
             ChkEnablePlugins.IsChecked = _pluginSettings.EnablePlugins;
             ChkCheckPluginUpdates.IsChecked = _pluginSettings.CheckForPluginUpdates;
@@ -539,6 +543,12 @@ namespace AIA
             
             if (int.TryParse(TxtMaxClipboardItemSize.Text, out var maxClipboardSize))
                 _appSettings.MaxClipboardItemSizeKb = maxClipboardSize;
+
+            // Screenshot history settings
+            _appSettings.EnableAllDisplayCapture = ChkCaptureAllDisplays.IsChecked ?? false;
+            
+            if (int.TryParse(TxtMaxScreenshotItems.Text, out var maxScreenshotItems))
+                _appSettings.MaxScreenshotHistoryItems = maxScreenshotItems;
 
             _pluginSettings.EnablePlugins = ChkEnablePlugins.IsChecked ?? true;
             _pluginSettings.CheckForPluginUpdates = ChkCheckPluginUpdates.IsChecked ?? true;
