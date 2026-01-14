@@ -500,16 +500,22 @@ namespace AIA
             var helper = new WindowInteropHelper(this);
             Models.OverlayViewModel.Singleton.SetOverlayWindowHandle(helper.Handle);
             
-            // Load and apply overlay opacity from settings
-            var appSettings = AppSettingsService.LoadAppSettingsAsync().Result;
-            Opacity = appSettings.OverlayOpacity;
-            
             SetFullscreenOverlay();
             
             Models.OverlayViewModel.Singleton.PauseWindowTracking();
-            Models.OverlayViewModel.Singleton.CaptureCurrentDataAssets();
+            
+            // Load and apply overlay opacity to background brush
+            var appSettings = AppSettingsService.LoadAppSettingsAsync().Result;
+            ApplyBackgroundOpacity(appSettings.OverlayOpacity);
             
             AnimateSlideIn();
+            
+            // Capture data assets AFTER the window has fully loaded and rendered
+            // Use Dispatcher.BeginInvoke with Background priority to ensure it runs after rendering completes
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Models.OverlayViewModel.Singleton.CaptureCurrentDataAssets();
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -519,9 +525,14 @@ namespace AIA
                 SetFullscreenOverlay();
                 
                 Models.OverlayViewModel.Singleton.PauseWindowTracking();
-                Models.OverlayViewModel.Singleton.CaptureCurrentDataAssets();
                 
                 AnimateSlideIn();
+                
+                // Capture data assets asynchronously after visibility change completes
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    Models.OverlayViewModel.Singleton.CaptureCurrentDataAssets();
+                }), System.Windows.Threading.DispatcherPriority.Background);
             }
             else
             {
@@ -547,6 +558,34 @@ namespace AIA
             Width = bounds.Width;
             Height = bounds.Height;
             WindowState = WindowState.Normal;
+        }
+
+        /// <summary>
+        /// Applies the overlay opacity setting to the window background brush
+        /// </summary>
+        private void ApplyBackgroundOpacity(double opacityMultiplier)
+        {
+            // Clamp opacity between 0.1 and 1.0
+            opacityMultiplier = Math.Max(0.1, Math.Min(1.0, opacityMultiplier));
+            
+            // Create gradient brush with adjusted opacity
+            var gradientBrush = new LinearGradientBrush
+            {
+                StartPoint = new System.Windows.Point(0.5, 0),
+                EndPoint = new System.Windows.Point(0.5, 1)
+            };
+            
+            // Top gradient stop - base opacity 0xEE (238/255 ≈ 0.93)
+            var topOpacity = (byte)(0xEE * opacityMultiplier);
+            gradientBrush.GradientStops.Add(new GradientStop(
+                WpfColor.FromArgb(topOpacity, 0x00, 0x00, 0x00), 0));
+            
+            // Bottom gradient stop - base opacity 0xAA (170/255 ≈ 0.67)
+            var bottomOpacity = (byte)(0xAA * opacityMultiplier);
+            gradientBrush.GradientStops.Add(new GradientStop(
+                WpfColor.FromArgb(bottomOpacity, 0x00, 0x00, 0x00), 1));
+            
+            Background = gradientBrush;
         }
 
         private void AnimateSlideIn()
@@ -633,6 +672,9 @@ namespace AIA
             
             base.Show();
             Activate();
+            
+            // Trigger slide-in animation
+            AnimateSlideIn();
         }
 
         /// <summary>

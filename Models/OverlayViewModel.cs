@@ -100,7 +100,7 @@ namespace AIA.Models
         /// <summary>
         /// Application settings
         /// </summary>
-        public AppSettings AppSettings => _appSettings ??= new AppSettings();
+        public AppSettings AppSettings => _appSettings ?? new AppSettings();
 
         /// <summary>
         /// Clipboard history collection
@@ -428,6 +428,9 @@ namespace AIA.Models
 
         public OverlayViewModel()
         {
+            // Initialize app settings synchronously first to avoid race conditions
+            _appSettings = new AppSettings();
+
             // Load chat sessions from disk (or create empty one if first run)
             _ = LoadChatsAsync();
 
@@ -449,7 +452,7 @@ namespace AIA.Models
             // Load data banks
             _ = LoadDataBanksAsync();
 
-            // Initialize clipboard history service
+            // Initialize clipboard history service (will update _appSettings from disk)
             _ = InitializeClipboardHistoryAsync();
         }
 
@@ -458,7 +461,8 @@ namespace AIA.Models
         /// </summary>
         private async Task InitializeClipboardHistoryAsync()
         {
-            _appSettings = await AppSettingsService.LoadAppSettingsAsync();
+            var loadedSettings = await AppSettingsService.LoadAppSettingsAsync();
+            _appSettings = loadedSettings;
             _clipboardHistoryService = new ClipboardHistoryService(() => _appSettings);
             
             OnPropertyChanged(nameof(ClipboardHistory));
