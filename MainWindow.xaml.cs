@@ -527,12 +527,21 @@ namespace AIA
 
         private void SetFullscreenOverlay()
         {
-            var screen = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+            // Get the screen where the cursor is currently located
+            var cursorPosition = System.Windows.Forms.Cursor.Position;
+            var screen = System.Windows.Forms.Screen.FromPoint(cursorPosition);
             
-            Left = screen.Left;
-            Top = screen.Top;
-            Width = screen.Width;
-            Height = screen.Height;
+            if (screen == null)
+            {
+                screen = System.Windows.Forms.Screen.PrimaryScreen;
+            }
+            
+            var bounds = screen.Bounds;
+            
+            Left = bounds.Left;
+            Top = bounds.Top;
+            Width = bounds.Width;
+            Height = bounds.Height;
             WindowState = WindowState.Normal;
         }
 
