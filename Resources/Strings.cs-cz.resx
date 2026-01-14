@@ -780,4 +780,22 @@
 	<data name="Status_TemplateDeleted" xml:space="preserve">
   <value>Šablona byla úspěšně odstraněna</value>
 </data>
+	<data name="Settings_ScreenshotHistory" xml:space="preserve">
+  <value>Historie snímků obrazovky</value>
+</data>
+	<data name="Settings_CaptureAllDisplays" xml:space="preserve">
+  <value>Snímá všechny displeje</value>
+</data>
+	<data name="Settings_CaptureAllDisplaysDesc" xml:space="preserve">
+  <value>Zachycujte snímky obrazovky ze všech připojených displejů místo pouze primárního displeje</value>
+</data>
+	<data name="Settings_MaxScreenshotHistoryItems" xml:space="preserve">
+  <value>Maximální počet položek v historii snímků</value>
+</data>
+	<data name="Settings_OverlayOpacity" xml:space="preserve">
+  <value>Neprůhlednost překrytí</value>
+</data>
+	<data name="Settings_OverlayOpacityDescription" xml:space="preserve">
+  <value>Upravte průhlednost okna překrytí</value>
+</data>
 </root>

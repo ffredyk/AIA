@@ -778,4 +778,22 @@
 	<data name="Status_TemplateDeleted" xml:space="preserve">
   <value>Vorlage erfolgreich gelöscht</value>
 </data>
+	<data name="Settings_ScreenshotHistory" xml:space="preserve">
+  <value>Screenshot-Verlauf</value>
+</data>
+	<data name="Settings_CaptureAllDisplays" xml:space="preserve">
+  <value>Alle Bildschirme erfassen</value>
+</data>
+	<data name="Settings_CaptureAllDisplaysDesc" xml:space="preserve">
+  <value>Screenshots von allen angeschlossenen Bildschirmen aufnehmen, nicht nur vom Hauptbildschirm</value>
+</data>
+	<data name="Settings_MaxScreenshotHistoryItems" xml:space="preserve">
+  <value>Maximale Anzahl der Screenshot-Verlaufselemente</value>
+</data>
+	<data name="Settings_OverlayOpacity" xml:space="preserve">
+  <value>Overlay-Deckkraft</value>
+</data>
+	<data name="Settings_OverlayOpacityDescription" xml:space="preserve">
+  <value>Passen Sie die Transparenz des Overlay-Fensters an</value>
+</data>
 </root>

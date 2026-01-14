@@ -794,4 +794,23 @@
     <value>Image thumbnail size (pixels)</value>
   </data>
 
+	<data name="Settings_ScreenshotHistory" xml:space="preserve">
+  <value>Screenshot History</value>
+</data>
+	<data name="Settings_CaptureAllDisplays" xml:space="preserve">
+  <value>Capture all displays</value>
+</data>
+	<data name="Settings_CaptureAllDisplaysDesc" xml:space="preserve">
+  <value>Capture screenshots from all connected displays instead of just the primary display</value>
+</data>
+	<data name="Settings_MaxScreenshotHistoryItems" xml:space="preserve">
+  <value>Maximum screenshot history items</value>
+</data>
+	<data name="Settings_OverlayOpacity" xml:space="preserve">
+  <value>Overlay Opacity</value>
+</data>
+	<data name="Settings_OverlayOpacityDescription" xml:space="preserve">
+  <value>Adjust the transparency of the overlay window</value>
+</data>
+
 </root>
