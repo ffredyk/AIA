@@ -10,6 +10,7 @@ namespace AIA.Views
         public ChatTemplatesView()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
         }
 
         private OverlayViewModel? ViewModel => DataContext as OverlayViewModel;
@@ -18,6 +19,27 @@ namespace AIA.Views
         /// Event raised when a template is clicked
         /// </summary>
         public event EventHandler<ChatMessageTemplate>? TemplateClicked;
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // Unsubscribe from old ViewModel's collection if exists
+            if (e.OldValue is OverlayViewModel oldViewModel)
+            {
+                oldViewModel.ChatMessageTemplates.CollectionChanged -= OnTemplatesCollectionChanged;
+            }
+
+            // Subscribe to new ViewModel's collection
+            if (e.NewValue is OverlayViewModel newViewModel)
+            {
+                newViewModel.ChatMessageTemplates.CollectionChanged += OnTemplatesCollectionChanged;
+                UpdateEmptyState();
+            }
+        }
+
+        private void OnTemplatesCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdateEmptyState();
+        }
 
         private void TemplateButton_Click(object sender, MouseButtonEventArgs e)
         {
