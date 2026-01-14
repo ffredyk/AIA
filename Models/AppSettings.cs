@@ -29,6 +29,9 @@ namespace AIA.Models
         private bool _trackClipboardImages = true;
         private bool _trackClipboardFiles = true;
 
+        // Chat attachment settings
+        private int _chatImageThumbnailSize = 80;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
@@ -184,6 +187,19 @@ namespace AIA.Models
         {
             get => _trackClipboardFiles;
             set { _trackClipboardFiles = value; OnPropertyChanged(nameof(TrackClipboardFiles)); }
+        }
+
+        #endregion
+
+        #region Chat Attachment Settings
+
+        /// <summary>
+        /// Size of image thumbnails in chat (in pixels)
+        /// </summary>
+        public int ChatImageThumbnailSize
+        {
+            get => _chatImageThumbnailSize;
+            set { _chatImageThumbnailSize = Math.Max(40, Math.Min(200, value)); OnPropertyChanged(nameof(ChatImageThumbnailSize)); }
         }
 
         #endregion

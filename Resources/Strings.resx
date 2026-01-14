@@ -772,4 +772,26 @@
     <value>Track file paths</value>
   </data>
 
+  <!-- Chat Image Attachments -->
+  <data name="Chat_ImageAttachment" xml:space="preserve">
+    <value>Image attached</value>
+  </data>
+  <data name="Chat_ImagesAttached" xml:space="preserve">
+    <value>images attached</value>
+  </data>
+  <data name="Chat_RemoveImage" xml:space="preserve">
+    <value>Remove this image</value>
+  </data>
+  <data name="Chat_ClearAllImages" xml:space="preserve">
+    <value>Clear all images</value>
+  </data>
+  <data name="Chat_PasteImageHint" xml:space="preserve">
+    <value>Paste images with Ctrl+V</value>
+  </data>
+  
+  <!-- Settings - Chat -->
+  <data name="Settings_ChatImageThumbnailSize" xml:space="preserve">
+    <value>Image thumbnail size (pixels)</value>
+  </data>
+
 </root>

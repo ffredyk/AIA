@@ -13,6 +13,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <!-- Chat Header -->
@@ -209,31 +210,60 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <TextBox Text="{Binding Content, Mode=OneWay}" 
-                                             Foreground="White" 
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             IsReadOnly="True"
-                                             TextWrapping="Wrap"
-                                             FontSize="13"
-                                             Cursor="IBeam"
-                                             Padding="0"
-                                             VerticalAlignment="Center">
-                                        <TextBox.Style>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="TextBox">
-                                                            <ScrollViewer x:Name="PART_ContentHost" 
-                                                                          Focusable="False" 
-                                                                          HorizontalScrollBarVisibility="Hidden" 
-                                                                          VerticalScrollBarVisibility="Hidden"/>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
+                                    <StackPanel>
+                                        <!-- Attached Images (thumbnails) -->
+                                        <ItemsControl ItemsSource="{Binding AttachedImages}" 
+                                                      Visibility="{Binding HasAttachedImages, Converter={StaticResource BoolToVis}}"
+                                                      Margin="0,0,0,8">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,6,6" 
+                                                            CornerRadius="6" 
+                                                            BorderBrush="#4DFFFFFF" 
+                                                            BorderThickness="1"
+                                                            Background="#19FFFFFF"
+                                                            Padding="3">
+                                                        <Image Source="{Binding Thumbnail}" 
+                                                               MaxWidth="80" MaxHeight="80"
+                                                               Stretch="Uniform"
+                                                               ToolTip="{Binding ImageSizeText}"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        
+                                        <!-- Message Content -->
+                                        <TextBox Text="{Binding Content, Mode=OneWay}" 
+                                                 Foreground="White" 
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 IsReadOnly="True"
+                                                 TextWrapping="Wrap"
+                                                 FontSize="13"
+                                                 Cursor="IBeam"
+                                                 Padding="0"
+                                                 VerticalAlignment="Center">
+                                            <TextBox.Style>
+                                                <Style TargetType="TextBox">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="TextBox">
+                                                                <ScrollViewer x:Name="PART_ContentHost" 
+                                                                              Focusable="False" 
+                                                                              HorizontalScrollBarVisibility="Hidden" 
+                                                                              VerticalScrollBarVisibility="Hidden"/>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </TextBox.Style>
+                                        </TextBox>
+                                    </StackPanel>
                                 </Border>
                             </Grid>
                         </DataTemplate>
@@ -273,8 +303,85 @@
             </Grid>
         </Border>
         
+        <!-- Image Attachments Preview Area -->
+        <Border x:Name="AttachmentsPreviewArea" 
+                Grid.Row="3" 
+                Margin="0,8,0,0" 
+                Padding="10,8" 
+                CornerRadius="8" 
+                Background="#19FFFFFF"
+                BorderBrush="#33FFFFFF" 
+                BorderThickness="1"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Attachment icon -->
+                <ui:SymbolIcon Grid.Column="0" Symbol="Image20" Foreground="#0078D4" Margin="0,0,8,0" VerticalAlignment="Top"/>
+                
+                <!-- Thumbnails scroll area -->
+                <ScrollViewer Grid.Column="1" 
+                              HorizontalScrollBarVisibility="Auto" 
+                              VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="PendingImagesControl">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,8,0">
+                                    <Border CornerRadius="6" 
+                                            BorderBrush="#4DFFFFFF" 
+                                            BorderThickness="1"
+                                            Background="#19FFFFFF"
+                                            Padding="3">
+                                        <Image Source="{Binding Thumbnail}" 
+                                               MaxWidth="70" MaxHeight="70"
+                                               Stretch="Uniform"/>
+                                    </Border>
+                                    <!-- Remove button -->
+                                    <Button Style="{StaticResource {x:Type Button}}"
+                                            Background="#CC333333"
+                                            Width="18" Height="18"
+                                            Padding="0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Top"
+                                            Margin="0,-4,-4,0"
+                                            Click="BtnRemoveAttachment_Click"
+                                            Tag="{Binding Id}"
+                                            ToolTip="Remove this image"
+                                            Cursor="Hand">
+                                        <ui:SymbolIcon Symbol="Dismiss12" FontSize="10" Foreground="White"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                
+                <!-- Clear all button -->
+                <ui:Button Grid.Column="2" 
+                           Padding="8,4"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Top"
+                           Click="BtnClearAllAttachments_Click"
+                           ToolTip="Clear all images">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Delete12" Foreground="#FF6666" FontSize="12"/>
+                        <TextBlock x:Name="AttachmentCountText" Margin="4,0,0,0" Foreground="#999999" FontSize="11" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </ui:Button>
+            </Grid>
+        </Border>
+        
         <!-- Message Input Area -->
-        <Border Grid.Row="3" Margin="0,8,0,0" BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="8" Background="#19FFFFFF">
+        <Border Grid.Row="4" Margin="0,8,0,0" BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="8" Background="#19FFFFFF">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -293,6 +400,7 @@
                          MaxHeight="100"
                          VerticalScrollBarVisibility="Auto"
                          KeyDown="MessageInput_KeyDown"
+                         PreviewKeyDown="MessageInput_PreviewKeyDown"
                          IsEnabled="{Binding IsAiProcessing, Converter={StaticResource InverseBoolToVis}, ConverterParameter=Bool}">
                     <TextBox.Resources>
                         <Style TargetType="{x:Type TextBox}">
@@ -308,6 +416,7 @@
                     </TextBox.Resources>
                 </TextBox>
                 <ui:Button Grid.Column="1" 
+                           x:Name="SendButton"
                            Margin="5"
                            Padding="12,8"
                            Background="#FF0078D4"
@@ -321,6 +430,19 @@
                                    Foreground="White" 
                                    FontWeight="SemiBold" 
                                    Text="{local:Localize Chat_Send}"/>
+                        <!-- Image count badge -->
+                        <Border x:Name="SendButtonBadge" 
+                                Visibility="Collapsed"
+                                Background="#1EB75F"
+                                CornerRadius="8"
+                                Padding="5,1"
+                                Margin="6,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock x:Name="SendButtonBadgeText" 
+                                       Foreground="White" 
+                                       FontSize="10" 
+                                       FontWeight="Bold"/>
+                        </Border>
                     </StackPanel>
                 </ui:Button>
             </Grid>

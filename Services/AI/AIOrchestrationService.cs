@@ -348,7 +348,11 @@ namespace AIA.Services.AI
         /// <summary>
         /// Generate a streaming response from the AI with tool use support
         /// </summary>
-        public async IAsyncEnumerable<(string Content, string Status)> GenerateStreamWithToolsAsync(string userMessage, List<AIMessage>? conversationHistory = null, AIProvider? specificProvider = null)
+        public async IAsyncEnumerable<(string Content, string Status)> GenerateStreamWithToolsAsync(
+            string userMessage, 
+            List<AIMessage>? conversationHistory = null, 
+            AIProvider? specificProvider = null,
+            List<AIImageContent>? images = null)
         {
             var provider = specificProvider ?? GetBestProvider(userMessage);
             if (provider == null)
@@ -383,13 +387,25 @@ namespace AIA.Services.AI
                 request.Messages.AddRange(conversationHistory);
             }
 
-            // Add user message
-            request.Messages.Add(new AIMessage { Role = "user", Content = userMessage });
+            // Add user message with optional images
+            var userAiMessage = new AIMessage { Role = "user", Content = userMessage };
+            if (images != null && images.Count > 0)
+            {
+                userAiMessage.Images = images;
+                System.Diagnostics.Debug.WriteLine($"Adding {images.Count} image(s) to user message");
+            }
+            request.Messages.Add(userAiMessage);
 
-            // Add tools if enabled
-            if (Settings.EnableToolUse)
+            // Add tools if enabled (but disable if we have images to analyze)
+            if (Settings.EnableToolUse && (images == null || images.Count == 0))
             {
                 request.Tools = _toolsService.GetAllTools().ToList();
+            }
+            else if (images != null && images.Count > 0)
+            {
+                // When sending images, disable tools to get a direct vision response
+                System.Diagnostics.Debug.WriteLine("Disabling tools for vision request with pasted images");
+                request.Tools = null;
             }
 
             // First, get response (potentially with tool calls)
@@ -506,7 +522,7 @@ namespace AIA.Services.AI
                     else
                     {
                         response = await client.GenerateAsync(provider, request);
-                      }
+                    }
 
                     System.Diagnostics.Debug.WriteLine($"Next response - Success: {response.Success}, HasContent: {!string.IsNullOrEmpty(response.Content)}, HasToolCalls: {response.RequiresToolExecution}");
 
