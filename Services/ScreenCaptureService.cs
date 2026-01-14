@@ -231,6 +231,82 @@ namespace AIA.Services
             return assets;
         }
 
+        /// <summary>
+        /// Gets information about all connected displays
+        /// </summary>
+        public List<(string Name, int Width, int Height, int X, int Y)> GetAllDisplays()
+        {
+            var displays = new List<(string, int, int, int, int)>();
+            
+            foreach (var screen in System.Windows.Forms.Screen.AllScreens)
+            {
+                displays.Add((
+                    screen.DeviceName,
+                    screen.Bounds.Width,
+                    screen.Bounds.Height,
+                    screen.Bounds.X,
+                    screen.Bounds.Y
+                ));
+            }
+
+            return displays;
+        }
+
+        /// <summary>
+        /// Captures all connected displays
+        /// </summary>
+        public List<DataAsset> CaptureAllDisplays()
+        {
+            var assets = new List<DataAsset>();
+            var screens = System.Windows.Forms.Screen.AllScreens;
+
+            foreach (var screen in screens)
+            {
+                var asset = CaptureDisplay(screen);
+                if (asset != null)
+                {
+                    assets.Add(asset);
+                }
+            }
+
+            return assets;
+        }
+
+        /// <summary>
+        /// Captures a specific display
+        /// </summary>
+        private DataAsset? CaptureDisplay(System.Windows.Forms.Screen screen)
+        {
+            try
+            {
+                var bounds = screen.Bounds;
+                using var bitmap = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb);
+                using var graphics = Graphics.FromImage(bitmap);
+                
+                graphics.CopyFromScreen(bounds.Left, bounds.Top, 0, 0,
+                    new System.Drawing.Size(bounds.Width, bounds.Height), CopyPixelOperation.SourceCopy);
+
+                var bitmapSource = ConvertToBitmapSource(bitmap);
+                var thumbnail = CreateThumbnail(bitmapSource, 120, 80);
+                var isPrimary = screen.Primary;
+                var displayName = isPrimary ? "Primary Display" : $"Display {screen.DeviceName}";
+
+                return new DataAsset
+                {
+                    Name = displayName,
+                    Description = $"{bounds.Width}x{bounds.Height} - {screen.DeviceName}",
+                    FullImage = bitmapSource,
+                    Thumbnail = thumbnail,
+                    CapturedAt = DateTime.Now,
+                    AssetType = DataAssetType.FullScreen
+                };
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         #region Save Methods
 
         /// <summary>

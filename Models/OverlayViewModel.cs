@@ -561,8 +561,29 @@ namespace AIA.Models
         {
             CurrentDataAssets.Clear();
 
-            var assets = _screenCaptureService.CaptureAllDataAssets();
-            foreach (var asset in assets)
+            List<DataAsset> assets;
+            
+            // Use app settings to determine capture mode
+            if (_appSettings?.EnableAllDisplayCapture ?? false)
+            {
+                // Capture all connected displays
+                assets = _screenCaptureService.CaptureAllDisplays();
+                
+                // Also capture recent windows
+                var windowAssets = _screenCaptureService.CaptureRecentActiveWindows(3);
+                assets.AddRange(windowAssets);
+            }
+            else
+            {
+                // Default: capture primary display and recent windows
+                assets = _screenCaptureService.CaptureAllDataAssets();
+            }
+
+            // Trim to max history size if set
+            int maxItems = _appSettings?.MaxScreenshotHistoryItems ?? 50;
+            var assetsToShow = assets.Take(maxItems).ToList();
+            
+            foreach (var asset in assetsToShow)
             {
                 CurrentDataAssets.Add(asset);
             }

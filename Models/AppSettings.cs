@@ -33,6 +33,10 @@ namespace AIA.Models
         // Chat attachment settings
         private int _chatImageThumbnailSize = 80;
 
+        // Screenshot history settings
+        private bool _enableAllDisplayCapture = false;
+        private int _maxScreenshotHistoryItems = 50;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
@@ -210,6 +214,28 @@ namespace AIA.Models
         {
             get => _chatImageThumbnailSize;
             set { _chatImageThumbnailSize = Math.Max(40, Math.Min(200, value)); OnPropertyChanged(nameof(ChatImageThumbnailSize)); }
+        }
+
+        #endregion
+
+        #region Screenshot History Settings
+
+        /// <summary>
+        /// Whether to enable capturing of all display screens
+        /// </summary>
+        public bool EnableAllDisplayCapture
+        {
+            get => _enableAllDisplayCapture;
+            set { _enableAllDisplayCapture = value; OnPropertyChanged(nameof(EnableAllDisplayCapture)); }
+        }
+
+        /// <summary>
+        /// Maximum number of screenshots to keep in history
+        /// </summary>
+        public int MaxScreenshotHistoryItems
+        {
+            get => _maxScreenshotHistoryItems;
+            set { _maxScreenshotHistoryItems = Math.Max(1, Math.Min(200, value)); OnPropertyChanged(nameof(MaxScreenshotHistoryItems)); }
         }
 
         #endregion

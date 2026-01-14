@@ -331,6 +331,30 @@
                             </StackPanel>
                         </Grid>
                         
+                        <!-- Screenshot History Section -->
+                        <TextBlock Text="{local:Localize Settings_ScreenshotHistory}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+                        
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{local:Localize Settings_CaptureAllDisplays}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_CaptureAllDisplaysDesc}" 
+                                               Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <CheckBox x:Name="ChkCaptureAllDisplays" Grid.Column="1" VerticalAlignment="Center" IsChecked="False"/>
+                            </Grid>
+                        </Border>
+                        
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{local:Localize Settings_MaxScreenshotHistoryItems}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBox x:Name="TxtMaxScreenshotItems" Text="50"
+                                     Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8" Width="100" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
