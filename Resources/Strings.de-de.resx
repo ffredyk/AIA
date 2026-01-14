@@ -778,6 +778,71 @@
 	<data name="Status_TemplateDeleted" xml:space="preserve">
   <value>Vorlage erfolgreich gelöscht</value>
 </data>
+  <!-- Clipboard History -->
+  <data name="DataAssets_ClipboardHistory" xml:space="preserve">
+    <value>Zwischenablage-Verlauf</value>
+  </data>
+  <data name="DataAssets_ClearClipboardHistory" xml:space="preserve">
+    <value>Zwischenablage-Verlauf löschen</value>
+  </data>
+  <data name="DataAssets_NoClipboardHistory" xml:space="preserve">
+    <value>Kein Zwischenablage-Verlauf</value>
+  </data>
+  <data name="DataAssets_RestoreToClipboard" xml:space="preserve">
+    <value>In Zwischenablage wiederherstellen</value>
+  </data>
+  <data name="DataAssets_Paste" xml:space="preserve">
+    <value>Einfügen</value>
+  </data>
+  
+  <!-- Settings - Clipboard History -->
+  <data name="Settings_ClipboardHistory" xml:space="preserve">
+    <value>Zwischenablage-Verlauf</value>
+  </data>
+  <data name="Settings_EnableClipboardHistory" xml:space="preserve">
+    <value>Zwischenablage-Verlauf aktivieren</value>
+  </data>
+  <data name="Settings_EnableClipboardHistoryDesc" xml:space="preserve">
+    <value>Zwischenablageänderungen während der App-Ausführung verfolgen</value>
+  </data>
+  <data name="Settings_MaxClipboardItems" xml:space="preserve">
+    <value>Maximale Anzahl von Verlaufselementen</value>
+  </data>
+  <data name="Settings_MaxClipboardItemSize" xml:space="preserve">
+    <value>Maximale Elementgröße (KB)</value>
+  </data>
+  <data name="Settings_TrackClipboardText" xml:space="preserve">
+    <value>Textinhalt verfolgen</value>
+  </data>
+  <data name="Settings_TrackClipboardImages" xml:space="preserve">
+    <value>Bilder verfolgen</value>
+  </data>
+  <data name="Settings_TrackClipboardFiles" xml:space="preserve">
+    <value>Dateipfade verfolgen</value>
+  </data>
+
+  <!-- Chat Image Attachments -->
+  <data name="Chat_ImageAttachment" xml:space="preserve">
+    <value>Bild angehängt</value>
+  </data>
+  <data name="Chat_ImagesAttached" xml:space="preserve">
+    <value>Bilder angehängt</value>
+  </data>
+  <data name="Chat_RemoveImage" xml:space="preserve">
+    <value>Dieses Bild entfernen</value>
+  </data>
+  <data name="Chat_ClearAllImages" xml:space="preserve">
+    <value>Alle Bilder löschen</value>
+  </data>
+  <data name="Chat_PasteImageHint" xml:space="preserve">
+    <value>Bilder mit Strg+V einfügen</value>
+  </data>
+  
+  <!-- Settings - Chat -->
+  <data name="Settings_ChatImageThumbnailSize" xml:space="preserve">
+    <value>Größe der Bildvorschau (Pixel)</value>
+  </data>
+
 	<data name="Settings_ScreenshotHistory" xml:space="preserve">
   <value>Screenshot-Verlauf</value>
 </data>
@@ -796,4 +861,89 @@
 	<data name="Settings_OverlayOpacityDescription" xml:space="preserve">
   <value>Passen Sie die Transparenz des Overlay-Fensters an</value>
 </data>
+
+	<!-- Automation Window -->
+	<data name="Automation_Title" xml:space="preserve"><value>Automatisierungseinstellungen</value></data>
+	<data name="Automation_Header" xml:space="preserve"><value>Automatisierung</value></data>
+	<data name="Automation_Description" xml:space="preserve"><value>Konfigurieren Sie ereignisgesteuerte Automatisierungen und Hintergrund-Agenten</value></data>
+	<data name="Automation_Enabled" xml:space="preserve"><value>Aktiviert</value></data>
+	<data name="Automation_TabAutomations" xml:space="preserve"><value>Automatisierungen</value></data>
+	<data name="Automation_TabRunning" xml:space="preserve"><value>Laufen</value></data>
+	<data name="Automation_TabHistory" xml:space="preserve"><value>Verlauf</value></data>
+	<data name="Automation_TabSettings" xml:space="preserve"><value>Einstellungen</value></data>
+	<data name="Automation_Automations" xml:space="preserve"><value>Automatisierungen</value></data>
+	<data name="Automation_Add" xml:space="preserve"><value>Hinzufügen</value></data>
+	<data name="Automation_SelectAutomation" xml:space="preserve"><value>Wählen Sie eine Automatisierung zur Konfiguration</value></data>
+	<data name="Automation_Configuration" xml:space="preserve"><value>Konfiguration</value></data>
+	<data name="Automation_RunNow" xml:space="preserve"><value>Diese Automatisierung jetzt ausführen</value></data>
+	<data name="Automation_Run" xml:space="preserve"><value>Ausführen</value></data>
+	<data name="Automation_BasicInfo" xml:space="preserve"><value>Grundlegende Informationen</value></data>
+	<data name="Automation_Name" xml:space="preserve"><value>Name</value></data>
+	<data name="Automation_DescriptionLabel" xml:space="preserve"><value>Beschreibung</value></data>
+	<data name="Automation_OneTimeTask" xml:space="preserve"><value>Einmalige Hintergrund-Aufgabe</value></data>
+	<data name="Automation_OneTimeTaskDesc" xml:space="preserve"><value>Als persistenter Agent ausführen, bis das Ziel erreicht ist</value></data>
+	<data name="Automation_Trigger" xml:space="preserve"><value>Auslöser</value></data>
+	<data name="Automation_TriggerType" xml:space="preserve"><value>Auslösertyp</value></data>
+	<data name="Automation_Agent" xml:space="preserve"><value>Agent</value></data>
+	<data name="Automation_AgentType" xml:space="preserve"><value>Agent-Typ</value></data>
+	<data name="Automation_SystemPrompt" xml:space="preserve"><value>System-Prompt</value></data>
+	<data name="Automation_UserPromptTemplate" xml:space="preserve"><value>Benutzer-Prompt-Vorlage</value></data>
+	<data name="Automation_MaxIterations" xml:space="preserve"><value>Maximale Iterationen</value></data>
+	<data name="Automation_MaxTotalTokens" xml:space="preserve"><value>Maximale Gesamttoken</value></data>
+	<data name="Automation_EnableToolUse" xml:space="preserve"><value>Werkzeugnutzung aktivieren</value></data>
+	<data name="Automation_Actions" xml:space="preserve"><value>Aktionen</value></data>
+	<data name="Automation_Permissions" xml:space="preserve"><value>Berechtigungen</value></data>
+	<data name="Automation_CanCreateTasks" xml:space="preserve"><value>Kann Aufgaben erstellen</value></data>
+	<data name="Automation_CanCreateReminders" xml:space="preserve"><value>Kann Erinnerungen erstellen</value></data>
+	<data name="Automation_CanSaveToDataBank" xml:space="preserve"><value>Kann in Datenbank speichern</value></data>
+	<data name="Automation_CanShowNotifications" xml:space="preserve"><value>Kann Benachrichtigungen anzeigen</value></data>
+	<data name="Automation_CanAccessClipboard" xml:space="preserve"><value>Kann auf Zwischenablage zugreifen</value></data>
+	<data name="Automation_CanAccessFileSystem" xml:space="preserve"><value>Kann auf Dateisystem zugreifen</value></data>
+	<data name="Automation_CanRunSubAutomations" xml:space="preserve"><value>Kann Unter-Automatisierungen ausführen</value></data>
+	<data name="Automation_RunningExecutions" xml:space="preserve"><value>Laufende Ausführungen</value></data>
+	<data name="Automation_NoRunningExecutions" xml:space="preserve"><value>Keine Automatisierungen werden derzeit ausgeführt</value></data>
+	<data name="Automation_ExecutionHistory" xml:space="preserve"><value>Ausführungsverlauf</value></data>
+	<data name="Automation_ClearHistory" xml:space="preserve"><value>Verlauf löschen</value></data>
+	<data name="Automation_ExecutionSettings" xml:space="preserve"><value>Ausführungseinstellungen</value></data>
+	<data name="Automation_MaxConcurrentAutomations" xml:space="preserve"><value>Maximale gleichzeitige Automatisierungen</value></data>
+	<data name="Automation_MaxConcurrentAgents" xml:space="preserve"><value>Maximale gleichzeitige Agenten</value></data>
+	<data name="Automation_DefaultMaxIterations" xml:space="preserve"><value>Standard maximale Iterationen</value></data>
+	<data name="Automation_DefaultMaxTotalTokens" xml:space="preserve"><value>Standard maximale Gesamttoken</value></data>
+	<data name="Automation_BehaviorSettings" xml:space="preserve"><value>Verhaltenseinstellungen</value></data>
+	<data name="Automation_PauseOnOverlay" xml:space="preserve"><value>Auslöser pausieren, wenn Overlay sichtbar ist</value></data>
+	<data name="Automation_PauseOnOverlayDesc" xml:space="preserve"><value>Auslöserüberwachung vorübergehend pausieren, wenn das Overlay angezeigt wird</value></data>
+	<data name="Automation_ShowExecutionNotifications" xml:space="preserve"><value>Ausführungsbenachrichtigungen anzeigen</value></data>
+	<data name="Automation_EnableLiveMonitoring" xml:space="preserve"><value>Live-Überwachung aktivieren</value></data>
+	<data name="Automation_LogDebugTraces" xml:space="preserve"><value>Debug-Ablaufverfolgung protokollieren</value></data>
+	<data name="Automation_HistorySettings" xml:space="preserve"><value>Verlaufseinstellungen</value></data>
+	<data name="Automation_HistoryRetentionDays" xml:space="preserve"><value>Verlaufsspeicherung (Tage)</value></data>
+	<data name="Automation_MaxHistoryEntries" xml:space="preserve"><value>Maximale Verlaufsbefunde</value></data>
+	<data name="Automation_ImportExport" xml:space="preserve"><value>Import/Export</value></data>
+	<data name="Automation_ImportAutomation" xml:space="preserve"><value>Automatisierung importieren</value></data>
+	<data name="Automation_Save" xml:space="preserve"><value>Speichern</value></data>
+	<data name="Automation_Close" xml:space="preserve"><value>Schließen</value></data>
+
+	<!-- Automation Trigger Configuration -->
+	<data name="Automation_Trigger_ContentType" xml:space="preserve"><value>Inhaltstyp</value></data>
+	<data name="Automation_Trigger_TextFilter" xml:space="preserve"><value>Textfilter (Schlüsselwörter oder regulärer Ausdruck)</value></data>
+	<data name="Automation_Trigger_UseRegex" xml:space="preserve"><value>Reguläre Ausdrücke verwenden</value></data>
+	<data name="Automation_Trigger_Debounce" xml:space="preserve"><value>Debounce</value></data>
+	<data name="Automation_Trigger_Hotkey" xml:space="preserve"><value>Tastenkombination</value></data>
+	<data name="Automation_Trigger_HotkeyHelp" xml:space="preserve"><value>Klicken Sie auf das Feld und drücken Sie Ihre gewünschte Tastenkombination (z.B. Strg+Umschalt+A)</value></data>
+	<data name="Automation_Trigger_WatchPath" xml:space="preserve"><value>Überwachter Pfad</value></data>
+	<data name="Automation_Trigger_FileFilter" xml:space="preserve"><value>Dateifilter (z.B. *.txt, *.json)</value></data>
+	<data name="Automation_Trigger_IncludeSubdirs" xml:space="preserve"><value>Unterverzeichnisse einbeziehen</value></data>
+	<data name="Automation_Trigger_ChangeTypes" xml:space="preserve"><value>Auf Änderungen auslösen</value></data>
+	<data name="Automation_Trigger_WindowTitle" xml:space="preserve"><value>Fensteritel-Filter</value></data>
+	<data name="Automation_Trigger_ProcessName" xml:space="preserve"><value>Prozessname-Filter</value></data>
+	<data name="Automation_Trigger_TriggerOnMatch" xml:space="preserve"><value>Auslösen, wenn Filter passt (Häkchen entfernen, um bei KEINE Übereinstimmung auszulösen)</value></data>
+	<data name="Automation_Trigger_ScheduledTime" xml:space="preserve"><value>Geplantes Datum und Uhrzeit</value></data>
+	<data name="Automation_Trigger_Recurrence" xml:space="preserve"><value>Wiederholung</value></data>
+	<data name="Automation_Trigger_RepeatEvery" xml:space="preserve"><value>Alle wiederholen</value></data>
+	<data name="Automation_Trigger_SourceAutomation" xml:space="preserve"><value>Quellautomatisierung</value></data>
+	<data name="Automation_Trigger_ChainHelp" xml:space="preserve"><value>Diese Automatisierung wird ausgelöst, wenn die ausgewählte Quellautomatisierung abgeschlossen ist.</value></data>
+	<data name="Automation_Trigger_RequireSuccess" xml:space="preserve"><value>Nur auslösen, wenn die Quellautomatisierung erfolgreich ist</value></data>
+	<data name="Automation_Trigger_Plugin" xml:space="preserve"><value>Plugin</value></data>
+	<data name="Automation_Trigger_PluginTrigger" xml:space="preserve"><value>Plugin-Auslöser</value></data>
+	<data name="Automation_Trigger_NoPluginTriggers" xml:space="preserve"><value>Keine Plugins mit Automatisierungs-Auslösern installiert.</value></data>
 </root>

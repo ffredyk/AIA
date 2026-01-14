@@ -798,4 +798,154 @@
 	<data name="Settings_OverlayOpacityDescription" xml:space="preserve">
   <value>Upravte průhlednost okna překrytí</value>
 </data>
+  
+  <!-- Clipboard History -->
+  <data name="DataAssets_ClipboardHistory" xml:space="preserve">
+    <value>Historie schránky</value>
+  </data>
+  <data name="DataAssets_ClearClipboardHistory" xml:space="preserve">
+    <value>Vymazat historii schránky</value>
+  </data>
+  <data name="DataAssets_NoClipboardHistory" xml:space="preserve">
+    <value>Žádná historie schránky</value>
+  </data>
+  <data name="DataAssets_RestoreToClipboard" xml:space="preserve">
+    <value>Obnovit do schránky</value>
+  </data>
+  <data name="DataAssets_Paste" xml:space="preserve">
+    <value>Vložit</value>
+  </data>
+  
+  <!-- Settings - Clipboard History -->
+  <data name="Settings_ClipboardHistory" xml:space="preserve">
+    <value>Historie schránky</value>
+  </data>
+  <data name="Settings_EnableClipboardHistory" xml:space="preserve">
+    <value>Povolit historii schránky</value>
+  </data>
+  <data name="Settings_EnableClipboardHistoryDesc" xml:space="preserve">
+    <value>Sledovat změny schránky během běhu aplikace</value>
+  </data>
+  <data name="Settings_MaxClipboardItems" xml:space="preserve">
+    <value>Maximální počet položek v historii</value>
+  </data>
+  <data name="Settings_MaxClipboardItemSize" xml:space="preserve">
+    <value>Maximální velikost položky (KB)</value>
+  </data>
+  <data name="Settings_TrackClipboardText" xml:space="preserve">
+    <value>Sledovat textový obsah</value>
+  </data>
+  <data name="Settings_TrackClipboardImages" xml:space="preserve">
+    <value>Sledovat obrázky</value>
+  </data>
+  <data name="Settings_TrackClipboardFiles" xml:space="preserve">
+    <value>Sledovat cesty k souborům</value>
+  </data>
+
+  <!-- Chat Image Attachments -->
+  <data name="Chat_ImageAttachment" xml:space="preserve">
+    <value>Obrázek připojen</value>
+  </data>
+  <data name="Chat_ImagesAttached" xml:space="preserve">
+    <value>obrázky připojeny</value>
+  </data>
+  <data name="Chat_RemoveImage" xml:space="preserve">
+    <value>Odebrat tento obrázek</value>
+  </data>
+  <data name="Chat_ClearAllImages" xml:space="preserve">
+    <value>Vymazat všechny obrázky</value>
+  </data>
+  <data name="Chat_PasteImageHint" xml:space="preserve">
+    <value>Vložte obrázky pomocí Ctrl+V</value>
+  </data>
+  
+  <!-- Settings - Chat -->
+  <data name="Settings_ChatImageThumbnailSize" xml:space="preserve">
+    <value>Velikost miniatury obrázku (pixely)</value>
+  </data>
+
+	<!-- Automation Window -->
+	<data name="Automation_Title" xml:space="preserve"><value>Nastavení automatizace</value></data>
+	<data name="Automation_Header" xml:space="preserve"><value>Automatizace</value></data>
+	<data name="Automation_Description" xml:space="preserve"><value>Konfigurace automatizací spouštěných na základě událostí a agentů na pozadí</value></data>
+	<data name="Automation_Enabled" xml:space="preserve"><value>Povoleno</value></data>
+	<data name="Automation_TabAutomations" xml:space="preserve"><value>Automatizace</value></data>
+	<data name="Automation_TabRunning" xml:space="preserve"><value>Běžící</value></data>
+	<data name="Automation_TabHistory" xml:space="preserve"><value>Historie</value></data>
+	<data name="Automation_TabSettings" xml:space="preserve"><value>Nastavení</value></data>
+	<data name="Automation_Automations" xml:space="preserve"><value>Automatizace</value></data>
+	<data name="Automation_Add" xml:space="preserve"><value>Přidat</value></data>
+	<data name="Automation_SelectAutomation" xml:space="preserve"><value>Vyberte automatizaci ke konfiguraci</value></data>
+	<data name="Automation_Configuration" xml:space="preserve"><value>Konfigurace</value></data>
+	<data name="Automation_RunNow" xml:space="preserve"><value>Spustit tuto automatizaci nyní</value></data>
+	<data name="Automation_Run" xml:space="preserve"><value>Spustit</value></data>
+	<data name="Automation_BasicInfo" xml:space="preserve"><value>Základní informace</value></data>
+	<data name="Automation_Name" xml:space="preserve"><value>Název</value></data>
+	<data name="Automation_DescriptionLabel" xml:space="preserve"><value>Popis</value></data>
+	<data name="Automation_OneTimeTask" xml:space="preserve"><value>Jednorázový úkol na pozadí</value></data>
+	<data name="Automation_OneTimeTaskDesc" xml:space="preserve"><value>Spustit jako trvalý agent až do dosažení cíle</value></data>
+	<data name="Automation_Trigger" xml:space="preserve"><value>Spouštěč</value></data>
+	<data name="Automation_TriggerType" xml:space="preserve"><value>Typ spouštěče</value></data>
+	<data name="Automation_Agent" xml:space="preserve"><value>Agent</value></data>
+	<data name="Automation_AgentType" xml:space="preserve"><value>Typ agenta</value></data>
+	<data name="Automation_SystemPrompt" xml:space="preserve"><value>Systémová výzva</value></data>
+	<data name="Automation_UserPromptTemplate" xml:space="preserve"><value>Šablona výzvy uživatele</value></data>
+	<data name="Automation_MaxIterations" xml:space="preserve"><value>Maximální počet iterací</value></data>
+	<data name="Automation_MaxTotalTokens" xml:space="preserve"><value>Maximální celkový počet tokenů</value></data>
+	<data name="Automation_EnableToolUse" xml:space="preserve"><value>Povolit použití nástrojů</value></data>
+	<data name="Automation_Actions" xml:space="preserve"><value>Akce</value></data>
+	<data name="Automation_Permissions" xml:space="preserve"><value>Oprávnění</value></data>
+	<data name="Automation_CanCreateTasks" xml:space="preserve"><value>Může vytvářet úkoly</value></data>
+	<data name="Automation_CanCreateReminders" xml:space="preserve"><value>Může vytvářet připomínky</value></data>
+	<data name="Automation_CanSaveToDataBank" xml:space="preserve"><value>Může ukládat do datové banky</value></data>
+	<data name="Automation_CanShowNotifications" xml:space="preserve"><value>Může zobrazovat upozornění</value></data>
+	<data name="Automation_CanAccessClipboard" xml:space="preserve"><value>Má přístup ke schránce</value></data>
+	<data name="Automation_CanAccessFileSystem" xml:space="preserve"><value>Má přístup k systému souborů</value></data>
+	<data name="Automation_CanRunSubAutomations" xml:space="preserve"><value>Může spouštět dílčí automatizace</value></data>
+	<data name="Automation_RunningExecutions" xml:space="preserve"><value>Běžící spuštění</value></data>
+	<data name="Automation_NoRunningExecutions" xml:space="preserve"><value>Žádné automatizace nejsou spuštěny</value></data>
+	<data name="Automation_ExecutionHistory" xml:space="preserve"><value>Historie spuštění</value></data>
+	<data name="Automation_ClearHistory" xml:space="preserve"><value>Vymazat historii</value></data>
+	<data name="Automation_ExecutionSettings" xml:space="preserve"><value>Nastavení spuštění</value></data>
+	<data name="Automation_MaxConcurrentAutomations" xml:space="preserve"><value>Maximální počet souběžných automatizací</value></data>
+	<data name="Automation_MaxConcurrentAgents" xml:space="preserve"><value>Maximální počet souběžných agentů</value></data>
+	<data name="Automation_DefaultMaxIterations" xml:space="preserve"><value>Výchozí maximální počet iterací</value></data>
+	<data name="Automation_DefaultMaxTotalTokens" xml:space="preserve"><value>Výchozí maximální celkový počet tokenů</value></data>
+	<data name="Automation_BehaviorSettings" xml:space="preserve"><value>Nastavení chování</value></data>
+	<data name="Automation_PauseOnOverlay" xml:space="preserve"><value>Pozastavit spouštěče, když je překryv viditelný</value></data>
+	<data name="Automation_PauseOnOverlayDesc" xml:space="preserve"><value>Dočasně pozastavit sledování spouštěčů, když je překryv zobrazen</value></data>
+	<data name="Automation_ShowExecutionNotifications" xml:space="preserve"><value>Zobrazovat upozornění na spuštění</value></data>
+	<data name="Automation_EnableLiveMonitoring" xml:space="preserve"><value>Povolit živé monitorování</value></data>
+	<data name="Automation_LogDebugTraces" xml:space="preserve"><value>Protokolovat ladící stopy</value></data>
+	<data name="Automation_HistorySettings" xml:space="preserve"><value>Nastavení historie</value></data>
+	<data name="Automation_HistoryRetentionDays" xml:space="preserve"><value>Uchovávání historie (dny)</value></data>
+	<data name="Automation_MaxHistoryEntries" xml:space="preserve"><value>Maximální počet položek v historii</value></data>
+	<data name="Automation_ImportExport" xml:space="preserve"><value>Import/Export</value></data>
+	<data name="Automation_ImportAutomation" xml:space="preserve"><value>Importovat automatizaci</value></data>
+	<data name="Automation_Save" xml:space="preserve"><value>Uložit</value></data>
+	<data name="Automation_Close" xml:space="preserve"><value>Zavřít</value></data>
+
+	<!-- Automation Trigger Configuration -->
+	<data name="Automation_Trigger_ContentType" xml:space="preserve"><value>Typ obsahu</value></data>
+	<data name="Automation_Trigger_TextFilter" xml:space="preserve"><value>Textový filtr (klíčová slova nebo regulární výraz)</value></data>
+	<data name="Automation_Trigger_UseRegex" xml:space="preserve"><value>Použít regulární výrazy</value></data>
+	<data name="Automation_Trigger_Debounce" xml:space="preserve"><value>Debounce</value></data>
+	<data name="Automation_Trigger_Hotkey" xml:space="preserve"><value>Kombinace klávesové zkratky</value></data>
+	<data name="Automation_Trigger_HotkeyHelp" xml:space="preserve"><value>Klikněte na pole a stiskněte požadovanou kombinaci kláves (např. Ctrl+Shift+A)</value></data>
+	<data name="Automation_Trigger_WatchPath" xml:space="preserve"><value>Sledovaná cesta</value></data>
+	<data name="Automation_Trigger_FileFilter" xml:space="preserve"><value>Filtr souborů (např. *.txt, *.json)</value></data>
+	<data name="Automation_Trigger_IncludeSubdirs" xml:space="preserve"><value>Zahrnout podadresáře</value></data>
+	<data name="Automation_Trigger_ChangeTypes" xml:space="preserve"><value>Spouštět změny</value></data>
+	<data name="Automation_Trigger_WindowTitle" xml:space="preserve"><value>Filtr názvu okna</value></data>
+	<data name="Automation_Trigger_ProcessName" xml:space="preserve"><value>Filtr názvu procesu</value></data>
+	<data name="Automation_Trigger_TriggerOnMatch" xml:space="preserve"><value>Spustit, když filtr odpovídá (zrušit zaškrtnutí pro spuštění, když NEODPOVÍDÁ)</value></data>
+	<data name="Automation_Trigger_ScheduledTime" xml:space="preserve"><value>Plánované datum a čas</value></data>
+	<data name="Automation_Trigger_Recurrence" xml:space="preserve"><value>Opakování</value></data>
+	<data name="Automation_Trigger_RepeatEvery" xml:space="preserve"><value>Opakovat každý</value></data>
+	<data name="Automation_Trigger_SourceAutomation" xml:space="preserve"><value>Zdrojová automatizace</value></data>
+	<data name="Automation_Trigger_ChainHelp" xml:space="preserve"><value>Tato automatizace se spustí, když vybraná zdrojová automatizace skončí.</value></data>
+	<data name="Automation_Trigger_RequireSuccess" xml:space="preserve"><value>Spustit pouze, pokud je zdrojová automatizace úspěšná</value></data>
+	<data name="Automation_Trigger_Plugin" xml:space="preserve"><value>Plugin</value></data>
+	<data name="Automation_Trigger_PluginTrigger" xml:space="preserve"><value>Spouštěč pluginu</value></data>
+	<data name="Automation_Trigger_NoPluginTriggers" xml:space="preserve"><value>Žádné pluginy se spouštěči automatizace nejsou nainstalovány.</value></data>
 </root>
