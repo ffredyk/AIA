@@ -14,6 +14,8 @@
   <strong>A modern, extensible WPF desktop application for intelligent task management, reminders, and AI-powered productivity with advanced automation capabilities</strong>
 </p>
 
+<img width="1920" height="1080" alt="obrazek" src="https://github.com/user-attachments/assets/c3f51910-5d37-4d65-b0bb-6ed9c0388a83" />
+
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
