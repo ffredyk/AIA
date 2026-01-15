@@ -234,10 +234,10 @@
                                     <Border CornerRadius="6,6,0,0" ClipToBounds="True" Height="80" Background="#0C000000">
                                         <Grid>
                                             <!-- Text Preview -->
-                                            <TextBlock Text="{Binding PreviewText}" Foreground="#CCCCCC" FontSize="10"
+                                            <!--TextBlock Text="{Binding PreviewText}" Foreground="#CCCCCC" FontSize="10"
                                                        TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
                                                        Padding="8" MaxHeight="80"
-                                                       Visibility="{Binding AssetType, Converter={StaticResource ClipboardTextVisConverter}}"/>
+                                                       Visibility="{Binding AssetType, Converter={StaticResource ClipboardTextVisConverter}}"/-->
                                             
                                             <!-- Image Preview -->
                                             <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" 
@@ -255,7 +255,7 @@
                         
                                             <!-- Type Badge -->
                                             <Border HorizontalAlignment="Left" VerticalAlignment="Top" 
-                                                    Margin="6" Padding="4,2" CornerRadius="4">
+                                                    Margin="6" Padding="4,2" CornerRadius="4" Panel.ZIndex="10">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="Background" Value="#991EB75F"/>
@@ -276,7 +276,7 @@
                                         
                                             <!-- Timestamp -->
                                             <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" 
-                                                    Margin="6" Padding="4,2" CornerRadius="4" Background="#99000000">
+                                                    Margin="6" Padding="4,2" CornerRadius="4" Background="#99000000" Panel.ZIndex="10">
                                                 <TextBlock Text="{Binding CapturedAtText}" FontSize="9" Foreground="#CCCCCC"/>
                                             </Border>
                                         </Grid>

@@ -114,7 +114,7 @@ namespace AIA.Models
         {
             DataAssetType.FullScreen => "DesktopMac20",
             DataAssetType.ActiveWindow => "WindowNew20",
-            DataAssetType.ClipboardText => "ClipboardText20",
+            DataAssetType.ClipboardText => "ClipboardText32",
             DataAssetType.ClipboardImage => "Image20",
             DataAssetType.ClipboardFiles => "FolderOpen20",
             _ => "Image20"
