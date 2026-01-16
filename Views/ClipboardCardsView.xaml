@@ -1,0 +1,40 @@
+<UserControl x:Class="AIA.Views.ClipboardCardsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:AIA"
+             xmlns:models="clr-namespace:AIA.Models"
+             mc:Ignorable="d" 
+             d:DesignHeight="180" d:DesignWidth="500"
+             x:Name="UserControlRoot">
+    
+    <UserControl.Resources>
+        <!-- Converters -->
+        <local:ClipboardTextVisibilityConverter x:Key="ClipboardTextVisConverter"/>
+        <local:ClipboardImageVisibilityConverter x:Key="ClipboardImageVisConverter"/>
+        <local:ClipboardFilesVisibilityConverter x:Key="ClipboardFilesVisConverter"/>
+        <local:IntToVisibilityConverter x:Key="IntToVisConverter"/>
+    </UserControl.Resources>
+    
+    <Grid x:Name="RootGrid">
+        <!-- Horizontal ScrollViewer for card scrolling -->
+        <ScrollViewer x:Name="CardsScrollViewer"
+                      HorizontalScrollBarVisibility="Auto" 
+                      VerticalScrollBarVisibility="Disabled"
+                      PanningMode="HorizontalOnly"
+                      PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+            <!-- Main horizontal stack of cards -->
+            <StackPanel x:Name="CardsPanel" Orientation="Horizontal" VerticalAlignment="Stretch" 
+                        HorizontalAlignment="Left" Margin="4,0"/>
+        </ScrollViewer>
+        
+        <!-- Empty state (shown when no clipboard history) -->
+        <StackPanel x:Name="EmptyState" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+            <ui:SymbolIcon Symbol="ClipboardPaste24" FontSize="36" Foreground="#555555"/>
+            <TextBlock Text="{local:Localize DataAssets_NoClipboardHistory}" Foreground="#666666" 
+                       FontSize="11" Margin="0,8,0,0" TextAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

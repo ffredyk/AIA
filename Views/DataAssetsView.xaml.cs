@@ -140,6 +140,11 @@ namespace AIA.Views
 
         #region Clipboard History
 
+        private void ClipboardCards_RestoreRequested(object? sender, DataAsset asset)
+        {
+            RestoreClipboardItem(asset);
+        }
+
         private void ClipboardItem_Click(object sender, MouseButtonEventArgs e)
         {
             if (sender is FrameworkElement element && element.Tag is DataAsset asset)
@@ -185,6 +190,15 @@ namespace AIA.Views
 
             ViewModel.ClearClipboardHistory();
             ToastRequested?.Invoke(this, "Clipboard history cleared");
+        }
+
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (sender is not ScrollViewer scrollViewer) return;
+
+            // Scroll horizontally based on mouse wheel delta
+            scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - e.Delta);
+            e.Handled = true;
         }
 
         #endregion
