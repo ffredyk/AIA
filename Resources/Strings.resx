@@ -813,4 +813,123 @@
   <value>Adjust the transparency of the overlay window</value>
 </data>
 
+	<!-- Orchestration Help Tab -->
+	<data name="Orchestration_TabHelp" xml:space="preserve">
+  <value>Help</value>
+</data>
+	<data name="Orchestration_Help_Title" xml:space="preserve">
+  <value>How AI Orchestration Works</value>
+</data>
+	<data name="Orchestration_Help_Subtitle" xml:space="preserve">
+  <value>Understanding provider routing, strengths, and priority</value>
+</data>
+	<data name="Orchestration_Help_AutoRouting" xml:space="preserve">
+  <value>Auto-Routing System</value>
+</data>
+	<data name="Orchestration_Help_AutoRoutingEnabled" xml:space="preserve">
+  <value>When Auto-Routing is enabled, AIA intelligently selects the best AI provider for each request based on the content of your prompt.</value>
+</data>
+	<data name="Orchestration_Help_AutoRoutingDisabled" xml:space="preserve">
+  <value>When Auto-Routing is disabled, AIA always uses your Default provider (or the first enabled provider if no default is set). Strengths and Priority are ignored.</value>
+</data>
+	<data name="Orchestration_Help_RoutingFlow" xml:space="preserve">
+  <value>Routing Decision Flow</value>
+</data>
+	<data name="Orchestration_Help_Step1_Title" xml:space="preserve">
+  <value>1. Prompt Analysis</value>
+</data>
+	<data name="Orchestration_Help_Step1_Desc" xml:space="preserve">
+  <value>AIA analyzes your prompt for keywords to detect the category: coding, math, analysis, creative, task-management, summarization, research, or conversation.</value>
+</data>
+	<data name="Orchestration_Help_Step2_Title" xml:space="preserve">
+  <value>2. Strengths Matching</value>
+</data>
+	<data name="Orchestration_Help_Step2_Desc" xml:space="preserve">
+  <value>AIA finds all enabled providers that have the detected category in their Strengths list (e.g., "coding", "creative").</value>
+</data>
+	<data name="Orchestration_Help_Step3_Title" xml:space="preserve">
+  <value>3. Priority Selection</value>
+</data>
+	<data name="Orchestration_Help_Step3_Desc" xml:space="preserve">
+  <value>Among matching providers, AIA selects the one with the highest Priority value (0-100). If multiple providers have the same strength, priority decides the winner.</value>
+</data>
+	<data name="Orchestration_Help_Step4_Title" xml:space="preserve">
+  <value>4. Fallback Strategy</value>
+</data>
+	<data name="Orchestration_Help_Step4_Desc" xml:space="preserve">
+  <value>If NO providers match the detected category, AIA falls back to the highest priority provider, then prefers the Default provider as a secondary tiebreaker.</value>
+</data>
+	<data name="Orchestration_Help_StrengthsField" xml:space="preserve">
+  <value>Strengths Field</value>
+</data>
+	<data name="Orchestration_Help_StrengthsDesc" xml:space="preserve">
+  <value>Strengths are comma-separated categories that define what each provider excels at. Available categories:</value>
+</data>
+	<data name="Orchestration_Help_Category_Coding" xml:space="preserve">
+  <value>coding - Programming, debugging, APIs</value>
+</data>
+	<data name="Orchestration_Help_Category_Math" xml:space="preserve">
+  <value>math - Calculations, equations, formulas</value>
+</data>
+	<data name="Orchestration_Help_Category_Analysis" xml:space="preserve">
+  <value>analysis - Data analysis, comparisons</value>
+</data>
+	<data name="Orchestration_Help_Category_Creative" xml:space="preserve">
+  <value>creative - Writing, stories, brainstorming</value>
+</data>
+	<data name="Orchestration_Help_Category_TaskMgmt" xml:space="preserve">
+  <value>task-management - Tasks, reminders, planning</value>
+</data>
+	<data name="Orchestration_Help_Category_Summarization" xml:space="preserve">
+  <value>summarization - Summaries, key points</value>
+</data>
+	<data name="Orchestration_Help_Category_Research" xml:space="preserve">
+  <value>research - Finding info, explanations</value>
+</data>
+	<data name="Orchestration_Help_Category_Conversation" xml:space="preserve">
+  <value>conversation - General chat</value>
+</data>
+	<data name="Orchestration_Help_StrengthsExample" xml:space="preserve">
+  <value>Example: coding, analysis, math</value>
+</data>
+	<data name="Orchestration_Help_PriorityField" xml:space="preserve">
+  <value>Priority Field</value>
+</data>
+	<data name="Orchestration_Help_PriorityDesc" xml:space="preserve">
+  <value>Priority is a number from 0-100 (default: 50) that determines preference when multiple providers match the same strength category.</value>
+</data>
+	<data name="Orchestration_Help_ExampleScenario" xml:space="preserve">
+  <value>Example Scenario:</value>
+</data>
+	<data name="Orchestration_Help_ExamplePrompt" xml:space="preserve">
+  <value>User asks: "Help me debug this C# function"</value>
+</data>
+	<data name="Orchestration_Help_ExampleCategory" xml:space="preserve">
+  <value>Category detected: coding</value>
+</data>
+	<data name="Orchestration_Help_ExampleProviders" xml:space="preserve">
+  <value>Providers with "coding" strength:</value>
+</data>
+	<data name="Orchestration_Help_ExampleSelected" xml:space="preserve">
+  <value>← SELECTED</value>
+</data>
+	<data name="Orchestration_Help_PriorityNote" xml:space="preserve">
+  <value>Higher priority = more preferred. Used as a tiebreaker among providers with matching strengths.</value>
+</data>
+	<data name="Orchestration_Help_QuickTips" xml:space="preserve">
+  <value>Quick Tips</value>
+</data>
+	<data name="Orchestration_Help_Tip1" xml:space="preserve">
+  <value>Set specific strengths for each provider based on their actual capabilities (e.g., Claude is great for creative writing, GPT-4 for coding).</value>
+</data>
+	<data name="Orchestration_Help_Tip2" xml:space="preserve">
+  <value>Use Priority to prefer faster/cheaper models when multiple providers have the same strength (e.g., GPT-4o-mini over GPT-4).</value>
+</data>
+	<data name="Orchestration_Help_Tip3" xml:space="preserve">
+  <value>Keep at least one provider without any specific strengths as a general-purpose fallback.</value>
+</data>
+	<data name="Orchestration_Help_Tip4" xml:space="preserve">
+  <value>The Default provider is only used when Auto-Routing is disabled or as a final fallback.</value>
+</data>
+
 </root>

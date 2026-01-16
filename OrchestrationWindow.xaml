@@ -500,6 +500,196 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+            
+            <!-- Help Tab -->
+            <TabItem Header="{local:Localize Orchestration_TabHelp}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="700">
+                        <!-- Header -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <ui:SymbolIcon Symbol="QuestionCircle24" FontSize="32" Foreground="#0078D4" Margin="0,0,12,0"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{local:Localize Orchestration_Help_Title}" FontSize="20" FontWeight="SemiBold" Foreground="White"/>
+                                <TextBlock Text="{local:Localize Orchestration_Help_Subtitle}" Foreground="#999999" FontSize="12" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <!-- Auto-Routing Explanation -->
+                        <Border Background="#2D2D30" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <ui:SymbolIcon Symbol="BranchFork24" FontSize="20" Foreground="#1EB75F" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{local:Localize Orchestration_Help_AutoRouting}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                
+                                <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,8">
+                                    <Run Text="{local:Localize Orchestration_Help_AutoRoutingEnabled}"/>
+                                </TextBlock>
+                                
+                                <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,8">
+                                    <Run Text="{local:Localize Orchestration_Help_AutoRoutingDisabled}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- How Routing Works -->
+                        <Border Background="#2D2D30" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <ui:SymbolIcon Symbol="Flow24" FontSize="20" Foreground="#0078D4" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{local:Localize Orchestration_Help_RoutingFlow}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                
+                                <!-- Step 1 -->
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_Step1_Title}" Foreground="#FFA500" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_Step1_Desc}" TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Step 2 -->
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_Step2_Title}" Foreground="#FFA500" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_Step2_Desc}" TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Step 3 -->
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_Step3_Title}" Foreground="#FFA500" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_Step3_Desc}" TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Step 4 -->
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="12">
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_Step4_Title}" Foreground="#FFA500" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_Step4_Desc}" TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Strengths Explanation -->
+                        <Border Background="#2D2D30" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <ui:SymbolIcon Symbol="Star24" FontSize="20" Foreground="#FFA500" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{local:Localize Orchestration_Help_StrengthsField}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                
+                                <TextBlock Text="{local:Localize Orchestration_Help_StrengthsDesc}" TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,12"/>
+                                
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="4,2" Text="{local:Localize Orchestration_Help_Category_Coding}"/>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="4,2" Text="{local:Localize Orchestration_Help_Category_Math}"/>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="4,2" Text="{local:Localize Orchestration_Help_Category_Analysis}"/>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="4,2" Text="{local:Localize Orchestration_Help_Category_Creative}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="4,2" Text="{local:Localize Orchestration_Help_Category_TaskMgmt}"/>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="4,2" Text="{local:Localize Orchestration_Help_Category_Summarization}"/>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="4,2" Text="{local:Localize Orchestration_Help_Category_Research}"/>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="4,2" Text="{local:Localize Orchestration_Help_Category_Conversation}"/>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <TextBlock TextWrapping="Wrap" Foreground="#999999" FontSize="11" FontStyle="Italic">
+                                    <Run Text="{local:Localize Orchestration_Help_StrengthsExample}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Priority Explanation -->
+                        <Border Background="#2D2D30" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <ui:SymbolIcon Symbol="ArrowUp24" FontSize="20" Foreground="#0078D4" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{local:Localize Orchestration_Help_PriorityField}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                
+                                <TextBlock Text="{local:Localize Orchestration_Help_PriorityDesc}" TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,8"/>
+                                
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Orchestration_Help_ExampleScenario}" Foreground="#1EB75F" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                        <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4">
+                                            <Run Text="{local:Localize Orchestration_Help_ExamplePrompt}"/>
+                                        </TextBlock>
+                                        <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4">
+                                            <Run Text="{local:Localize Orchestration_Help_ExampleCategory}"/>
+                                        </TextBlock>
+                                        <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4">
+                                            <Run Text="{local:Localize Orchestration_Help_ExampleProviders}"/>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="16,2" Text="- GPT-4 (Priority: 80)"/>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="16,2">
+                                            <Run Text="- Claude 3.5 (Priority: 90) "/>
+                                            <Run Text="{local:Localize Orchestration_Help_ExampleSelected}" Foreground="#1EB75F"/>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#999999" FontSize="11" Margin="16,2" Text="- Gemini Flash (Priority: 60)"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <TextBlock Text="{local:Localize Orchestration_Help_PriorityNote}" TextWrapping="Wrap" Foreground="#999999" FontSize="11" FontStyle="Italic"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Quick Tips -->
+                        <Border Background="#2D2D30" CornerRadius="8" Padding="16">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <ui:SymbolIcon Symbol="Lightbulb24" FontSize="20" Foreground="#FFD700" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{local:Localize Orchestration_Help_QuickTips}" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="10" Margin="0,0,0,6">
+                                    <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11">
+                                        <Run Foreground="#1EB75F">?</Run>
+                                        <Run Text=" "/>
+                                        <Run Text="{local:Localize Orchestration_Help_Tip1}"/>
+                                    </TextBlock>
+                                </Border>
+                                
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="10" Margin="0,0,0,6">
+                                    <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11">
+                                        <Run Foreground="#1EB75F">?</Run>
+                                        <Run Text=" "/>
+                                        <Run Text="{local:Localize Orchestration_Help_Tip2}"/>
+                                    </TextBlock>
+                                </Border>
+                                
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="10" Margin="0,0,0,6">
+                                    <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11">
+                                        <Run Foreground="#1EB75F">?</Run>
+                                        <Run Text=" "/>
+                                        <Run Text="{local:Localize Orchestration_Help_Tip3}"/>
+                                    </TextBlock>
+                                </Border>
+                                
+                                <Border Background="#3E3E42" CornerRadius="6" Padding="10">
+                                    <TextBlock TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="11">
+                                        <Run Foreground="#1EB75F">?</Run>
+                                        <Run Text=" "/>
+                                        <Run Text="{local:Localize Orchestration_Help_Tip4}"/>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
         </TabControl>
         
         <!-- Footer -->
