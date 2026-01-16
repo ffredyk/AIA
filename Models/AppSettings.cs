@@ -37,6 +37,9 @@ namespace AIA.Models
         private bool _enableAllDisplayCapture = false;
         private int _maxScreenshotHistoryItems = 50;
 
+        // Reminder notification settings
+        private ReminderNotificationSettings _notificationSettings = new ReminderNotificationSettings();
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
@@ -236,6 +239,19 @@ namespace AIA.Models
         {
             get => _maxScreenshotHistoryItems;
             set { _maxScreenshotHistoryItems = Math.Max(1, Math.Min(200, value)); OnPropertyChanged(nameof(MaxScreenshotHistoryItems)); }
+        }
+
+        #endregion
+
+        #region Notification Settings
+
+        /// <summary>
+        /// Reminder notification settings
+        /// </summary>
+        public ReminderNotificationSettings NotificationSettings
+        {
+            get => _notificationSettings;
+            set { _notificationSettings = value; OnPropertyChanged(nameof(NotificationSettings)); }
         }
 
         #endregion

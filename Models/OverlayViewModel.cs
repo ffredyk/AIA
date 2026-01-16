@@ -465,6 +465,19 @@ namespace AIA.Models
             _appSettings = loadedSettings;
             _clipboardHistoryService = new ClipboardHistoryService(() => _appSettings);
             
+            // Apply saved notification settings to the notification service
+            var savedNotificationSettings = _appSettings.NotificationSettings;
+            var currentNotificationSettings = _reminderNotificationService.Settings;
+            
+            currentNotificationSettings.IsEnabled = savedNotificationSettings.IsEnabled;
+            currentNotificationSettings.ShowWarningNotifications = savedNotificationSettings.ShowWarningNotifications;
+            currentNotificationSettings.ShowUrgentNotifications = savedNotificationSettings.ShowUrgentNotifications;
+            currentNotificationSettings.ShowOverdueNotifications = savedNotificationSettings.ShowOverdueNotifications;
+            currentNotificationSettings.PlaySound = savedNotificationSettings.PlaySound;
+            currentNotificationSettings.WarningMinutes = savedNotificationSettings.WarningMinutes;
+            currentNotificationSettings.UrgentMinutes = savedNotificationSettings.UrgentMinutes;
+            currentNotificationSettings.NotificationDurationSeconds = savedNotificationSettings.NotificationDurationSeconds;
+            
             OnPropertyChanged(nameof(ClipboardHistory));
             OnPropertyChanged(nameof(AppSettings));
             

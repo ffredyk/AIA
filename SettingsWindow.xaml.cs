@@ -119,8 +119,8 @@ namespace AIA
             ChkCheckPluginUpdates.IsChecked = _pluginSettings.CheckForPluginUpdates;
             ChkAutoUpdatePlugins.IsChecked = _pluginSettings.AutoUpdatePlugins;
 
-            // Notification tab
-            var notificationSettings = OverlayViewModel.Singleton.NotificationSettings;
+            // Notification tab - load from saved settings
+            var notificationSettings = _appSettings.NotificationSettings;
             ChkNotificationsEnabled.IsChecked = notificationSettings.IsEnabled;
             ChkWarningNotifications.IsChecked = notificationSettings.ShowWarningNotifications;
             ChkUrgentNotifications.IsChecked = notificationSettings.ShowUrgentNotifications;
@@ -554,22 +554,32 @@ namespace AIA
             _pluginSettings.CheckForPluginUpdates = ChkCheckPluginUpdates.IsChecked ?? true;
             _pluginSettings.AutoUpdatePlugins = ChkAutoUpdatePlugins.IsChecked ?? false;
 
-            // Update notification settings
-            var notificationSettings = OverlayViewModel.Singleton.NotificationSettings;
-            notificationSettings.IsEnabled = ChkNotificationsEnabled.IsChecked ?? true;
-            notificationSettings.ShowWarningNotifications = ChkWarningNotifications.IsChecked ?? true;
-            notificationSettings.ShowUrgentNotifications = ChkUrgentNotifications.IsChecked ?? true;
-            notificationSettings.ShowOverdueNotifications = ChkOverdueNotifications.IsChecked ?? true;
-            notificationSettings.PlaySound = ChkPlaySound.IsChecked ?? false;
+            // Update notification settings in AppSettings
+            _appSettings.NotificationSettings.IsEnabled = ChkNotificationsEnabled.IsChecked ?? true;
+            _appSettings.NotificationSettings.ShowWarningNotifications = ChkWarningNotifications.IsChecked ?? true;
+            _appSettings.NotificationSettings.ShowUrgentNotifications = ChkUrgentNotifications.IsChecked ?? true;
+            _appSettings.NotificationSettings.ShowOverdueNotifications = ChkOverdueNotifications.IsChecked ?? true;
+            _appSettings.NotificationSettings.PlaySound = ChkPlaySound.IsChecked ?? false;
             
             if (int.TryParse(TxtWarningMinutes.Text, out var warningMinutes))
-                notificationSettings.WarningMinutes = warningMinutes;
+                _appSettings.NotificationSettings.WarningMinutes = warningMinutes;
             
             if (int.TryParse(TxtUrgentMinutes.Text, out var urgentMinutes))
-                notificationSettings.UrgentMinutes = urgentMinutes;
+                _appSettings.NotificationSettings.UrgentMinutes = urgentMinutes;
             
             if (int.TryParse(TxtNotificationDuration.Text, out var duration))
-                notificationSettings.NotificationDurationSeconds = duration;
+                _appSettings.NotificationSettings.NotificationDurationSeconds = duration;
+
+            // Also apply to the live OverlayViewModel notification settings
+            var liveNotificationSettings = OverlayViewModel.Singleton.NotificationSettings;
+            liveNotificationSettings.IsEnabled = _appSettings.NotificationSettings.IsEnabled;
+            liveNotificationSettings.ShowWarningNotifications = _appSettings.NotificationSettings.ShowWarningNotifications;
+            liveNotificationSettings.ShowUrgentNotifications = _appSettings.NotificationSettings.ShowUrgentNotifications;
+            liveNotificationSettings.ShowOverdueNotifications = _appSettings.NotificationSettings.ShowOverdueNotifications;
+            liveNotificationSettings.PlaySound = _appSettings.NotificationSettings.PlaySound;
+            liveNotificationSettings.WarningMinutes = _appSettings.NotificationSettings.WarningMinutes;
+            liveNotificationSettings.UrgentMinutes = _appSettings.NotificationSettings.UrgentMinutes;
+            liveNotificationSettings.NotificationDurationSeconds = _appSettings.NotificationSettings.NotificationDurationSeconds;
 
             // Save all settings
             await AppSettingsService.SaveAppSettingsAsync(_appSettings);
