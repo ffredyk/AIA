@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="AIA.Mobile.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:AIA.Mobile.Pages"
+    FlyoutBehavior="Disabled"
+    Shell.NavBarIsVisible="True">
+
+    <!-- App Theme Colors -->
+    <Shell.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#0078D4</Color>
+            <Color x:Key="PrimaryDark">#005A9E</Color>
+            <Color x:Key="Accent">#1EB75F</Color>
+            <Color x:Key="Surface">#1E1E1E</Color>
+            <Color x:Key="SurfaceVariant">#2D2D2D</Color>
+            <Color x:Key="OnPrimary">#FFFFFF</Color>
+            <Color x:Key="OnSurface">#E1E1E1</Color>
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <!-- Bottom Tab Bar -->
+    <TabBar>
+        <!-- Tasks Tab -->
+        <ShellContent
+            Title="Tasks"
+            ContentTemplate="{DataTemplate pages:TasksPage}"
+            Route="tasks">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE86C;" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <!-- Reminders Tab -->
+        <ShellContent
+            Title="Reminders"
+            ContentTemplate="{DataTemplate pages:RemindersPage}"
+            Route="reminders">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE7F5;" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <!-- Data Banks Tab -->
+        <ShellContent
+            Title="Data"
+            ContentTemplate="{DataTemplate pages:DataBanksPage}"
+            Route="databanks">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE2C7;" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <!-- Chat Tab -->
+        <ShellContent
+            Title="Chat"
+            ContentTemplate="{DataTemplate pages:ChatPage}"
+            Route="chat">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE8AF;" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <!-- Settings Tab -->
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate pages:SettingsPage}"
+            Route="settings">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xE8B8;" />
+            </ShellContent.Icon>
+        </ShellContent>
+    </TabBar>
+
+</Shell>
