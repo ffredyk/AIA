@@ -715,17 +715,40 @@ namespace AIA
         /// <summary>
         /// Shows the window with slide-in animation
         /// </summary>
-        public void ShowWithAnimation()
+        /// <param name="preserveForegroundFocus">
+        /// When true, the previously focused window keeps focus after the overlay is shown.
+        /// </param>
+        public void ShowWithAnimation(bool preserveForegroundFocus = false)
         {
+            var previousForegroundWindow = preserveForegroundFocus
+                ? WindowsIntegrationService.GetForegroundWindowHandle()
+                : IntPtr.Zero;
+
             // Reset opacity and transform before showing to ensure animation plays correctly
             Opacity = 0;
             if (RenderTransform is TranslateTransform transform)
             {
                 transform.Y = -50;
             }
-            
+
+            ShowActivated = !preserveForegroundFocus;
             base.Show();
-            Activate();
+
+            if (preserveForegroundFocus)
+            {
+                if (previousForegroundWindow != IntPtr.Zero)
+                {
+                    // WPF may activate the window during Show, so restore focus once input is processed.
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        WindowsIntegrationService.TryRestoreForegroundWindow(previousForegroundWindow);
+                    }), System.Windows.Threading.DispatcherPriority.Input);
+                }
+            }
+            else
+            {
+                Activate();
+            }
             
             // Trigger slide-in animation
             AnimateSlideIn();

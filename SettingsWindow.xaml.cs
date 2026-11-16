@@ -102,6 +102,17 @@ namespace AIA
             SldrOverlayOpacity.Value = _appSettings.OverlayOpacity;
             UpdateOpacityDisplay();
             
+            // Windows integration
+            var windowsIntegration = _appSettings.WindowsIntegration ?? new WindowsIntegrationSettings();
+            ChkEnableWindowsIntegration.IsChecked = windowsIntegration.Enabled;
+            ChkProtectFullscreenApps.IsChecked = windowsIntegration.ProtectFullscreenAndGames;
+            ChkProtectKnownApps.IsChecked = windowsIntegration.ProtectKnownApps;
+            ChkProtectAutomationHotkeys.IsChecked = windowsIntegration.ApplyToAutomationHotkeys;
+            CmbProtectedHotkeyAction.SelectedIndex =
+                windowsIntegration.HotkeyAction == ProtectedAppHotkeyAction.ShowWithoutActivation ? 1 : 0;
+            TxtCustomProtectedApps.Text = windowsIntegration.CustomProtectedProcesses;
+            UpdateWindowsIntegrationControlsEnabled();
+
             // Clipboard history settings
             ChkEnableClipboardHistory.IsChecked = _appSettings.EnableClipboardHistory;
             ChkTrackClipboardText.IsChecked = _appSettings.TrackClipboardText;
@@ -400,6 +411,19 @@ namespace AIA
             UpdateOpacityDisplay();
         }
 
+        private void ChkEnableWindowsIntegration_Changed(object sender, RoutedEventArgs e)
+        {
+            UpdateWindowsIntegrationControlsEnabled();
+        }
+
+        private void UpdateWindowsIntegrationControlsEnabled()
+        {
+            if (PnlWindowsIntegrationOptions != null)
+            {
+                PnlWindowsIntegrationOptions.IsEnabled = ChkEnableWindowsIntegration.IsChecked ?? false;
+            }
+        }
+
         private void ChkRunOnStartup_Changed(object sender, RoutedEventArgs e)
         {
             var isChecked = ChkRunOnStartup.IsChecked ?? false;
@@ -596,6 +620,19 @@ namespace AIA
             _appSettings.AutoInstallUpdates = ChkAutoInstallUpdates.IsChecked ?? false;
             _appSettings.EnableAutoBackup = ChkAutoBackup.IsChecked ?? false;
             _appSettings.OverlayOpacity = SldrOverlayOpacity.Value;
+
+            var windowsIntegration = _appSettings.WindowsIntegration ?? new WindowsIntegrationSettings();
+            windowsIntegration.Enabled = ChkEnableWindowsIntegration.IsChecked ?? true;
+            windowsIntegration.ProtectFullscreenAndGames = ChkProtectFullscreenApps.IsChecked ?? true;
+            windowsIntegration.ProtectKnownApps = ChkProtectKnownApps.IsChecked ?? true;
+            windowsIntegration.ApplyToAutomationHotkeys = ChkProtectAutomationHotkeys.IsChecked ?? true;
+            windowsIntegration.HotkeyAction =
+                (CmbProtectedHotkeyAction.SelectedItem as ComboBoxItem)?.Tag?.ToString() ==
+                nameof(ProtectedAppHotkeyAction.ShowWithoutActivation)
+                    ? ProtectedAppHotkeyAction.ShowWithoutActivation
+                    : ProtectedAppHotkeyAction.Ignore;
+            windowsIntegration.CustomProtectedProcesses = TxtCustomProtectedApps.Text?.Trim() ?? string.Empty;
+            _appSettings.WindowsIntegration = windowsIntegration;
             
             if (int.TryParse(TxtBackupInterval.Text, out var backupInterval))
                 _appSettings.AutoBackupIntervalHours = backupInterval;
@@ -661,6 +698,9 @@ namespace AIA
 
         private void ApplyLiveSettings()
         {
+            // Apply focus protection immediately without restarting
+            App.Current.RefreshWindowsIntegrationSettings(_appSettings);
+
             // Refresh the overlay opacity immediately if the main window is open
             if (Owner is MainWindow mainWindow)
             {

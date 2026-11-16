@@ -21,6 +21,7 @@ namespace AIA.Models
         private int _maxBackupCount = 5;
         private string _language = string.Empty; // Empty = use system language
         private double _overlayOpacity = 1.0; // Default: fully opaque
+        private WindowsIntegrationSettings _windowsIntegration = new();
         
         // Clipboard history settings
         private bool _enableClipboardHistory = true;
@@ -148,6 +149,15 @@ namespace AIA.Models
         {
             get => _overlayOpacity;
             set { _overlayOpacity = Math.Max(0.1, Math.Min(1.0, value)); OnPropertyChanged(nameof(OverlayOpacity)); }
+        }
+
+        /// <summary>
+        /// Focus-aware Windows integration settings
+        /// </summary>
+        public WindowsIntegrationSettings WindowsIntegration
+        {
+            get => _windowsIntegration;
+            set { _windowsIntegration = value ?? new WindowsIntegrationSettings(); OnPropertyChanged(nameof(WindowsIntegration)); }
         }
 
         #region Clipboard History Settings

@@ -54,6 +54,9 @@ namespace AIA
                 _ = CheckForUpdatesInBackgroundAsync();
             }
 
+            // Apply focus protection before any global hotkey is registered
+            WindowsIntegrationService.Current.Configure(_appSettings.WindowsIntegration);
+
             // Initialize localization with saved language preference
             if (!string.IsNullOrEmpty(_appSettings.Language))
             {
@@ -147,6 +150,26 @@ namespace AIA
 
         private void OnOverlayHotkeyPressed(object? sender, NHotkey.HotkeyEventArgs e)
         {
+            e.Handled = true;
+
+            var windowsIntegration = WindowsIntegrationService.Current;
+            if (windowsIntegration.ShouldSuppressHotkey(HotkeyPurpose.Overlay))
+            {
+                if (MainWindow is AIA.MainWindow overlay)
+                {
+                    if (overlay.IsVisible)
+                    {
+                        overlay.HideWithAnimation();
+                    }
+                    else if (windowsIntegration.Settings.HotkeyAction == ProtectedAppHotkeyAction.ShowWithoutActivation)
+                    {
+                        overlay.ShowWithAnimation(preserveForegroundFocus: true);
+                    }
+                }
+
+                return;
+            }
+
             ToggleMainWindow();
         }
 
@@ -174,6 +197,14 @@ namespace AIA
                 return false;
 
             return _hotkeyService.RegisterHotkey(hotkeyString);
+        }
+
+        /// <summary>
+        /// Applies focus protection settings without restarting the app
+        /// </summary>
+        public void RefreshWindowsIntegrationSettings(AppSettings settings)
+        {
+            WindowsIntegrationService.Current.Configure(settings?.WindowsIntegration);
         }
 
         private async Task InitializePluginsAsync()
