@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -56,6 +56,17 @@ namespace AIA.Models
 
         // Reminder notification service
         private readonly ReminderNotificationService _reminderNotificationService = new();
+
+        // Coalesced persistence
+        private readonly object _saveGate = new();
+        private CancellationTokenSource? _tasksSaveCts;
+        private CancellationTokenSource? _chatsSaveCts;
+
+        /// <summary>
+        /// Raised when a background save fails so the UI can surface the problem instead of
+        /// silently losing changes.
+        /// </summary>
+        public event EventHandler<string>? SaveFailed;
 
         // AI Orchestration service
         private AIOrchestrationService? _aiOrchestrationService;
@@ -477,12 +488,24 @@ namespace AIA.Models
             currentNotificationSettings.WarningMinutes = savedNotificationSettings.WarningMinutes;
             currentNotificationSettings.UrgentMinutes = savedNotificationSettings.UrgentMinutes;
             currentNotificationSettings.NotificationDurationSeconds = savedNotificationSettings.NotificationDurationSeconds;
+            currentNotificationSettings.ExpiredCheckSeconds = savedNotificationSettings.ExpiredCheckSeconds;
+
+            // Re-assign so the service recomputes its check interval.
+            _reminderNotificationService.Settings = currentNotificationSettings;
             
             OnPropertyChanged(nameof(ClipboardHistory));
             OnPropertyChanged(nameof(AppSettings));
             
             // Start clipboard monitoring (will be paused when overlay is visible)
             _clipboardHistoryService.Start();
+        }
+
+        /// <summary>
+        /// Reapplies the current notification settings (e.g. after settings changed).
+        /// </summary>
+        public void ApplyNotificationSettings()
+        {
+            _reminderNotificationService.ApplySettings();
         }
 
         /// <summary>
@@ -610,12 +633,22 @@ namespace AIA.Models
 
         private async Task LoadChatsAsync()
         {
-            var chats = await ChatSessionService.LoadChatsAsync();
-
-            ActiveChats.Clear();
-            foreach (var chat in chats)
+            try
             {
-                ActiveChats.Add(chat);
+                var chats = await ChatSessionService.LoadChatsAsync();
+
+                ActiveChats.Clear();
+                foreach (var chat in chats)
+                {
+                    ActiveChats.Add(chat);
+                }
+            }
+            catch (DataLoadException ex)
+            {
+                // Never start from an empty list when the stored file could not be read:
+                // saving would overwrite the (quarantined) history.
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                SaveFailed?.Invoke(this, $"Chat history could not be loaded. The file was preserved at '{ex.QuarantinedPath}'.");
             }
 
             // If no chats exist, create an empty one
@@ -638,6 +671,41 @@ namespace AIA.Models
         }
 
         /// <summary>
+        /// Queues a debounced chat save. Repeated edits collapse into a single write.
+        /// </summary>
+        public void QueueChatsSave()
+        {
+            CancellationToken token;
+            lock (_saveGate)
+            {
+                _chatsSaveCts?.Cancel();
+                _chatsSaveCts?.Dispose();
+                _chatsSaveCts = new CancellationTokenSource();
+                token = _chatsSaveCts.Token;
+            }
+
+            _ = DebouncedSaveAsync(token, SaveChatsAsync);
+        }
+
+        private async Task DebouncedSaveAsync(CancellationToken token, Func<Task> save)
+        {
+            try
+            {
+                await Task.Delay(400, token);
+                await save();
+            }
+            catch (OperationCanceledException)
+            {
+                // Superseded by a newer edit
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Background save failed: {ex.Message}");
+                SaveFailed?.Invoke(this, "Changes could not be saved to disk.");
+            }
+        }
+
+        /// <summary>
         /// Creates a new chat session and selects it
         /// </summary>
         public ChatSession CreateNewChatSession(string? title = null)
@@ -653,7 +721,7 @@ namespace AIA.Models
             ActiveChats.Add(chatSession);
             SelectedChatSession = chatSession;
 
-            _ = SaveChatsAsync();
+            QueueChatsSave();
 
             return chatSession;
         }
@@ -685,7 +753,7 @@ namespace AIA.Models
                 }
             }
 
-            _ = SaveChatsAsync();
+            QueueChatsSave();
         }
 
         /// <summary>
@@ -733,7 +801,7 @@ namespace AIA.Models
             IsRenamingChat = false;
             RenameChatTitle = string.Empty;
 
-            _ = SaveChatsAsync();
+            QueueChatsSave();
         }
 
         /// <summary>
@@ -754,7 +822,7 @@ namespace AIA.Models
 
             chatSession.Messages.Clear();
 
-            _ = SaveChatsAsync();
+            QueueChatsSave();
         }
 
         /// <summary>
@@ -792,7 +860,7 @@ namespace AIA.Models
                 ActiveChats.Remove(chat);
             }
 
-            _ = SaveChatsAsync();
+            QueueChatsSave();
         }
 
         /// <summary>
@@ -1030,25 +1098,13 @@ namespace AIA.Models
 
         private async Task LoadTasksAndRemindersAsync()
         {
-            var tasks = await TaskReminderService.LoadTasksAsync();
-            var reminders = await TaskReminderService.LoadRemindersAsync();
+            var loadFailed = false;
 
-            // Load task templates
-            var templates = await TaskTemplateService.LoadTemplatesAsync();
-            foreach (var template in templates)
+            try
             {
-                TaskTemplates.Add(template);
-            }
+                var tasks = await TaskReminderService.LoadTasksAsync();
+                var reminders = await TaskReminderService.LoadRemindersAsync();
 
-            if (tasks.Count == 0 && reminders.Count == 0)
-            {
-                // First run - initialize with sample data
-                InitializeSampleTasks();
-                InitializeSampleReminders();
-                await SaveTasksAndRemindersAsync();
-            }
-            else
-            {
                 foreach (var task in tasks)
                 {
                     Tasks.Add(task);
@@ -1057,9 +1113,40 @@ namespace AIA.Models
                 {
                     Reminders.Add(reminder);
                 }
-                
-                // Process recurring tasks
-                await ProcessRecurringTasksAsync();
+
+                if (Tasks.Count > 0 || Reminders.Count > 0)
+                {
+                    // Process recurring tasks
+                    await ProcessRecurringTasksAsync();
+                }
+            }
+            catch (DataLoadException ex)
+            {
+                loadFailed = true;
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                SaveFailed?.Invoke(this, $"Task data could not be loaded. The file was preserved at '{ex.QuarantinedPath}'.");
+            }
+
+            // Load task templates
+            try
+            {
+                var templates = await TaskTemplateService.LoadTemplatesAsync();
+                foreach (var template in templates)
+                {
+                    TaskTemplates.Add(template);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load task templates: {ex.Message}");
+            }
+
+            if (!loadFailed && !TaskReminderService.HasStoredData)
+            {
+                // Genuine first run - initialize with sample data
+                InitializeSampleTasks();
+                InitializeSampleReminders();
+                await SaveTasksAndRemindersAsync();
             }
 
             ApplyTaskFilter();
@@ -1070,8 +1157,24 @@ namespace AIA.Models
         /// </summary>
         public async Task SaveTasksAndRemindersAsync()
         {
-            await TaskReminderService.SaveTasksAsync(Tasks);
-            await TaskReminderService.SaveRemindersAsync(Reminders);
+            await TaskReminderService.SaveAllAsync(Tasks, Reminders);
+        }
+
+        /// <summary>
+        /// Queues a debounced task/reminder save. Repeated edits collapse into a single write.
+        /// </summary>
+        public void QueueTasksSave()
+        {
+            CancellationToken token;
+            lock (_saveGate)
+            {
+                _tasksSaveCts?.Cancel();
+                _tasksSaveCts?.Dispose();
+                _tasksSaveCts = new CancellationTokenSource();
+                token = _tasksSaveCts.Token;
+            }
+
+            _ = DebouncedSaveAsync(token, SaveTasksAndRemindersAsync);
         }
 
         /// <summary>
@@ -1196,7 +1299,7 @@ namespace AIA.Models
             IsAddingNewTask = false;
             
             ApplyTaskFilter();
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         public void AddSubtask(TaskItem parentTask, string title)
@@ -1211,7 +1314,7 @@ namespace AIA.Models
             };
             parentTask.AddSubtask(subtask);
             
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         public void DeleteTask(TaskItem task)
@@ -1236,7 +1339,7 @@ namespace AIA.Models
             }
             
             ApplyTaskFilter();
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         /// <summary>
@@ -1262,7 +1365,7 @@ namespace AIA.Models
             }
 
             ApplyTaskFilter();
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
             
             return duplicate;
         }
@@ -1281,7 +1384,7 @@ namespace AIA.Models
             }
             
             ApplyTaskFilter();
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         /// <summary>
@@ -1293,7 +1396,7 @@ namespace AIA.Models
 
             task.IsArchived = false;
             ApplyTaskFilter();
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         /// <summary>
@@ -1308,7 +1411,7 @@ namespace AIA.Models
             SelectedTask = task;
 
             ApplyTaskFilter();
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
             _ = SaveTaskTemplatesAsync(); // Save updated usage stats
 
             return task;
@@ -1367,7 +1470,7 @@ namespace AIA.Models
             if (!task.Tags.Contains(tag))
             {
                 task.Tags.Add(tag);
-                _ = SaveTasksAndRemindersAsync();
+                QueueTasksSave();
             }
         }
 
@@ -1379,7 +1482,7 @@ namespace AIA.Models
             if (task == null || string.IsNullOrWhiteSpace(tag)) return;
 
             task.Tags.Remove(tag);
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         /// <summary>
@@ -1409,7 +1512,7 @@ namespace AIA.Models
             if (!task.DependencyTaskIds.Contains(dependsOn.Id))
             {
                 task.DependencyTaskIds.Add(dependsOn.Id);
-                _ = SaveTasksAndRemindersAsync();
+                QueueTasksSave();
             }
         }
 
@@ -1421,7 +1524,7 @@ namespace AIA.Models
             if (task == null) return;
 
             task.DependencyTaskIds.Remove(dependencyId);
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         /// <summary>
@@ -1566,7 +1669,7 @@ namespace AIA.Models
             
             if (selectedTasks.Count > 0)
             {
-                _ = SaveTasksAndRemindersAsync();
+                QueueTasksSave();
             }
         }
 
@@ -1583,7 +1686,7 @@ namespace AIA.Models
             
             if (selectedTasks.Count > 0)
             {
-                _ = SaveTasksAndRemindersAsync();
+                QueueTasksSave();
             }
         }
 
@@ -1602,7 +1705,7 @@ namespace AIA.Models
             if (selectedTasks.Count > 0)
             {
                 ApplyTaskFilter();
-                _ = SaveTasksAndRemindersAsync();
+                QueueTasksSave();
             }
         }
 
@@ -1623,7 +1726,7 @@ namespace AIA.Models
             if (selectedTasks.Count > 0)
             {
                 ApplyTaskFilter();
-                _ = SaveTasksAndRemindersAsync();
+                QueueTasksSave();
             }
         }
 
@@ -1735,7 +1838,7 @@ namespace AIA.Models
             NewReminderTitle = string.Empty;
             IsAddingNewReminder = false;
             
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         public void DeleteReminder(ReminderItem reminder)
@@ -1749,7 +1852,7 @@ namespace AIA.Models
                 SelectedReminder = null;
             }
             
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         public void ToggleReminderComplete(ReminderItem reminder)
@@ -1757,7 +1860,7 @@ namespace AIA.Models
             if (reminder == null) return;
             reminder.IsCompleted = !reminder.IsCompleted;
             
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         /// <summary>
@@ -1776,7 +1879,7 @@ namespace AIA.Models
 
             reminder.RefreshTimeLeft();
             
-            _ = SaveTasksAndRemindersAsync();
+            QueueTasksSave();
         }
 
         /// <summary>

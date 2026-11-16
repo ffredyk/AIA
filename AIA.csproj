@@ -30,19 +30,8 @@
 
   <ItemGroup>
     <PackageReference Include="NHotkey.Wpf" Version="3.0.0" />
-    <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+    <PackageReference Include="PdfPig" Version="0.1.10" />
     <PackageReference Include="WPF-UI" Version="4.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="AIWrap">
-      <HintPath>..\AIWrap\bin\Debug\net10.0\AIWrap.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="AIA\Models\" />
-    <Folder Include="Converters\" />
   </ItemGroup>
 
   <!-- Reference the SDK project for plugin host functionality -->

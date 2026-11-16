@@ -21,6 +21,9 @@ namespace AIA.Views
         // Pending image attachments
         private readonly ObservableCollection<ChatImageAttachment> _pendingAttachments = new();
 
+        // Cancellation for the in-flight AI request
+        private CancellationTokenSource? _sendCts;
+
         public ChatPanelView()
         {
             InitializeComponent();
@@ -30,6 +33,29 @@ namespace AIA.Views
             
             // Subscribe to collection changes to update UI
             _pendingAttachments.CollectionChanged += PendingAttachments_CollectionChanged;
+
+            Unloaded += (s, e) =>
+            {
+                _sendCts?.Cancel();
+                _sendCts?.Dispose();
+                _sendCts = null;
+            };
+
+            DataContextChanged += (s, e) =>
+            {
+                if (e.OldValue is OverlayViewModel oldViewModel)
+                    oldViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+                if (e.NewValue is OverlayViewModel newViewModel)
+                    newViewModel.PropertyChanged += ViewModel_PropertyChanged;
+            };
+        }
+
+        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(OverlayViewModel.SelectedChatSession))
+            {
+                _sendCts?.Cancel();
+            }
         }
 
         private OverlayViewModel? ViewModel => DataContext as OverlayViewModel;
@@ -376,6 +402,15 @@ namespace AIA.Views
             if (ViewModel == null || ViewModel.SelectedChatSession == null)
                 return;
 
+            // Only one in-flight request per panel
+            if (ViewModel.IsAiProcessing)
+                return;
+
+            _sendCts?.Cancel();
+            _sendCts?.Dispose();
+            _sendCts = new CancellationTokenSource();
+            var cancellationToken = _sendCts.Token;
+
             var userMessage = MessageInput.Text?.Trim();
             var hasImages = _pendingAttachments.Count > 0;
             
@@ -477,7 +512,8 @@ namespace AIA.Views
                     effectiveUserMessage,
                     conversationHistory,
                     null,  // specificProvider
-                    aiImages))  // Pass images directly
+                    aiImages,  // Pass images directly
+                    cancellationToken))
                 {
                     ProcessStreamChunk(chunk, status, contentBuilder, assistantMessage);
                 }
@@ -499,6 +535,12 @@ namespace AIA.Views
                 {
                     await HandleAutoNamingAsync(chatSession);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                if (string.IsNullOrWhiteSpace(assistantMessage.Content))
+                    assistantMessage.Content = "[Cancelled]";
+                ViewModel.AiStatusMessage = "Cancelled";
             }
             catch (Exception ex)
             {

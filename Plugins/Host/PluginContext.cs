@@ -47,7 +47,7 @@ namespace AIA.Plugins.Host
             DataBanks = new GuardedDataBankService(_hostServices.DataBanks, this);
             DataAssets = new GuardedDataAssetService(_hostServices.DataAssets, this);
             Chats = new GuardedChatService(_hostServices.Chats, this);
-            UI = _hostServices.UI;
+            UI = new GuardedPluginUIService(_hostServices.UI, this);
             HttpClientFactory = new GuardedHttpClientFactory(this);
             
             _settingsStorage = new PluginSettingsStorage(pluginDataDirectory, pluginInfo.Id);
@@ -440,6 +440,71 @@ namespace AIA.Plugins.Host
             if (!_context.HasPermission(permission))
             {
                 throw new PluginPermissionException(_context.PluginDataDirectory, permission);
+            }
+        }
+    }
+
+    /// <summary>
+    /// UI service wrapper that enforces the UI permission.
+    /// </summary>
+    internal class GuardedPluginUIService : IPluginUIService
+    {
+        private readonly IPluginUIService _inner;
+        private readonly PluginContext _context;
+
+        public GuardedPluginUIService(IPluginUIService inner, PluginContext context)
+        {
+            _inner = inner;
+            _context = context;
+        }
+
+        public void RegisterTab(PluginTabDefinition tabDefinition)
+        {
+            RequirePermission();
+            _inner.RegisterTab(tabDefinition);
+        }
+
+        public void UnregisterTab(string tabId)
+        {
+            RequirePermission();
+            _inner.UnregisterTab(tabId);
+        }
+
+        public void RegisterToolbarButton(PluginToolbarButton button)
+        {
+            RequirePermission();
+            _inner.RegisterToolbarButton(button);
+        }
+
+        public void UnregisterToolbarButton(string buttonId)
+        {
+            RequirePermission();
+            _inner.UnregisterToolbarButton(buttonId);
+        }
+
+        public void ShowToast(string message, ToastType type = ToastType.Info)
+        {
+            RequirePermission();
+            _inner.ShowToast(message, type);
+        }
+
+        public bool? ShowDialog(string title, object content, DialogButtons buttons = DialogButtons.OkCancel)
+        {
+            RequirePermission();
+            return _inner.ShowDialog(title, content, buttons);
+        }
+
+        public void RefreshUI()
+        {
+            RequirePermission();
+            _inner.RefreshUI();
+        }
+
+        private void RequirePermission()
+        {
+            if (!_context.HasPermission(PluginPermissions.UI))
+            {
+                throw new PluginPermissionException(_context.PluginDataDirectory, PluginPermissions.UI);
             }
         }
     }

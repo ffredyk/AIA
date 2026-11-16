@@ -14,17 +14,15 @@ namespace AIA.Services
     /// </summary>
     public static class TaskReminderService
     {
-        private static readonly string DataFolder;
-        private static readonly string TasksFile;
-        private static readonly string RemindersFile;
+        private static string DataFolder => AppPaths.UserDataFolder;
+        private static string TasksFile => Path.Combine(DataFolder, "tasks.json");
+        private static string RemindersFile => Path.Combine(DataFolder, "reminders.json");
 
-        static TaskReminderService()
-        {
-            var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            DataFolder = Path.Combine(exeDirectory, "userdata");
-            TasksFile = Path.Combine(DataFolder, "tasks.json");
-            RemindersFile = Path.Combine(DataFolder, "reminders.json");
-        }
+        /// <summary>
+        /// True when task or reminder data has ever been persisted. Used to distinguish a real
+        /// first run from a failed load or a user who deleted everything.
+        /// </summary>
+        public static bool HasStoredData => File.Exists(TasksFile) || File.Exists(RemindersFile);
 
         private static void EnsureDirectoryExists()
         {
@@ -57,17 +55,18 @@ namespace AIA.Services
 
             try
             {
-                var json = await File.ReadAllTextAsync(TasksFile);
-                var taskDtos = JsonSerializer.Deserialize<List<TaskItemDto>>(json, GetJsonOptions());
-                
+                var taskDtos = await JsonFileStore.ReadAsync<List<TaskItemDto>>(TasksFile, GetJsonOptions());
+
                 if (taskDtos == null)
                     return new List<TaskItem>();
 
                 return taskDtos.Select(ConvertFromDto).ToList();
             }
-            catch
+            catch (Exception ex)
             {
-                return new List<TaskItem>();
+                // Never report "no tasks" for a file that exists but cannot be parsed: callers
+                // treat an empty list as a first run and would overwrite the user's data.
+                throw new DataLoadException(TasksFile, JsonFileStore.Quarantine(TasksFile), ex);
             }
         }
 
@@ -79,8 +78,16 @@ namespace AIA.Services
             EnsureDirectoryExists();
 
             var taskDtos = tasks.Select(ConvertToDto).ToList();
-            var json = JsonSerializer.Serialize(taskDtos, GetJsonOptions());
-            await File.WriteAllTextAsync(TasksFile, json);
+            await JsonFileStore.WriteAsync(TasksFile, taskDtos, GetJsonOptions());
+        }
+
+        /// <summary>
+        /// Persists tasks and reminders in one serialized pass.
+        /// </summary>
+        public static async Task SaveAllAsync(IEnumerable<TaskItem> tasks, IEnumerable<ReminderItem> reminders)
+        {
+            await SaveTasksAsync(tasks);
+            await SaveRemindersAsync(reminders);
         }
 
         private static TaskItemDto ConvertToDto(TaskItem task)
@@ -97,6 +104,12 @@ namespace AIA.Services
                 DueDate = task.DueDate,
                 CompletedDate = task.CompletedDate,
                 ParentTaskId = task.ParentTaskId,
+                IsArchived = task.IsArchived,
+                RecurrenceType = task.RecurrenceType,
+                RecurrenceInterval = task.RecurrenceInterval,
+                RecurrenceEndDate = task.RecurrenceEndDate,
+                Tags = task.Tags.ToList(),
+                DependencyTaskIds = task.DependencyTaskIds.ToList(),
                 Subtasks = task.Subtasks.Select(ConvertToDto).ToList()
             };
         }
@@ -114,8 +127,22 @@ namespace AIA.Services
                 CreatedDate = dto.CreatedDate,
                 DueDate = dto.DueDate,
                 CompletedDate = dto.CompletedDate,
-                ParentTaskId = dto.ParentTaskId
+                ParentTaskId = dto.ParentTaskId,
+                IsArchived = dto.IsArchived,
+                RecurrenceType = dto.RecurrenceType,
+                RecurrenceInterval = dto.RecurrenceInterval,
+                RecurrenceEndDate = dto.RecurrenceEndDate
             };
+
+            foreach (var tag in dto.Tags)
+            {
+                task.Tags.Add(tag);
+            }
+
+            foreach (var dependencyId in dto.DependencyTaskIds)
+            {
+                task.DependencyTaskIds.Add(dependencyId);
+            }
 
             foreach (var subtaskDto in dto.Subtasks)
             {
@@ -145,17 +172,16 @@ namespace AIA.Services
 
             try
             {
-                var json = await File.ReadAllTextAsync(RemindersFile);
-                var reminderDtos = JsonSerializer.Deserialize<List<ReminderItemDto>>(json, GetJsonOptions());
-                
+                var reminderDtos = await JsonFileStore.ReadAsync<List<ReminderItemDto>>(RemindersFile, GetJsonOptions());
+
                 if (reminderDtos == null)
                     return new List<ReminderItem>();
 
                 return reminderDtos.Select(ConvertFromDto).ToList();
             }
-            catch
+            catch (Exception ex)
             {
-                return new List<ReminderItem>();
+                throw new DataLoadException(RemindersFile, JsonFileStore.Quarantine(RemindersFile), ex);
             }
         }
 
@@ -167,8 +193,7 @@ namespace AIA.Services
             EnsureDirectoryExists();
 
             var reminderDtos = reminders.Select(ConvertToDto).ToList();
-            var json = JsonSerializer.Serialize(reminderDtos, GetJsonOptions());
-            await File.WriteAllTextAsync(RemindersFile, json);
+            await JsonFileStore.WriteAsync(RemindersFile, reminderDtos, GetJsonOptions());
         }
 
         private static ReminderItemDto ConvertToDto(ReminderItem reminder)
@@ -213,6 +238,12 @@ namespace AIA.Services
             public DateTime? DueDate { get; set; }
             public DateTime? CompletedDate { get; set; }
             public Guid? ParentTaskId { get; set; }
+            public bool IsArchived { get; set; }
+            public RecurrenceType RecurrenceType { get; set; }
+            public int RecurrenceInterval { get; set; } = 1;
+            public DateTime? RecurrenceEndDate { get; set; }
+            public List<string> Tags { get; set; } = new();
+            public List<Guid> DependencyTaskIds { get; set; } = new();
             public List<TaskItemDto> Subtasks { get; set; } = new();
         }
 

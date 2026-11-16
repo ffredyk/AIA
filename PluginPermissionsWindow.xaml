@@ -108,6 +108,27 @@
                     </Grid>
                 </Border>
                 
+                <!-- COM Automation Access -->
+                <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="Mail20" Foreground="#0078D4" FontSize="18" Margin="0,0,12,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{local:Localize PluginPermissions_ComAccess}" Foreground="White" FontWeight="SemiBold"/>
+                            <TextBlock Text="{local:Localize PluginPermissions_ComAccessDesc}" 
+                                       Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                            <Border Background="#33FF4444" Padding="4,2" CornerRadius="3" Margin="0,4,0,0" HorizontalAlignment="Left">
+                                <TextBlock Text="{local:Localize PluginPermissions_SensitivePermission}" Foreground="#FF6B6B" FontSize="9"/>
+                            </Border>
+                        </StackPanel>
+                        <CheckBox x:Name="ChkComAccess" Grid.Column="2"/>
+                    </Grid>
+                </Border>
+
                 <!-- Requested Permissions Info -->
                 <Border Padding="12" CornerRadius="6" Background="#33FFA500" Margin="0,16,0,0" 
                         x:Name="RequestedPermissionsPanel" Visibility="Collapsed">

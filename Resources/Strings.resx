@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -932,4 +932,35 @@
   <value>The Default provider is only used when Auto-Routing is disabled or as a final fallback.</value>
 </data>
 
+  <data name="PluginPermissions_ResetToDefaults" xml:space="preserve"><value>Reset to defaults</value></data>
+  <data name="Status_UpdateAvailable" xml:space="preserve"><value>Update available: version {0}</value></data>
+  <data name="Common_Error" xml:space="preserve"><value>Error</value></data>
+  <data name="PluginPermissions_NetworkAccess" xml:space="preserve"><value>Network access</value></data>
+  <data name="PluginPermissions_UserInterfaceDesc" xml:space="preserve"><value>Add tabs, toolbar buttons and refresh the plugin UI.</value></data>
+  <data name="Settings_CheckInterval" xml:space="preserve"><value>Reminder check interval (seconds)</value></data>
+  <data name="Tasks_InvalidTask" xml:space="preserve"><value>Invalid task</value></data>
+  <data name="PluginPermissions_FileSystemAccess" xml:space="preserve"><value>File system access</value></data>
+  <data name="PluginPermissions_FileSystemAccessDesc" xml:space="preserve"><value>Allow the plugin to read and write files.</value></data>
+  <data name="PluginPermissions_Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="PluginPermissions_NetworkAccessDesc" xml:space="preserve"><value>Allow the plugin to make HTTP requests.</value></data>
+  <data name="PluginPermissions_Title" xml:space="preserve"><value>Plugin Permissions</value></data>
+  <data name="PluginPermissions_NotificationsDesc" xml:space="preserve"><value>Show toast notifications from the plugin.</value></data>
+  <data name="PluginPermissions_SensitivePermission" xml:space="preserve"><value>Sensitive</value></data>
+  <data name="PluginPermissions_Permissions" xml:space="preserve"><value>Permissions</value></data>
+  <data name="PluginPermissions_ComAccessDesc" xml:space="preserve"><value>Allow the plugin to control desktop applications such as Microsoft Outlook.</value></data>
+  <data name="Settings_Change" xml:space="preserve"><value>Change</value></data>
+  <data name="Tasks_UnknownTask" xml:space="preserve"><value>Unknown task</value></data>
+  <data name="Status_SettingsSaveFailed" xml:space="preserve"><value>Could not save settings: {0}</value></data>
+  <data name="Status_UpdateCheckFailed" xml:space="preserve"><value>Could not check for updates. Try again later.</value></data>
+  <data name="PluginPermissions_Description" xml:space="preserve"><value>Choose what this plugin is allowed to do.</value></data>
+  <data name="Status_DataFolderRestartRequired" xml:space="preserve"><value>Data folder changed. Restart the application to apply.</value></data>
+  <data name="PluginPermissions_UserInterface" xml:space="preserve"><value>User interface access</value></data>
+  <data name="PluginPermissions_ComAccess" xml:space="preserve"><value>COM automation access</value></data>
+  <data name="Tasks_AddSubtask" xml:space="preserve"><value>Add subtask</value></data>
+  <data name="PluginPermissions_RequestedPermissions" xml:space="preserve"><value>Permissions requested by the plugin</value></data>
+  <data name="Tray_Show" xml:space="preserve"><value>Show</value></data>
+  <data name="Tray_Exit" xml:space="preserve"><value>Exit</value></data>
+  <data name="Status_HotkeySetFormat" xml:space="preserve"><value>Hotkey set to {0}. Click Save to apply.</value></data>
+  <data name="Status_HotkeyResetFormat" xml:space="preserve"><value>Hotkey reset to {0}. Click Save to apply.</value></data>
+  <data name="Status_CopyingData" xml:space="preserve"><value>Copying existing data to the new folder...</value></data>
 </root>

@@ -30,7 +30,8 @@ namespace AIA.Plugins.Teams
             PluginPermissions.ComAutomation |
             PluginPermissions.Network |
             PluginPermissions.ReadReminders |
-            PluginPermissions.WriteReminders;
+            PluginPermissions.WriteReminders |
+            PluginPermissions.UI;
 
         protected override async Task OnInitializeAsync()
         {

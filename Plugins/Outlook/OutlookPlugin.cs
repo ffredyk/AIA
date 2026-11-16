@@ -29,7 +29,8 @@ namespace AIA.Plugins.Outlook
         public override PluginPermissions RequiredPermissions =>
             PluginPermissions.ComAutomation |
             PluginPermissions.ReadReminders |
-            PluginPermissions.WriteReminders;
+            PluginPermissions.WriteReminders |
+            PluginPermissions.UI;
 
         protected override async Task OnInitializeAsync()
         {

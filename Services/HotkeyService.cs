@@ -13,7 +13,7 @@ namespace AIA.Services
     {
         private const string OverlayHotkeyName = "AIA.ToggleOverlay";
         
-        private ModifierKeys _currentModifiers = ModifierKeys.Windows;
+        private ModifierKeys _currentModifiers = ModifierKeys.Alt;
         private Key _currentKey = Key.Q;
         private bool _isRegistered;
 

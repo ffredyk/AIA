@@ -22,7 +22,7 @@ namespace AIA.Services
         public static readonly (string Code, string DisplayName)[] SupportedLanguages =
         [
             ("en", "English"),
-            ("cs-CZ", "Èeština"),
+            ("cs-CZ", "ÄŒeÅ¡tina"),
             ("de-DE", "Deutsch")
         ];
 

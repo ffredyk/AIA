@@ -17,15 +17,13 @@ namespace AIA.Services.Automation
     /// </summary>
     public class AutomationService : IDisposable
     {
-        private static readonly string AutomationsFolder;
-        private static readonly string SettingsFile;
-        private static readonly string HistoryFolder;
-
         private readonly TriggerMonitorService _triggerMonitor;
         private readonly AgentExecutionService _agentExecutor;
         private readonly ActionExecutorService _actionExecutor;
         private readonly object _executionLock = new();
         private readonly SemaphoreSlim _concurrencySemaphore;
+        private readonly Dictionary<Guid, List<DateTime>> _executionTimes = new();
+        private readonly Dictionary<Guid, int> _pendingExecutions = new();
         private bool _isDisposed;
 
         public ObservableCollection<AutomationTask> Automations { get; } = new();
@@ -48,13 +46,14 @@ namespace AIA.Services.Automation
         /// </summary>
         public event EventHandler<ConfirmationRequestEventArgs>? ConfirmationRequired;
 
-        static AutomationService()
-        {
-            var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            AutomationsFolder = Path.Combine(exeDirectory, "automations");
-            SettingsFile = Path.Combine(AutomationsFolder, "settings.json");
-            HistoryFolder = Path.Combine(AutomationsFolder, "history");
-        }
+        /// <summary>
+        /// Raised when a trigger could not be registered (e.g. hotkey collision).
+        /// </summary>
+        public event EventHandler<string>? TriggerRegistrationFailed;
+
+        private static string AutomationsFolder => AppPaths.AutomationsFolder;
+        private static string SettingsFile => Path.Combine(AutomationsFolder, "settings.json");
+        private static string HistoryFolder => AppPaths.AutomationHistoryFolder;
 
         public AutomationService(Func<OverlayViewModel> getViewModel)
         {
@@ -64,6 +63,7 @@ namespace AIA.Services.Automation
             _concurrencySemaphore = new SemaphoreSlim(Settings.MaxConcurrentAutomations);
 
             _triggerMonitor.TriggerFired += OnTriggerFired;
+            _triggerMonitor.TriggerRegistrationFailed += (s, message) => TriggerRegistrationFailed?.Invoke(this, message);
         }
 
         #region Initialization
@@ -269,21 +269,38 @@ namespace AIA.Services.Automation
         /// </summary>
         public async Task<AutomationExecution?> ExecuteAutomationAsync(AutomationTask automation, AutomationContext context)
         {
-            // Check if we can execute
-            if (!CanExecute(automation))
+            // Reserve a slot atomically so simultaneous triggers cannot exceed the limits.
+            lock (_executionLock)
             {
-                return null;
+                if (!CanExecuteLocked(automation))
+                {
+                    return null;
+                }
+
+                _pendingExecutions[automation.Id] = _pendingExecutions.TryGetValue(automation.Id, out var pending) ? pending + 1 : 1;
+
+                if (!_executionTimes.TryGetValue(automation.Id, out var times))
+                {
+                    times = new List<DateTime>();
+                    _executionTimes[automation.Id] = times;
+                }
+                times.Add(DateTime.Now);
             }
 
-            // Wait for concurrency slot
-            if (!await _concurrencySemaphore.WaitAsync(TimeSpan.FromSeconds(30)))
-            {
-                return null;
-            }
-
+            var semaphoreAcquired = false;
             AutomationExecution? execution = null;
+
             try
             {
+                // Wait for a global concurrency slot
+                if (!await _concurrencySemaphore.WaitAsync(TimeSpan.FromSeconds(30)))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Automation '{automation.Name}' skipped: concurrency limit reached.");
+                    return null;
+                }
+
+                semaphoreAcquired = true;
+
                 execution = new AutomationExecution
                 {
                     AutomationId = automation.Id,
@@ -302,16 +319,13 @@ namespace AIA.Services.Automation
 
                 execution.AddTrace(TraceLevel.Info, "Automation started", $"Trigger: {context.Trigger?.Name}");
 
-                // Execute the agent
                 var result = await _agentExecutor.ExecuteAsync(automation, context, execution);
 
-                // Execute actions if agent succeeded
                 if (result.IsSuccess && automation.Actions.Any(a => a.IsEnabled))
                 {
                     await ExecuteActionsAsync(automation, context, execution, result.Result);
                 }
 
-                // Complete execution
                 if (result.IsSuccess)
                 {
                     execution.Complete(result.Result ?? "Completed");
@@ -325,14 +339,12 @@ namespace AIA.Services.Automation
             }
             catch (Exception ex)
             {
-                if (execution == null)
+                execution ??= new AutomationExecution
                 {
-                    execution = new AutomationExecution
-                    {
-                        AutomationId = automation.Id,
-                        AutomationName = automation.Name
-                    };
-                }
+                    AutomationId = automation.Id,
+                    AutomationName = automation.Name
+                };
+
                 execution.Fail(ex.Message);
                 automation.RecordFailure(ex.Message);
             }
@@ -346,26 +358,45 @@ namespace AIA.Services.Automation
                     }
                 }
 
-                if (!automation.IsOneTime)
+                if (!automation.IsOneTime && automation.Status == AutomationStatus.Running)
                 {
                     automation.Status = AutomationStatus.Active;
                 }
 
-                _concurrencySemaphore.Release();
+                if (semaphoreAcquired)
+                {
+                    _concurrencySemaphore.Release();
+                }
+
+                lock (_executionLock)
+                {
+                    if (_pendingExecutions.TryGetValue(automation.Id, out var remaining))
+                    {
+                        if (remaining <= 1)
+                            _pendingExecutions.Remove(automation.Id);
+                        else
+                            _pendingExecutions[automation.Id] = remaining - 1;
+                    }
+                }
             }
 
-            // Add to history (execution is guaranteed to be non-null here)
             if (execution != null)
             {
                 AddToHistory(execution);
                 ExecutionCompleted?.Invoke(this, execution);
             }
 
-            await SaveAutomationAsync(automation);
+            try
+            {
+                await SaveAutomationAsync(automation);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to persist automation '{automation.Name}': {ex.Message}");
+            }
 
             return execution;
         }
-
         /// <summary>
         /// Cancels a running execution
         /// </summary>
@@ -403,7 +434,11 @@ namespace AIA.Services.Automation
             }
         }
 
-        private bool CanExecute(AutomationTask automation)
+        /// <summary>
+        /// Checks the global enable flag, per-automation concurrency and rate limits.
+        /// Callers must hold <see cref="_executionLock"/>.
+        /// </summary>
+        private bool CanExecuteLocked(AutomationTask automation)
         {
             // Check global enable
             if (!Settings.IsEnabled) return false;
@@ -412,13 +447,32 @@ namespace AIA.Services.Automation
             if (automation.Status != AutomationStatus.Active && automation.Status != AutomationStatus.Paused)
                 return false;
 
-            // Check concurrent execution limit
+            // Check concurrent execution limit (running + reserved)
             var runningCount = RunningExecutions.Count(e => e.AutomationId == automation.Id);
+            if (_pendingExecutions.TryGetValue(automation.Id, out var reserved))
+                runningCount += reserved;
+
             if (runningCount >= automation.Limits.MaxConcurrentExecutions)
                 return false;
 
-            // Check rate limits (simplified)
-            // TODO: Implement proper rate limiting with time windows
+            // Check rate limits over sliding windows
+            var now = DateTime.Now;
+            if (_executionTimes.TryGetValue(automation.Id, out var times))
+            {
+                times.RemoveAll(t => now - t > TimeSpan.FromDays(1));
+
+                if (automation.Limits.MaxExecutionsPerHour > 0 &&
+                    times.Count(t => now - t < TimeSpan.FromHours(1)) >= automation.Limits.MaxExecutionsPerHour)
+                {
+                    return false;
+                }
+
+                if (automation.Limits.MaxExecutionsPerDay > 0 &&
+                    times.Count >= automation.Limits.MaxExecutionsPerDay)
+                {
+                    return false;
+                }
+            }
 
             return true;
         }
@@ -433,12 +487,18 @@ namespace AIA.Services.Automation
                 // Check confirmation
                 if (action.RequireConfirmation)
                 {
+                    if (ConfirmationRequired == null)
+                    {
+                        execution.AddTrace(TraceLevel.Warning, $"Action '{action.Name}' skipped - no confirmation handler is available");
+                        continue;
+                    }
+
                     var args = new ConfirmationRequestEventArgs(automation, action, context);
                     ConfirmationRequired?.Invoke(this, args);
 
                     if (!await args.WaitForConfirmationAsync())
                     {
-                        execution.AddTrace(TraceLevel.Warning, $"Action '{action.Name}' skipped - user declined");
+                        execution.AddTrace(TraceLevel.Warning, $"Action '{action.Name}' skipped - user declined or confirmation timed out");
                         continue;
                     }
                 }
@@ -580,7 +640,19 @@ namespace AIA.Services.Automation
             }
 
             // Save to disk
-            _ = SaveExecutionHistoryAsync(execution);
+            _ = SaveExecutionHistorySafeAsync(execution);
+        }
+
+        private async Task SaveExecutionHistorySafeAsync(AutomationExecution execution)
+        {
+            try
+            {
+                await SaveExecutionHistoryAsync(execution);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to save automation history: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -670,11 +742,13 @@ namespace AIA.Services.Automation
             {
                 try
                 {
-                    var json = await File.ReadAllTextAsync(SettingsFile);
-                    Settings = JsonSerializer.Deserialize<AutomationSettings>(json) ?? new AutomationSettings();
+                    var settings = await JsonFileStore.ReadAsync<AutomationSettings>(SettingsFile, GetJsonOptions());
+                    Settings = settings ?? new AutomationSettings();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine($"Failed to load automation settings: {ex.Message}");
+                    JsonFileStore.Quarantine(SettingsFile);
                     Settings = new AutomationSettings();
                 }
             }
@@ -686,8 +760,7 @@ namespace AIA.Services.Automation
         public async Task SaveSettingsAsync()
         {
             EnsureDirectoriesExist();
-            var json = JsonSerializer.Serialize(Settings, GetJsonOptions());
-            await File.WriteAllTextAsync(SettingsFile, json);
+            await JsonFileStore.WriteAsync(SettingsFile, Settings, GetJsonOptions());
         }
 
         private async Task LoadAutomationsAsync()
@@ -699,8 +772,7 @@ namespace AIA.Services.Automation
             {
                 try
                 {
-                    var json = await File.ReadAllTextAsync(file);
-                    var automation = JsonSerializer.Deserialize<AutomationTask>(json, GetJsonOptions());
+                    var automation = await JsonFileStore.ReadAsync<AutomationTask>(file, GetJsonOptions());
                     if (automation != null)
                     {
                         // Reset running status on load
@@ -711,16 +783,18 @@ namespace AIA.Services.Automation
                         Automations.Add(automation);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to load automation '{file}': {ex.Message}");
+                    JsonFileStore.Quarantine(file);
+                }
             }
         }
 
         private async Task SaveAutomationAsync(AutomationTask automation)
         {
             EnsureDirectoriesExist();
-            var filePath = GetAutomationFilePath(automation.Id);
-            var json = JsonSerializer.Serialize(automation, GetJsonOptions());
-            await File.WriteAllTextAsync(filePath, json);
+            await JsonFileStore.WriteAsync(GetAutomationFilePath(automation.Id), automation, GetJsonOptions());
         }
 
         private async Task LoadHistoryAsync()
@@ -759,8 +833,7 @@ namespace AIA.Services.Automation
             EnsureDirectoriesExist();
             var fileName = $"{execution.StartedAt:yyyyMMdd_HHmmss}_{execution.Id:N}.json";
             var filePath = Path.Combine(HistoryFolder, fileName);
-            var json = JsonSerializer.Serialize(execution, GetJsonOptions());
-            await File.WriteAllTextAsync(filePath, json);
+            await JsonFileStore.WriteAsync(filePath, execution, GetJsonOptions());
         }
 
         private string GetAutomationFilePath(Guid automationId)
@@ -830,9 +903,19 @@ namespace AIA.Services.Automation
             _tcs.TrySetResult(false);
         }
 
-        public Task<bool> WaitForConfirmationAsync()
+        public async Task<bool> WaitForConfirmationAsync(TimeSpan? timeout = null)
         {
-            return _tcs.Task;
+            // Never block an automation forever if nobody answers the prompt.
+            var effectiveTimeout = timeout ?? TimeSpan.FromSeconds(60);
+            var completed = await Task.WhenAny(_tcs.Task, Task.Delay(effectiveTimeout));
+
+            if (completed != _tcs.Task)
+            {
+                _tcs.TrySetResult(false);
+                return false;
+            }
+
+            return await _tcs.Task;
         }
     }
 

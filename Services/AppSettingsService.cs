@@ -14,22 +14,13 @@ namespace AIA.Services
     /// </summary>
     public class AppSettingsService
     {
-        private static readonly string SettingsFolder;
-        private static readonly string AppSettingsFile;
-        private static readonly string PluginSettingsFile;
-        private static readonly string PluginInstanceSettingsFile;
+        private static string SettingsFolder => AppPaths.SettingsFolder;
+        private static string AppSettingsFile => Path.Combine(SettingsFolder, "app-settings.json");
+        private static string PluginSettingsFile => Path.Combine(SettingsFolder, "plugin-settings.json");
+        private static string PluginInstanceSettingsFile => Path.Combine(SettingsFolder, "plugin-instance-settings.json");
 
         private const string RegistryRunKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
         private const string AppName = "AIA";
-
-        static AppSettingsService()
-        {
-            var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            SettingsFolder = Path.Combine(exeDirectory, "settings");
-            AppSettingsFile = Path.Combine(SettingsFolder, "app-settings.json");
-            PluginSettingsFile = Path.Combine(SettingsFolder, "plugin-settings.json");
-            PluginInstanceSettingsFile = Path.Combine(SettingsFolder, "plugin-instance-settings.json");
-        }
 
         private static void EnsureDirectoryExists()
         {
@@ -53,12 +44,14 @@ namespace AIA.Services
 
             try
             {
-                var json = await File.ReadAllTextAsync(AppSettingsFile);
-                var settings = JsonSerializer.Deserialize<AppSettings>(json);
+                var settings = await JsonFileStore.ReadAsync<AppSettings>(AppSettingsFile, GetJsonOptions());
                 return settings ?? new AppSettings();
             }
-            catch
+            catch (Exception ex)
             {
+                // Preserve the unreadable file instead of silently dropping user settings.
+                var quarantined = JsonFileStore.Quarantine(AppSettingsFile);
+                System.Diagnostics.Debug.WriteLine($"Failed to load app settings ({ex.Message}); preserved at '{quarantined}'.");
                 return new AppSettings();
             }
         }
@@ -66,10 +59,12 @@ namespace AIA.Services
         public static async Task SaveAppSettingsAsync(AppSettings settings)
         {
             EnsureDirectoryExists();
+            await JsonFileStore.WriteAsync(AppSettingsFile, settings, GetJsonOptions());
+        }
 
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(settings, options);
-            await File.WriteAllTextAsync(AppSettingsFile, json);
+        private static JsonSerializerOptions GetJsonOptions()
+        {
+            return new JsonSerializerOptions { WriteIndented = true };
         }
 
         #endregion
@@ -87,12 +82,12 @@ namespace AIA.Services
 
             try
             {
-                var json = await File.ReadAllTextAsync(PluginSettingsFile);
-                var settings = JsonSerializer.Deserialize<PluginSettings>(json);
+                var settings = await JsonFileStore.ReadAsync<PluginSettings>(PluginSettingsFile, GetJsonOptions());
                 return settings ?? new PluginSettings();
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Failed to load plugin settings: {ex.Message}");
                 return new PluginSettings();
             }
         }
@@ -100,10 +95,7 @@ namespace AIA.Services
         public static async Task SavePluginSettingsAsync(PluginSettings settings)
         {
             EnsureDirectoryExists();
-
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(settings, options);
-            await File.WriteAllTextAsync(PluginSettingsFile, json);
+            await JsonFileStore.WriteAsync(PluginSettingsFile, settings, GetJsonOptions());
         }
 
         public static async Task<List<PluginInstanceSettings>> LoadPluginInstanceSettingsAsync()
@@ -117,12 +109,12 @@ namespace AIA.Services
 
             try
             {
-                var json = await File.ReadAllTextAsync(PluginInstanceSettingsFile);
-                var settings = JsonSerializer.Deserialize<List<PluginInstanceSettings>>(json);
+                var settings = await JsonFileStore.ReadAsync<List<PluginInstanceSettings>>(PluginInstanceSettingsFile, GetJsonOptions());
                 return settings ?? new List<PluginInstanceSettings>();
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Failed to load plugin instance settings: {ex.Message}");
                 return new List<PluginInstanceSettings>();
             }
         }
@@ -130,10 +122,7 @@ namespace AIA.Services
         public static async Task SavePluginInstanceSettingsAsync(List<PluginInstanceSettings> settings)
         {
             EnsureDirectoryExists();
-
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(settings, options);
-            await File.WriteAllTextAsync(PluginInstanceSettingsFile, json);
+            await JsonFileStore.WriteAsync(PluginInstanceSettingsFile, settings, GetJsonOptions());
         }
 
         #endregion
@@ -214,62 +203,87 @@ namespace AIA.Services
 
         public static string GetBackupFolder()
         {
-            var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            return Path.Combine(exeDirectory, "backups");
+            return AppPaths.BackupsFolder;
         }
 
-        public static async Task<bool> CreateBackupAsync()
+        /// <summary>
+        /// Creates a backup of all user data folders under the resolved data root.
+        /// </summary>
+        public static Task<bool> CreateBackupAsync()
+        {
+            return Task.Run(CreateBackupCore);
+        }
+
+        private static bool CreateBackupCore()
         {
             try
             {
                 var backupFolder = GetBackupFolder();
-                if (!Directory.Exists(backupFolder))
-                    Directory.CreateDirectory(backupFolder);
+                Directory.CreateDirectory(backupFolder);
 
                 var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
                 var backupPath = Path.Combine(backupFolder, $"backup_{timestamp}");
                 Directory.CreateDirectory(backupPath);
 
-                var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
-                // Copy data files
-                var dataBanksFolder = Path.Combine(exeDirectory, "databanks");
-                if (Directory.Exists(dataBanksFolder))
+                var sources = new (string Source, string Name)[]
                 {
-                    CopyDirectory(dataBanksFolder, Path.Combine(backupPath, "databanks"));
+                    (AppPaths.UserDataFolder, "userdata"),
+                    (AppPaths.DataBanksFolder, "databanks"),
+                    (AppPaths.AutomationsFolder, "automations"),
+                    (AppPaths.AiConfigFolder, "ai-config"),
+                    (AppPaths.SettingsFolder, "settings")
+                };
+
+                foreach (var (source, name) in sources)
+                {
+                    if (Directory.Exists(source))
+                    {
+                        CopyDirectory(source, Path.Combine(backupPath, name));
+                    }
                 }
 
-                // Copy tasks and reminders
-                var tasksFile = Path.Combine(exeDirectory, "tasks.json");
-                if (File.Exists(tasksFile))
-                {
-                    File.Copy(tasksFile, Path.Combine(backupPath, "tasks.json"));
-                }
-
-                var remindersFile = Path.Combine(exeDirectory, "reminders.json");
-                if (File.Exists(remindersFile))
-                {
-                    File.Copy(remindersFile, Path.Combine(backupPath, "reminders.json"));
-                }
-
-                // Copy chat sessions
-                var chatsFolder = Path.Combine(exeDirectory, "chats");
-                if (Directory.Exists(chatsFolder))
-                {
-                    CopyDirectory(chatsFolder, Path.Combine(backupPath, "chats"));
-                }
-
-                // Copy settings
-                if (Directory.Exists(SettingsFolder))
-                {
-                    CopyDirectory(SettingsFolder, Path.Combine(backupPath, "settings"));
-                }
+                var manifest = $"AIA backup{Environment.NewLine}Created: {DateTime.Now:O}{Environment.NewLine}Version: {GetAppVersion()}{Environment.NewLine}Source: {AppPaths.DataRoot}{Environment.NewLine}";
+                File.WriteAllText(Path.Combine(backupPath, "backup-info.txt"), manifest);
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Backup failed: {ex.Message}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Creates a scheduled backup when the configured interval has elapsed.
+        /// </summary>
+        public static async Task RunScheduledBackupAsync(AppSettings settings)
+        {
+            if (settings == null || !settings.EnableAutoBackup)
+                return;
+
+            try
+            {
+                var backupFolder = GetBackupFolder();
+                Directory.CreateDirectory(backupFolder);
+
+                var interval = TimeSpan.FromHours(Math.Max(1, settings.AutoBackupIntervalHours));
+                var newest = Directory.GetDirectories(backupFolder, "backup_*")
+                    .Select(Directory.GetCreationTimeUtc)
+                    .DefaultIfEmpty(DateTime.MinValue)
+                    .Max();
+
+                if (DateTime.UtcNow - newest < interval)
+                    return;
+
+                if (await CreateBackupAsync())
+                {
+                    await CleanupOldBackupsAsync(Math.Max(1, settings.MaxBackupCount));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Scheduled backup failed: {ex.Message}");
             }
         }
 
@@ -339,12 +353,12 @@ namespace AIA.Services
 
         public static string GetPluginsDirectory()
         {
-            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+            return AppPaths.PluginsDirectory;
         }
 
         public static string GetDataDirectory()
         {
-            return AppDomain.CurrentDomain.BaseDirectory;
+            return AppPaths.DataRoot;
         }
 
         #endregion

@@ -1,4 +1,4 @@
-﻿# AIA - AI-Powered Personal Productivity Assistant
+# AIA - AI-Powered Personal Productivity Assistant
 
 <p align="center">
   <img src="Icons/AIA_t.png" alt="AIA Logo" width="128" height="128" />
@@ -197,7 +197,7 @@ The AI assistant can perform actions on your behalf:
 - **System Tray Integration**: Runs in background with tray icon
 - **Dark Theme**: Modern dark theme using WPF-UI Fluent Design
 - **Fluent Design**: Windows 11 Fluent Design System aesthetics
-- **Global Hotkey**: Customizable keyboard shortcut (default: Win+Q)
+- **Global Hotkey**: Customizable keyboard shortcut (default: `Alt+Q`; registration failures are reported in the tray)
 - **Responsive Layout**: Adaptive layout for different screen sizes
 - **Toast Notifications**: Non-intrusive toast messages for feedback
 - **Tab Navigation**: Organized tabs for different features
@@ -267,12 +267,12 @@ dotnet run --project AIA.csproj
 
 ### Configuration
 
-On first run, AIA creates the following directory structure:
+On first run, AIA creates its data directory under `%LOCALAPPDATA%\AIA` (older builds stored data next to the executable; that data is migrated automatically on first launch):
 
 ```
-[App Directory]/
+%LOCALAPPDATA%\AIA\
 ├── ai-config/              # AI provider configurations
-│   ├── providers.json      # API keys and provider settings
+│   ├── providers.json      # Provider settings (API keys DPAPI-encrypted)
 │   └── settings.json       # AI behavior settings
 ├── databanks/              # Data bank storage
 │   ├── files/              # Imported files
@@ -282,16 +282,17 @@ On first run, AIA creates the following directory structure:
 │   ├── settings.json       # Automation global settings
 │   ├── automation_*.json   # Individual automations
 │   └── history/            # Execution history
+├── settings/               # Application settings and templates
 ├── userdata/               # User data
 │   ├── tasks.json          # Task data
 │   ├── reminders.json      # Reminder data
-│   └── chats.json          # Chat history
-├── backups/                # Application backups (optional)
-└── Plugins/                # Plugin assemblies
-    ├── Outlook/
-    ├── Teams/
-    └── SDK/
+│   ├── chats.json          # Chat history
+│   └── chat-images/        # Persisted chat image attachments
+├── backups/                # Application backups
+└── Plugins/                # Plugin configuration and per-plugin data
 ```
+
+Plugin assemblies are still loaded from `<install dir>\Plugins`; their configuration lives under `%LOCALAPPDATA%\AIA\Plugins`. A custom data location can be set in **Settings → Data** (requires a restart).
 
 ---
 
@@ -307,7 +308,7 @@ On first run, AIA creates the following directory structure:
 
 | Shortcut | Action |
 |----------|--------|
-| `Alt+Q` | Toggle overlay (customizable) |
+| `Alt+Q` | Toggle overlay (customizable, default) |
 | `Escape` | Close overlay |
 | `Ctrl+N` | New task (when in Tasks tab) |
 | `Ctrl+R` | New reminder (when in Reminders tab) |
@@ -573,6 +574,9 @@ Plugins must declare required permissions:
 | `FileSystem` | File system access |
 | `ComAutomation` | COM automation (Office) |
 | `PluginServices` | Inter-plugin communication |
+| `UI` | Register tabs/toolbar buttons, show toasts and dialogs |
+
+Data permissions requested by a plugin are granted automatically. Capability permissions (`Network`, `FileSystem`, `ComAutomation`, `UI`) must be approved by the user in **Settings → Plugins → Permissions**; newly discovered plugins start with those capabilities denied.
 
 ### Built-in Plugins
 
@@ -718,9 +722,13 @@ AIA/
 │       ├── AutomationExecution.cs      # Execution tracking
 │       └── AutomationEnums.cs          # Automation enumerations
 ├── Services/
+│   ├── AppPaths.cs                     # Data root resolution + legacy migration
+│   ├── JsonFileStore.cs                # Serialized, atomic JSON persistence
+│   ├── SecretProtector.cs              # Windows DPAPI secret protection
+│   ├── UpdateCheckService.cs           # GitHub release check (report only)
 │   ├── AppSettingsService.cs           # Settings management
 │   ├── ChatSessionService.cs           # Chat persistence
-│   ├── DataBankService.cs              # Data bank operations
+│   ├── DataBankService.cs              # Data bank operations (incl. PDF text)
 │   ├── ScreenCaptureService.cs         # Screenshot functionality
 │   ├── TaskReminderService.cs          # Task/reminder persistence
 │   ├── NotificationService.cs          # Central notification service
@@ -743,12 +751,18 @@ AIA/
 │   ├── DataBanksTabView.xaml           # Data banks tab
 │   ├── DataAssetsView.xaml             # Screen captures
 │   └── ToolbarView.xaml                # Toolbar
-├── Dialogs/
-│   ├── SettingsWindow.xaml             # Settings dialog
-│   ├── OrchestrationWindow.xaml        # AI provider management
-│   ├── AutomationWindow.xaml           # Automation management
-│   ├── ReminderNotificationWindow.xaml # Reminder notification
-│   └── TaskTemplateDialog.xaml         # Task templates
+├── SettingsWindow.xaml                 # Settings window (repo root)
+├── OrchestrationWindow.xaml            # AI provider management (repo root)
+├── AutomationWindow.xaml               # Automation management (repo root)
+├── ReminderNotificationWindow.xaml     # Reminder notification popup (repo root)
+├── PluginPermissionsWindow.xaml        # Plugin permission editor (repo root)
+├── Dialogs/                            # Task/template/filter dialogs
+│   ├── TaskTemplateDialog.xaml
+│   ├── TemplateManagerDialog.xaml
+│   ├── TaskFilterDialog.xaml
+│   ├── TaskImportExportDialog.xaml
+│   ├── RecurrenceConfigDialog.xaml
+│   └── SaveAsTemplateDialog.xaml
 ├── Plugins/
 │   ├── SDK/                            # Plugin SDK project
 │   │   ├── IPlugin.cs
@@ -765,8 +779,9 @@ AIA/
 ├── Resources/
 │   ├── SharedStyles.xaml               # Common styles
 │   ├── PluginTemplates.xaml            # Plugin UI templates
-│   └── Localization/
-│       └── en-US.json                  # English strings
+│   ├── Strings.resx                    # English strings
+│   ├── Strings.cs-cz.resx              # Czech strings
+│   └── Strings.de-de.resx              # German strings
 └── Icons/                              # Application icons
 ```
 
@@ -818,21 +833,24 @@ dotnet build AIA.sln
 All data is stored locally in the application directory:
 
 - **Tasks & Reminders**: `userdata/tasks.json`, `userdata/reminders.json`
-- **Chats**: `userdata/chats.json` - JSON array of chat sessions
+- **Chats**: `userdata/chats.json` (messages incl. image references) + `userdata/chat-images/*.png`
 - **Data Banks**: `databanks/metadata.json` + files in `databanks/files/`
 - **Screenshots**: `screenshots/*.png`
-- **Settings**: `app-settings.json`
-- **AI Config**: `ai-config/providers.json`, `ai-config/settings.json`
+- **Settings**: `settings/app-settings.json`
+- **AI Config**: `ai-config/providers.json` (API keys DPAPI-encrypted), `ai-config/settings.json`
 - **Automations**: `automations/automation_*.json`, `automations/settings.json`
 - **Automation History**: `automations/history/*.json`
-- **Plugin Settings**: `plugin-settings.json`
+- **Plugin Settings**: `settings/plugin-settings.json`, `settings/plugin-instance-settings.json`, `Plugins/plugins.config.json`
+
+All paths are relative to the data root (`%LOCALAPPDATA%\AIA` by default). Writes are serialized and atomic; an unreadable data file is renamed to `*.corrupt-<timestamp>` instead of being overwritten.
 
 ### Backup & Restore
 
-- **Auto-Save**: All data auto-saves on change
-- **Manual Backup**: Export individual items or full backup
+- **Auto-Save**: All data saves on change (debounced, atomic)
+- **Manual Backup**: **Settings → Data → Backup now** copies `userdata` (tasks, reminders, chats, images), `databanks`, `automations`, `ai-config` and `settings`
+- **Auto-Backup**: Optional scheduled backup with configurable interval and retention count
+- **Backup Location**: `backups/backup_<timestamp>/` under the data root
 - **Import**: Import tasks, automations, or settings
-- **Backup Location**: Configure in Settings → Data
 
 ---
 
@@ -847,13 +865,13 @@ All data is stored locally in the application directory:
 | Run on Startup | Launch with Windows | Off |
 | Minimize to Tray | Close to tray | On |
 | **Overlay** | | |
-| Overlay Shortcut | Global hotkey | Win+Q |
+| Overlay Shortcut | Global hotkey | Alt+Q |
 | **Notifications** | | |
 | Enable Notifications | Show desktop notifications | On |
-| Warning Minutes | Minutes before warning | 30 |
-| Urgent Minutes | Minutes for urgent state | 5 |
+| Warning Minutes | Minutes before warning | 60 |
+| Urgent Minutes | Minutes for urgent state | 15 |
 | Notification Duration | Display time (seconds) | 10 |
-| Check Interval | How often to check (seconds) | 10 |
+| Check Interval | How often to check (seconds) | 30 |
 | Play Sound | Audio notifications | Off |
 | **AI** | | |
 | Enable Auto Routing | Auto-select provider | On |
@@ -929,12 +947,13 @@ All data is stored locally in the application directory:
 
 ## Security & Privacy
 
-- **Local-Only**: All data stored locally on your machine
+- **Local-Only**: All data stored locally on your machine under `%LOCALAPPDATA%\AIA`
 - **No Telemetry**: No data sent to AIA developers
-- **API Keys**: Stored encrypted in local configuration
-- **Plugin Sandboxing**: Plugins run with declared permissions only
-- **Automation Permissions**: Fine-grained control over what automations can do
-- **Confirmation Dialogs**: Optional confirmations for sensitive actions
+- **Secrets at Rest**: AI provider API keys are encrypted with Windows DPAPI (current user scope)
+- **Plugin Permissions**: Plugins receive only the data scopes they declare; sensitive capabilities (network, file system, COM automation, UI) require explicit approval in Settings → Plugins → Permissions
+- **AI Tool Safeguards**: Destructive AI tools (file writes/reads, deletions, clipboard changes, triggering automations) ask for confirmation; AI file access is confined to `Documents\AIA` and the app data folder; tool output is treated as untrusted input
+- **Automation Permissions**: Fine-grained control over what automations can do, with confirmations and timeouts for sensitive actions
+- **Update Check**: Report-only GitHub release lookup; nothing is downloaded or installed automatically
 
 ---
 

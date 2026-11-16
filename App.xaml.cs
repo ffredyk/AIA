@@ -40,8 +40,19 @@ namespace AIA
         {
             base.OnStartup(e);
 
+            AppPaths.Initialize(message => System.Diagnostics.Debug.WriteLine(message));
+
             // Load app settings
             _appSettings = await AppSettingsService.LoadAppSettingsAsync();
+
+            // Run a scheduled backup in the background when enabled
+            _ = AppSettingsService.RunScheduledBackupAsync(_appSettings);
+
+            // Report-only update check
+            if (_appSettings.CheckForUpdatesOnStartup)
+            {
+                _ = CheckForUpdatesInBackgroundAsync();
+            }
 
             // Initialize localization with saved language preference
             if (!string.IsNullOrEmpty(_appSettings.Language))
@@ -72,8 +83,8 @@ namespace AIA
 
             // Create context menu
             var contextMenu = new ContextMenuStrip();
-            contextMenu.Items.Add("Show", null, (s, args) => ShowMainWindow());
-            contextMenu.Items.Add("Exit", null, (s, args) => Shutdown());
+            contextMenu.Items.Add(LocalizationService.Instance.GetString("Tray_Show"), null, (s, args) => ShowMainWindow());
+            contextMenu.Items.Add(LocalizationService.Instance.GetString("Tray_Exit"), null, (s, args) => Shutdown());
             notifyIcon.ContextMenuStrip = contextMenu;
 
             // Initialize hotkey service
@@ -83,18 +94,50 @@ namespace AIA
             await InitializePluginsAsync();
         }
 
+        private async Task CheckForUpdatesInBackgroundAsync()
+        {
+            try
+            {
+                var latest = await UpdateCheckService.GetLatestVersionAsync();
+                if (latest != null && UpdateCheckService.IsNewer(latest, AppSettingsService.GetAppVersion()))
+                {
+                    notifyIcon?.ShowBalloonTip(
+                        8000,
+                        "AIA update available",
+                        $"Version {latest} is available on GitHub. Open Settings → General to learn more.",
+                        ToolTipIcon.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Startup update check failed: {ex.Message}");
+            }
+        }
+
         private void InitializeHotkeyService()
         {
             _hotkeyService = new HotkeyService();
             _hotkeyService.OverlayHotkeyPressed += OnOverlayHotkeyPressed;
 
             // Register the configured hotkey
-            var hotkeyString = _appSettings?.OverlayShortcut ?? "Win+Q";
+            var hotkeyString = _appSettings?.OverlayShortcut ?? "Alt+Q";
             var success = _hotkeyService.RegisterHotkey(hotkeyString);
-            
+
+            // Win+Q and other shell-reserved combinations cannot be registered; fall back.
+            if (!success && hotkeyString.Equals("Win+Q", StringComparison.OrdinalIgnoreCase))
+            {
+                hotkeyString = "Alt+Q";
+                success = _hotkeyService.RegisterHotkey(hotkeyString);
+            }
+
             if (!success)
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to register hotkey: {hotkeyString}");
+                notifyIcon?.ShowBalloonTip(
+                    5000,
+                    "AIA hotkey unavailable",
+                    $"The shortcut '{hotkeyString}' is already in use by another application. Open Settings → Overlay to choose another.",
+                    ToolTipIcon.Warning);
             }
             else
             {
@@ -137,9 +180,15 @@ namespace AIA
         {
             try
             {
+                var pluginSettings = await AppSettingsService.LoadPluginSettingsAsync();
+                if (!pluginSettings.EnablePlugins)
+                {
+                    System.Diagnostics.Debug.WriteLine("Plugin system disabled in settings.");
+                    return;
+                }
+
                 // Determine plugins directory
-                var appDir = AppDomain.CurrentDomain.BaseDirectory;
-                var pluginsDir = Path.Combine(appDir, "Plugins");
+                var pluginsDir = AppPaths.PluginsDirectory;
 
                 // Create host services
                 var hostServices = new PluginHostServices(() => OverlayViewModel.Singleton);
@@ -148,7 +197,7 @@ namespace AIA
                 OverlayViewModel.Singleton.SetPluginUIService(hostServices.UIService);
 
                 // Create plugin manager
-                _pluginManager = new PluginManager(pluginsDir, hostServices);
+                _pluginManager = new PluginManager(pluginsDir, hostServices, AppPaths.PluginDataFolder);
 
                 // Subscribe to plugin events
                 _pluginManager.PluginLoaded += (s, args) =>
@@ -183,23 +232,48 @@ namespace AIA
             }
         }
 
-        protected override async void OnExit(ExitEventArgs e)
+        protected override void OnExit(ExitEventArgs e)
         {
-            // Dispose hotkey service
-            _hotkeyService?.Dispose();
-
-            // Shutdown plugin system
-            if (_pluginManager != null)
+            try
             {
-                await _pluginManager.ShutdownAsync();
-                _pluginManager.Dispose();
-            }
+                _hotkeyService?.Dispose();
 
-            // Save tasks and reminders before exiting
-            await OverlayViewModel.Singleton.SaveTasksAndRemindersAsync();
-            
-            notifyIcon?.Dispose();
-            base.OnExit(e);
+                // Shut plugins down synchronously: WPF does not await async handlers.
+                if (_pluginManager != null)
+                {
+                    try
+                    {
+                        _pluginManager.ShutdownAsync().Wait(TimeSpan.FromSeconds(5));
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Plugin shutdown failed: {ex.Message}");
+                    }
+
+                    _pluginManager.Dispose();
+                }
+
+                // Flush tasks, reminders and chats; give the IO a bounded amount of time.
+                var saves = new[]
+                {
+                    OverlayViewModel.Singleton.SaveTasksAndRemindersAsync(),
+                    OverlayViewModel.Singleton.SaveChatsAsync()
+                };
+
+                if (!Task.WaitAll(saves, TimeSpan.FromSeconds(5)))
+                {
+                    System.Diagnostics.Debug.WriteLine("Timed out while saving data on exit.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to persist data on exit: {ex.Message}");
+            }
+            finally
+            {
+                notifyIcon?.Dispose();
+                base.OnExit(e);
+            }
         }
     }
 }

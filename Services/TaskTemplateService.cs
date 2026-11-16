@@ -14,13 +14,7 @@ namespace AIA.Services
     /// </summary>
     public class TaskTemplateService
     {
-        private static readonly string TemplatesFile;
-
-        static TaskTemplateService()
-        {
-            var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            TemplatesFile = Path.Combine(exeDirectory, "task-templates.json");
-        }
+        private static string TemplatesFile => Path.Combine(AppPaths.SettingsFolder, "task-templates.json");
 
         /// <summary>
         /// Loads all task templates from disk
@@ -50,8 +44,7 @@ namespace AIA.Services
         public static async Task SaveTemplatesAsync(List<TaskTemplate> templates)
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(templates, options);
-            await File.WriteAllTextAsync(TemplatesFile, json);
+            await JsonFileStore.WriteAsync(TemplatesFile, templates, options);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿================================================================================
+================================================================================
                     AIA - AI-Powered Personal Productivity Assistant
                                   Installation Guide
 ================================================================================
@@ -28,19 +28,22 @@ AIA will install the following components:
   1. AIA Application
      - Main productivity assistant application
      - System tray integration
-     - Global hotkey support (default: Win+Q)
+     - Global hotkey support (default: Alt+Q)
 
   2. Plugin System
      - Outlook Integration Plugin (optional)
      - Teams Integration Plugin (optional)
 
   3. Data Directories
-     The following folders will be created in the installation directory:
+     The following folders will be created in %LOCALAPPDATA%\AIA:
      - ai-config/      : AI provider configurations
      - databanks/      : Data bank storage
      - screenshots/    : Saved screen captures
      - backups/        : Application backups
-     - Plugins/        : Plugin assemblies
+     - settings/       : Application settings and templates
+     - userdata/       : Tasks, reminders, chats
+     - automations/    : Automation definitions and history
+     - screenshots/    : Saved screen captures
 
 --------------------------------------------------------------------------------
                                 KEY FEATURES
@@ -86,7 +89,7 @@ After installation:
 
   1. Launch AIA from the Start Menu or Desktop shortcut
   2. The application will minimize to the system tray
-  3. Press Win+Q (or your custom hotkey) to open the overlay
+  3. Press Alt+Q (or your custom hotkey) to open the overlay
   4. Configure AI providers in Settings → Orchestration (optional)
   5. Start creating tasks, reminders, and organizing your data!
 

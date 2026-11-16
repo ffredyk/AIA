@@ -129,6 +129,7 @@ namespace AIA
             TxtWarningMinutes.Text = notificationSettings.WarningMinutes.ToString();
             TxtUrgentMinutes.Text = notificationSettings.UrgentMinutes.ToString();
             TxtNotificationDuration.Text = notificationSettings.NotificationDurationSeconds.ToString();
+            TxtCheckInterval.Text = notificationSettings.ExpiredCheckSeconds.ToString();
 
             // Data tab
             TxtDataPath.Text = AppSettingsService.GetDataDirectory();
@@ -163,7 +164,8 @@ namespace AIA
                         Author = plugin.Author,
                         IsEnabled = plugin.IsEnabled,
                         IsBuiltIn = plugin.IsBuiltIn,
-                        State = plugin.State
+                        State = plugin.State,
+                        RequiredPermissions = plugin.RequiredPermissions
                     });
                 }
             }
@@ -276,7 +278,7 @@ namespace AIA
             
             // Show success message but don't apply yet
             var hotkeyString = HotkeyService.FormatHotkey(_pendingModifiers, _pendingKey);
-            UpdateHotkeyStatus($"Hotkey set to {hotkeyString}. Click Save to apply.", true);
+            UpdateHotkeyStatus(string.Format(LocalizationService.Instance.GetString("Status_HotkeySetFormat"), hotkeyString), true);
             
             // Remove focus to exit capture mode
             HotkeyTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
@@ -320,7 +322,7 @@ namespace AIA
             UpdateHotkeyDisplay();
             
             // Show message but don't apply yet
-            UpdateHotkeyStatus($"Hotkey reset to {DefaultHotkeyString}. Click Save to apply.", true);
+            UpdateHotkeyStatus(string.Format(LocalizationService.Instance.GetString("Status_HotkeyResetFormat"), DefaultHotkeyString), true);
         }
 
         private void BtnApplyShortcut_Click(object sender, RoutedEventArgs e)
@@ -418,11 +420,21 @@ namespace AIA
             }
         }
 
-        private void BtnCheckForUpdates_Click(object sender, RoutedEventArgs e)
+        private async void BtnCheckForUpdates_Click(object sender, RoutedEventArgs e)
         {
             StatusText.Text = LocalizationService.Instance.GetString("Status_CheckingUpdates");
-            // TODO: Implement actual update check
-            StatusText.Text = LocalizationService.Instance.GetString("Status_LatestVersion");
+
+            var latest = await UpdateCheckService.GetLatestVersionAsync();
+            if (latest == null)
+            {
+                StatusText.Text = LocalizationService.Instance.GetString("Status_UpdateCheckFailed");
+                return;
+            }
+
+            var current = AppSettingsService.GetAppVersion();
+            StatusText.Text = UpdateCheckService.IsNewer(latest, current)
+                ? string.Format(LocalizationService.Instance.GetString("Status_UpdateAvailable"), latest)
+                : LocalizationService.Instance.GetString("Status_LatestVersion");
         }
 
         private void BtnRefreshPlugins_Click(object sender, RoutedEventArgs e)
@@ -438,6 +450,36 @@ namespace AIA
                 var permissionsWindow = new PluginPermissionsWindow(plugin);
                 permissionsWindow.Owner = this;
                 permissionsWindow.ShowDialog();
+            }
+        }
+
+        private async void BtnChangeDataFolder_Click(object sender, RoutedEventArgs e)
+        {
+            using var dialog = new System.Windows.Forms.FolderBrowserDialog
+            {
+                Description = LocalizationService.Instance.GetString("Settings_DataStorageFolder"),
+                UseDescriptionForTitle = true,
+                SelectedPath = AppSettingsService.GetDataDirectory()
+            };
+
+            if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                return;
+
+            StatusText.Text = LocalizationService.Instance.GetString("Status_CopyingData");
+
+            try
+            {
+                var target = dialog.SelectedPath;
+                await Task.Run(() => AppPaths.CopyDataTo(target));
+                AppPaths.SaveDataStoragePath(target);
+
+                _appSettings.DataStoragePath = target;
+                TxtDataPath.Text = target;
+                StatusText.Text = LocalizationService.Instance.GetString("Status_DataFolderRestartRequired");
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = string.Format(LocalizationService.Instance.GetString("Status_SettingsSaveFailed"), ex.Message);
             }
         }
 
@@ -516,6 +558,35 @@ namespace AIA
 
         private async void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            await SaveSettingsAsync();
+        }
+
+        private async Task SaveSettingsAsync()
+        {
+            try
+            {
+                CollectSettingsForSave();
+
+                await AppSettingsService.SaveAppSettingsAsync(_appSettings);
+                await AppSettingsService.SavePluginSettingsAsync(_pluginSettings);
+
+                ApplyLiveSettings();
+
+                StatusText.Text = LocalizationService.Instance.GetString("Status_SettingsSaved");
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = string.Format(
+                    LocalizationService.Instance.GetString("Status_SettingsSaveFailed"),
+                    ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Copies the UI state into the settings models.
+        /// </summary>
+        private void CollectSettingsForSave()
+        {
             // Apply hotkey changes first
             ApplyHotkey();
             
@@ -570,6 +641,9 @@ namespace AIA
             if (int.TryParse(TxtNotificationDuration.Text, out var duration))
                 _appSettings.NotificationSettings.NotificationDurationSeconds = duration;
 
+            if (int.TryParse(TxtCheckInterval.Text, out var checkInterval))
+                _appSettings.NotificationSettings.ExpiredCheckSeconds = Math.Max(1, checkInterval);
+
             // Also apply to the live OverlayViewModel notification settings
             var liveNotificationSettings = OverlayViewModel.Singleton.NotificationSettings;
             liveNotificationSettings.IsEnabled = _appSettings.NotificationSettings.IsEnabled;
@@ -580,18 +654,18 @@ namespace AIA
             liveNotificationSettings.WarningMinutes = _appSettings.NotificationSettings.WarningMinutes;
             liveNotificationSettings.UrgentMinutes = _appSettings.NotificationSettings.UrgentMinutes;
             liveNotificationSettings.NotificationDurationSeconds = _appSettings.NotificationSettings.NotificationDurationSeconds;
+            liveNotificationSettings.ExpiredCheckSeconds = _appSettings.NotificationSettings.ExpiredCheckSeconds;
 
-            // Save all settings
-            await AppSettingsService.SaveAppSettingsAsync(_appSettings);
-            await AppSettingsService.SavePluginSettingsAsync(_pluginSettings);
+            OverlayViewModel.Singleton.ApplyNotificationSettings();
+        }
 
+        private void ApplyLiveSettings()
+        {
             // Refresh the overlay opacity immediately if the main window is open
             if (Owner is MainWindow mainWindow)
             {
                 mainWindow.RefreshOpacityFromSettings();
             }
-
-            StatusText.Text = LocalizationService.Instance.GetString("Status_SettingsSaved");
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
@@ -685,8 +759,25 @@ namespace AIA
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            // Auto-save on close
-            BtnSave_Click(this, new RoutedEventArgs());
+            // Persist synchronously: the process may exit before an async continuation runs.
+            try
+            {
+                CollectSettingsForSave();
+
+                var saveTask = Task.WhenAll(
+                    AppSettingsService.SaveAppSettingsAsync(_appSettings),
+                    AppSettingsService.SavePluginSettingsAsync(_pluginSettings));
+
+                if (!saveTask.Wait(TimeSpan.FromSeconds(3)))
+                {
+                    System.Diagnostics.Debug.WriteLine("Timed out while saving settings on close.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to save settings on close: {ex.Message}");
+            }
+
             base.OnClosing(e);
         }
 
@@ -712,6 +803,7 @@ namespace AIA
         public string Author { get; set; } = string.Empty;
         public bool IsBuiltIn { get; set; }
         public Plugins.SDK.PluginState State { get; set; }
+        public Plugins.SDK.PluginPermissions RequiredPermissions { get; set; }
 
         public bool IsEnabled
         {

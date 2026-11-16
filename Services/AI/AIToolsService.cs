@@ -60,11 +60,50 @@ namespace AIA.Services.AI
             _tools.Remove(name);
         }
 
+        /// <summary>
+        /// Approves execution of a tool that needs confirmation. When null, such tools are
+        /// denied (fail closed).
+        /// </summary>
+        public Func<AITool, Dictionary<string, object>, bool>? ConfirmToolExecution { get; set; }
+
         public string ExecuteTool(string name, Dictionary<string, object> arguments)
         {
             if (!_tools.TryGetValue(name, out var tool))
             {
                 return JsonSerializer.Serialize(new { error = $"Tool '{name}' not found" });
+            }
+
+            if (tool.RequiresConfirmation)
+            {
+                // Automations run unattended: never block them on an interactive prompt. They
+                // must use explicit automation actions (which have their own permissions).
+                if (_currentAutomationContext != null)
+                {
+                    return JsonSerializer.Serialize(new
+                    {
+                        error = "permission_denied",
+                        message = $"'{name}' cannot run inside an automation. Configure an automation action instead."
+                    });
+                }
+
+                var approved = false;
+                try
+                {
+                    approved = ConfirmToolExecution?.Invoke(tool, arguments) ?? false;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Tool confirmation failed: {ex.Message}");
+                }
+
+                if (!approved)
+                {
+                    return JsonSerializer.Serialize(new
+                    {
+                        error = "permission_denied",
+                        message = $"The user did not approve running '{name}'. Explain the situation instead of retrying."
+                    });
+                }
             }
 
             try
@@ -227,6 +266,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "delete_task",
+                RequiresConfirmation = true,
                 Description = "Delete a task by ID or title",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -269,6 +309,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "delete_subtask",
+                RequiresConfirmation = true,
                 Description = "Delete a subtask from a parent task",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -304,6 +345,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "delete_reminder",
+                RequiresConfirmation = true,
                 Description = "Delete a reminder by ID or title",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -332,6 +374,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "delete_databank_entry",
+                RequiresConfirmation = true,
                 Description = "Delete a data bank entry by ID or title",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -551,6 +594,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "copy_to_clipboard",
+                RequiresConfirmation = true,
                 Description = "Copy text content to the system clipboard",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -612,6 +656,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "save_to_file",
+                RequiresConfirmation = true,
                 Description = "Save text content to a file",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -626,6 +671,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "read_file",
+                RequiresConfirmation = true,
                 Description = "Read text content from a file",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -649,6 +695,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "trigger_automation",
+                RequiresConfirmation = true,
                 Description = "Trigger an automation to run",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -2132,12 +2179,12 @@ namespace AIA.Services.AI
                 return JsonSerializer.Serialize(new { error = "filename is required" });
             }
 
-            var folder = TryGetArg<string>(args, "folder", out var f) ? f : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var folder = TryGetArg<string>(args, "folder", out var f) ? f : string.Empty;
             var append = TryGetArg<bool>(args, "append", out var a) && a;
 
             try
             {
-                var filePath = Path.Combine(folder, filename);
+                var filePath = ResolveAllowedPath(folder, filename);
                 var directory = Path.GetDirectoryName(filePath);
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
@@ -2155,6 +2202,35 @@ namespace AIA.Services.AI
             }
         }
 
+        /// <summary>
+        /// Confines AI file access to the user's Documents\AIA folder and the application data
+        /// root so a prompt-injected model cannot read or write arbitrary files.
+        /// </summary>
+        private static string ResolveAllowedPath(string folder, string filename)
+        {
+            var documentRoot = Path.GetFullPath(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "AIA"));
+            Directory.CreateDirectory(documentRoot);
+
+            var allowedRoots = new[] { documentRoot, Path.GetFullPath(AppPaths.DataRoot) };
+
+            var candidate = Path.GetFullPath(string.IsNullOrWhiteSpace(folder)
+                ? Path.Combine(documentRoot, filename)
+                : Path.Combine(folder, filename));
+
+            foreach (var root in allowedRoots)
+            {
+                if (candidate.Equals(root, StringComparison.OrdinalIgnoreCase) ||
+                    candidate.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                {
+                    return candidate;
+                }
+            }
+
+            throw new UnauthorizedAccessException(
+                $"Access outside '{documentRoot}' is not allowed. Use a relative filename instead.");
+        }
+
         private string ReadFileHandler(Dictionary<string, object> args)
         {
             if (!TryGetArg<string>(args, "filepath", out var filepath))
@@ -2164,7 +2240,8 @@ namespace AIA.Services.AI
 
             try
             {
-                var content = File.ReadAllText(filepath);
+                var resolved = ResolveAllowedPath(Path.GetDirectoryName(filepath) ?? string.Empty, Path.GetFileName(filepath));
+                var content = File.ReadAllText(resolved);
                 return JsonSerializer.Serialize(new { success = true, content = content });
             }
             catch (Exception ex)
@@ -2175,12 +2252,52 @@ namespace AIA.Services.AI
 
         private string ListAutomationsHandler(Dictionary<string, object> args)
         {
-            return JsonSerializer.Serialize(new { count = 0, automations = new List<object>(), message = "Automation listing not yet implemented" });
+            try
+            {
+                var automations = _getViewModel().AutomationService.Automations;
+                var items = automations.Select(a => new
+                {
+                    id = a.Id,
+                    name = a.Name,
+                    status = a.Status.ToString(),
+                    isEnabled = a.Status == AIA.Models.Automation.AutomationStatus.Active
+                }).ToList();
+
+                return JsonSerializer.Serialize(new { count = items.Count, automations = items });
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new { error = ex.Message });
+            }
         }
 
         private string TriggerAutomationHandler(Dictionary<string, object> args)
         {
-            return JsonSerializer.Serialize(new { error = "Automation triggering not yet implemented" });
+            if (!TryGetArg<string>(args, "automation", out var automationRef))
+            {
+                return JsonSerializer.Serialize(new { error = "automation (id or name) is required" });
+            }
+
+            try
+            {
+                var service = _getViewModel().AutomationService;
+                var automation = service.Automations.FirstOrDefault(a =>
+                        string.Equals(a.Name, automationRef, StringComparison.OrdinalIgnoreCase))
+                    ?? service.Automations.FirstOrDefault(a =>
+                        string.Equals(a.Id.ToString(), automationRef, StringComparison.OrdinalIgnoreCase));
+
+                if (automation == null)
+                {
+                    return JsonSerializer.Serialize(new { error = $"Automation '{automationRef}' was not found" });
+                }
+
+                _ = Task.Run(async () => await service.TriggerManuallyAsync(automation));
+                return JsonSerializer.Serialize(new { success = true, message = $"Automation '{automation.Name}' started" });
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new { error = ex.Message });
+            }
         }
 
         private string GetContextVariableHandler(Dictionary<string, object> args)

@@ -9,17 +9,9 @@ namespace AIA.Services
 {
     public class DataBankService
     {
-        private static readonly string DataBanksFolder;
-        private static readonly string MetadataFile;
-        private static readonly string FilesFolder;
-
-        static DataBankService()
-        {
-            var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            DataBanksFolder = Path.Combine(exeDirectory, "databanks");
-            MetadataFile = Path.Combine(DataBanksFolder, "metadata.json");
-            FilesFolder = Path.Combine(DataBanksFolder, "files");
-        }
+        private static string DataBanksFolder => AppPaths.DataBanksFolder;
+        private static string MetadataFile => Path.Combine(DataBanksFolder, "metadata.json");
+        private static string FilesFolder => AppPaths.DataBankFilesFolder;
 
         public static void EnsureDirectoriesExist()
         {
@@ -41,12 +33,13 @@ namespace AIA.Services
 
             try
             {
-                var json = await File.ReadAllTextAsync(MetadataFile);
-                var metadata = JsonSerializer.Deserialize<DataBankMetadata>(json);
+                var metadata = await JsonFileStore.ReadAsync<DataBankMetadata>(MetadataFile, GetJsonOptions());
                 return metadata ?? new DataBankMetadata();
             }
-            catch
+            catch (Exception ex)
             {
+                var quarantined = JsonFileStore.Quarantine(MetadataFile);
+                System.Diagnostics.Debug.WriteLine($"Failed to load data bank metadata ({ex.Message}); preserved at '{quarantined}'.");
                 return new DataBankMetadata();
             }
         }
@@ -54,10 +47,12 @@ namespace AIA.Services
         public static async Task SaveMetadataAsync(DataBankMetadata metadata)
         {
             EnsureDirectoriesExist();
+            await JsonFileStore.WriteAsync(MetadataFile, metadata, GetJsonOptions());
+        }
 
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(metadata, options);
-            await File.WriteAllTextAsync(MetadataFile, json);
+        private static JsonSerializerOptions GetJsonOptions()
+        {
+            return new JsonSerializerOptions { WriteIndented = true };
         }
 
         public static async Task<string> ImportFileAsync(string sourcePath, DataEntryType entryType)
@@ -91,11 +86,32 @@ namespace AIA.Services
             };
         }
 
-        private static Task<string> ExtractPdfTextAsync(string filePath)
+        private static async Task<string> ExtractPdfTextAsync(string filePath)
         {
-            // Basic PDF text extraction placeholder
-            // In production, you'd use a library like iTextSharp or PdfPig
-            return Task.FromResult($"[PDF Content from: {Path.GetFileName(filePath)}]");
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    using var document = UglyToad.PdfPig.PdfDocument.Open(filePath);
+                    var builder = new System.Text.StringBuilder();
+
+                    foreach (var page in document.GetPages())
+                    {
+                        builder.AppendLine(page.Text);
+                        builder.AppendLine();
+                    }
+
+                    var text = builder.ToString().Trim();
+                    return string.IsNullOrWhiteSpace(text)
+                        ? "[PDF contains no extractable text]"
+                        : text;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"PDF extraction failed for '{filePath}': {ex.Message}");
+                    return $"[PDF text extraction failed: {ex.Message}]";
+                }
+            });
         }
 
         private static string GetImageMetadata(string filePath)

@@ -46,6 +46,14 @@ namespace AIA.Services
         }
 
         /// <summary>
+        /// Reapplies the current settings (e.g. after the check interval changed).
+        /// </summary>
+        public void ApplySettings()
+        {
+            UpdateTimerInterval();
+        }
+
+        /// <summary>
         /// Starts monitoring reminders for notifications
         /// </summary>
         public void Start()

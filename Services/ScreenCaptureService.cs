@@ -94,13 +94,7 @@ namespace AIA.Services
         private IntPtr _overlayWindowHandle = IntPtr.Zero;
 
         // Directory for saving screenshots
-        private static readonly string ScreenshotsFolder;
-
-        static ScreenCaptureService()
-        {
-            var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            ScreenshotsFolder = Path.Combine(exeDirectory, "screenshots");
-        }
+        private static string ScreenshotsFolder => AppPaths.ScreenshotsFolder;
 
         /// <summary>
         /// Sets the handle of the overlay window to exclude from captures
@@ -424,7 +418,7 @@ namespace AIA.Services
             try
             {
                 // First save the image to the databanks/files folder
-                var dataBankFilesFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "databanks", "files");
+                var dataBankFilesFolder = AppPaths.DataBankFilesFolder;
                 if (!Directory.Exists(dataBankFilesFolder))
                     Directory.CreateDirectory(dataBankFilesFolder);
 
