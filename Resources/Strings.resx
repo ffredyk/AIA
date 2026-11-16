@@ -813,6 +813,23 @@
   <value>Adjust the transparency of the overlay window</value>
 </data>
 
+	<!-- Windows Integration -->
+	<data name="Settings_WindowsIntegration" xml:space="preserve"><value>Windows Integration</value></data>
+	<data name="Settings_EnableWindowsIntegration" xml:space="preserve"><value>Protect focus in games and fullscreen apps</value></data>
+	<data name="Settings_EnableWindowsIntegrationDesc" xml:space="preserve"><value>Ignore AIA or show it without activating when a game, fullscreen app, or other protected app is focused</value></data>
+	<data name="Settings_ProtectFullscreenApps" xml:space="preserve"><value>Protect fullscreen apps and games</value></data>
+	<data name="Settings_ProtectFullscreenAppsDesc" xml:space="preserve"><value>Detect fullscreen or borderless-fullscreen windows and known game windows</value></data>
+	<data name="Settings_ProtectKnownApps" xml:space="preserve"><value>Protect known sensitive apps</value></data>
+	<data name="Settings_ProtectKnownAppsDesc" xml:space="preserve"><value>Remote desktop, presentation, and meeting/screen-sharing apps</value></data>
+	<data name="Settings_ApplyToAutomationHotkeys" xml:space="preserve"><value>Apply to automation hotkeys</value></data>
+	<data name="Settings_ApplyToAutomationHotkeysDesc" xml:space="preserve"><value>Also suppress automation trigger hotkeys while a protected app is focused</value></data>
+	<data name="Settings_ProtectedHotkeyAction" xml:space="preserve"><value>Hotkey behavior while protected</value></data>
+	<data name="Settings_ProtectedHotkeyActionDesc" xml:space="preserve"><value>Choose what happens when the AIA hotkey is pressed in a protected app</value></data>
+	<data name="Settings_ProtectedHotkeyActionIgnore" xml:space="preserve"><value>Ignore hotkey (keep focus)</value></data>
+	<data name="Settings_ProtectedHotkeyActionShowWithoutFocus" xml:space="preserve"><value>Show overlay without activating</value></data>
+	<data name="Settings_CustomProtectedApps" xml:space="preserve"><value>Additional protected processes</value></data>
+	<data name="Settings_CustomProtectedAppsDesc" xml:space="preserve"><value>Comma or newline separated process names, for example: notepad, myapp.exe</value></data>
+
 	<!-- Orchestration Help Tab -->
 	<data name="Orchestration_TabHelp" xml:space="preserve">
   <value>Help</value>

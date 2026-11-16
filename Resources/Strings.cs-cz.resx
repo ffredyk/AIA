@@ -798,7 +798,24 @@
 	<data name="Settings_OverlayOpacityDescription" xml:space="preserve">
   <value>Upravte průhlednost okna překrytí</value>
 </data>
-  
+
+	<!-- Windows Integration -->
+	<data name="Settings_WindowsIntegration" xml:space="preserve"><value>Integrace s Windows</value></data>
+	<data name="Settings_EnableWindowsIntegration" xml:space="preserve"><value>Chránit fokus ve hrách a aplikacích na celou obrazovku</value></data>
+	<data name="Settings_EnableWindowsIntegrationDesc" xml:space="preserve"><value>Ignorovat AIA nebo jej zobrazit bez aktivace, když je fokus na hře, aplikaci na celou obrazovku nebo jiné chráněné aplikaci</value></data>
+	<data name="Settings_ProtectFullscreenApps" xml:space="preserve"><value>Chránit aplikace na celou obrazovku a hry</value></data>
+	<data name="Settings_ProtectFullscreenAppsDesc" xml:space="preserve"><value>Detekovat okna na celou obrazovku, okna bez rámečku na celou obrazovku a známá okna her</value></data>
+	<data name="Settings_ProtectKnownApps" xml:space="preserve"><value>Chránit známé citlivé aplikace</value></data>
+	<data name="Settings_ProtectKnownAppsDesc" xml:space="preserve"><value>Vzdálená plocha, prezentace a meetingové aplikace / aplikace pro sdílení obrazovky</value></data>
+	<data name="Settings_ApplyToAutomationHotkeys" xml:space="preserve"><value>Použít na hotkeys automatizace</value></data>
+	<data name="Settings_ApplyToAutomationHotkeysDesc" xml:space="preserve"><value>Také potlačit spouštěcí hotkeys automatizace, když je fokus na chráněné aplikaci</value></data>
+	<data name="Settings_ProtectedHotkeyAction" xml:space="preserve"><value>Chování hotkey při ochraně</value></data>
+	<data name="Settings_ProtectedHotkeyActionDesc" xml:space="preserve"><value>Zvolte, co se stane při stisknutí hotkey AIA v chráněné aplikaci</value></data>
+	<data name="Settings_ProtectedHotkeyActionIgnore" xml:space="preserve"><value>Ignorovat hotkey (zachovat fokus)</value></data>
+	<data name="Settings_ProtectedHotkeyActionShowWithoutFocus" xml:space="preserve"><value>Zobrazit překrytí bez aktivace</value></data>
+	<data name="Settings_CustomProtectedApps" xml:space="preserve"><value>Další chráněné procesy</value></data>
+	<data name="Settings_CustomProtectedAppsDesc" xml:space="preserve"><value>Procesy oddělené čárkou nebo novým řádkem, například: notepad, myapp.exe</value></data>
+
   <!-- Clipboard History -->
   <data name="DataAssets_ClipboardHistory" xml:space="preserve">
     <value>Historie schránky</value>

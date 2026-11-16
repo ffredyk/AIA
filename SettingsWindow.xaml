@@ -202,6 +202,97 @@
                             </StackPanel>
                         </Border>
                         
+                        <!-- Windows Integration Section -->
+                        <TextBlock Text="{local:Localize Settings_WindowsIntegration}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{local:Localize Settings_EnableWindowsIntegration}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_EnableWindowsIntegrationDesc}"
+                                               Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <CheckBox x:Name="ChkEnableWindowsIntegration" Grid.Column="1" VerticalAlignment="Center"
+                                          Checked="ChkEnableWindowsIntegration_Changed" Unchecked="ChkEnableWindowsIntegration_Changed"/>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel x:Name="PnlWindowsIntegrationOptions">
+                            <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Settings_ProtectFullscreenApps}" Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{local:Localize Settings_ProtectFullscreenAppsDesc}"
+                                                   Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox x:Name="ChkProtectFullscreenApps" Grid.Column="1" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Settings_ProtectKnownApps}" Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{local:Localize Settings_ProtectKnownAppsDesc}"
+                                                   Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox x:Name="ChkProtectKnownApps" Grid.Column="1" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Settings_ApplyToAutomationHotkeys}" Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{local:Localize Settings_ApplyToAutomationHotkeysDesc}"
+                                                   Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox x:Name="ChkProtectAutomationHotkeys" Grid.Column="1" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <TextBlock Text="{local:Localize Settings_ProtectedHotkeyAction}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_ProtectedHotkeyActionDesc}"
+                                               Foreground="#999999" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,8"/>
+                                    <ComboBox x:Name="CmbProtectedHotkeyAction" Width="280" HorizontalAlignment="Left"
+                                              Background="#3E3E42" Foreground="White" BorderBrush="#555555">
+                                        <ComboBoxItem Content="{local:Localize Settings_ProtectedHotkeyActionIgnore}" Tag="Ignore"/>
+                                        <ComboBoxItem Content="{local:Localize Settings_ProtectedHotkeyActionShowWithoutFocus}" Tag="ShowWithoutActivation"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <TextBlock Text="{local:Localize Settings_CustomProtectedApps}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_CustomProtectedAppsDesc}"
+                                               Foreground="#999999" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,8"/>
+                                    <TextBox x:Name="TxtCustomProtectedApps"
+                                             Background="#3E3E42" Foreground="White" BorderBrush="#555555" BorderThickness="1"
+                                             Padding="8,6" Height="60" AcceptsReturn="True" TextWrapping="Wrap"
+                                             VerticalScrollBarVisibility="Auto"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
                         <!-- Behavior Section -->
                         <TextBlock Text="{local:Localize Settings_Behavior}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
                         

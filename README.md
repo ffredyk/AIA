@@ -198,6 +198,7 @@ The AI assistant can perform actions on your behalf:
 - **Dark Theme**: Modern dark theme using WPF-UI Fluent Design
 - **Fluent Design**: Windows 11 Fluent Design System aesthetics
 - **Global Hotkey**: Customizable keyboard shortcut (default: Win+Q)
+- **Focus-Aware Hotkeys**: Detects games, fullscreen apps, presentations, remote desktop, and custom processes so AIA doesn't steal focus
 - **Responsive Layout**: Adaptive layout for different screen sizes
 - **Toast Notifications**: Non-intrusive toast messages for feedback
 - **Tab Navigation**: Organized tabs for different features
@@ -848,6 +849,14 @@ All data is stored locally in the application directory:
 | Minimize to Tray | Close to tray | On |
 | **Overlay** | | |
 | Overlay Shortcut | Global hotkey | Win+Q |
+| Overlay Opacity | Overlay background transparency | 100% |
+| **Windows Integration** | | |
+| Protect Focus | Avoid stealing focus from games and protected apps | On |
+| Protect Fullscreen Apps | Detect fullscreen/borderless windows and known game windows | On |
+| Protect Known Apps | Remote desktop, presentation, and meeting/screen-sharing apps | On |
+| Apply to Automation Hotkeys | Also suppress automation trigger hotkeys | On |
+| Hotkey Behavior | Ignore hotkey or show the overlay without activating | Ignore |
+| Additional Protected Processes | Comma/newline separated process names | Empty |
 | **Notifications** | | |
 | Enable Notifications | Show desktop notifications | On |
 | Warning Minutes | Minutes before warning | 30 |
@@ -881,6 +890,7 @@ All data is stored locally in the application directory:
 - Try running as Administrator
 - Verify the application is running (check system tray)
 - Check Settings → Overlay for hotkey configuration
+- If a game or fullscreen app is focused, AIA intentionally ignores the hotkey to protect focus. Check Settings → Windows Integration, or use the tray icon to open the overlay directly.
 
 **AI not responding**
 - Verify API key is correct in Orchestration settings
