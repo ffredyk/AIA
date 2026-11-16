@@ -250,14 +250,17 @@ namespace AIA.Services.Automation
             {
                 HotkeyManager.Current.AddOrReplace(hotkeyName, trigger.Key, trigger.Modifiers, (s, e) =>
                 {
+                    e.Handled = true;
+
                     if (_isPaused) return;
+
+                    if (WindowsIntegrationService.Current.ShouldSuppressHotkey(HotkeyPurpose.Automation))
+                        return;
 
                     if (CheckDebounce(automationId, trigger.DebounceMsec))
                     {
                         FireTrigger(automationId, trigger, null);
                     }
-
-                    e.Handled = true;
                 });
             }
             catch (HotkeyAlreadyRegisteredException)

@@ -862,6 +862,23 @@
   <value>Passen Sie die Transparenz des Overlay-Fensters an</value>
 </data>
 
+	<!-- Windows Integration -->
+	<data name="Settings_WindowsIntegration" xml:space="preserve"><value>Windows-Integration</value></data>
+	<data name="Settings_EnableWindowsIntegration" xml:space="preserve"><value>Fokus in Spielen und Vollbild-Apps schützen</value></data>
+	<data name="Settings_EnableWindowsIntegrationDesc" xml:space="preserve"><value>AIA ignorieren oder ohne Aktivierung anzeigen, wenn ein Spiel, eine Vollbild-App oder eine andere geschützte App fokussiert ist</value></data>
+	<data name="Settings_ProtectFullscreenApps" xml:space="preserve"><value>Vollbild-Apps und Spiele schützen</value></data>
+	<data name="Settings_ProtectFullscreenAppsDesc" xml:space="preserve"><value>Vollbild- oder randlose Vollbildfenster und bekannte Spielfenster erkennen</value></data>
+	<data name="Settings_ProtectKnownApps" xml:space="preserve"><value>Bekannte sensible Apps schützen</value></data>
+	<data name="Settings_ProtectKnownAppsDesc" xml:space="preserve"><value>Remotedesktop-, Präsentations- und Meeting-/Bildschirmfreigabe-Apps</value></data>
+	<data name="Settings_ApplyToAutomationHotkeys" xml:space="preserve"><value>Auf Automatisierungs-Hotkeys anwenden</value></data>
+	<data name="Settings_ApplyToAutomationHotkeysDesc" xml:space="preserve"><value>Auch Automatisierungs-Hotkeys unterdrücken, während eine geschützte App fokussiert ist</value></data>
+	<data name="Settings_ProtectedHotkeyAction" xml:space="preserve"><value>Hotkey-Verhalten bei Schutz</value></data>
+	<data name="Settings_ProtectedHotkeyActionDesc" xml:space="preserve"><value>Wählen Sie, was beim Drücken des AIA-Hotkeys in einer geschützten App passiert</value></data>
+	<data name="Settings_ProtectedHotkeyActionIgnore" xml:space="preserve"><value>Hotkey ignorieren (Fokus behalten)</value></data>
+	<data name="Settings_ProtectedHotkeyActionShowWithoutFocus" xml:space="preserve"><value>Overlay ohne Aktivierung anzeigen</value></data>
+	<data name="Settings_CustomProtectedApps" xml:space="preserve"><value>Weitere geschützte Prozesse</value></data>
+	<data name="Settings_CustomProtectedAppsDesc" xml:space="preserve"><value>Durch Kommas oder Zeilenumbrüche getrennte Prozessnamen, z. B.: notepad, myapp.exe</value></data>
+
 	<!-- Automation Window -->
 	<data name="Automation_Title" xml:space="preserve"><value>Automatisierungseinstellungen</value></data>
 	<data name="Automation_Header" xml:space="preserve"><value>Automatisierung</value></data>
