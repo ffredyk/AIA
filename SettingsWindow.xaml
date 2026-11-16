@@ -796,6 +796,12 @@
                                      Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8" Width="100" HorizontalAlignment="Left"/>
                         </StackPanel>
                         
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{local:Localize Settings_CheckInterval}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                            <TextBox x:Name="TxtCheckInterval" Text="30"
+                                     Background="#3E3E42" Foreground="White" BorderBrush="#555555" Padding="8" Width="100" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -817,12 +823,20 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBox x:Name="TxtDataPath" IsReadOnly="True"
                                              Background="#3E3E42" Foreground="#AAAAAA" BorderBrush="#555555" Padding="8"/>
-                                    <ui:Button Grid.Column="1" Margin="8,0,0,0" Padding="12,6" Click="BtnOpenDataFolder_Click">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ui:SymbolIcon Symbol="FolderOpen20" Foreground="White" FontSize="14"/>
-                                            <TextBlock Text="{local:Localize Settings_Open}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
-                                        </StackPanel>
-                                    </ui:Button>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <ui:Button Margin="8,0,0,0" Padding="12,6" Click="BtnChangeDataFolder_Click">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:SymbolIcon Symbol="Folder20" Foreground="White" FontSize="14"/>
+                                                <TextBlock Text="{local:Localize Settings_Change}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </ui:Button>
+                                        <ui:Button Margin="8,0,0,0" Padding="12,6" Click="BtnOpenDataFolder_Click">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:SymbolIcon Symbol="FolderOpen20" Foreground="White" FontSize="14"/>
+                                                <TextBlock Text="{local:Localize Settings_Open}" Foreground="White" FontSize="11" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </ui:Button>
+                                    </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </Border>

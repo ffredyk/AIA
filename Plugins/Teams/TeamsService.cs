@@ -304,7 +304,7 @@ namespace AIA.Plugins.Teams
                 try { return await GetMessagesFromGraphAsync(); }
                 catch { }
             }
-            return GetSampleUnreadMessages();
+            return new List<TeamsMessageData>();
         }
 
         private async Task<List<TeamsMessageData>> GetMessagesFromGraphAsync()
@@ -404,7 +404,7 @@ namespace AIA.Plugins.Teams
                 try { return await GetTasksFromGraphAsync(); }
                 catch { }
             }
-            return GetSampleReminders();
+            return new List<TeamsReminderData>();
         }
 
         private async Task<List<TeamsReminderData>> GetTasksFromGraphAsync()

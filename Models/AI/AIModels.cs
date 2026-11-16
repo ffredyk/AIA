@@ -14,6 +14,12 @@ namespace AIA.Models.AI
         public string Description { get; set; } = string.Empty;
         public Dictionary<string, AIToolParameter> Parameters { get; set; } = new();
         public Func<Dictionary<string, object>, string>? Handler { get; set; }
+
+        /// <summary>
+        /// Tools that modify data, files, the clipboard or trigger other automations require an
+        /// explicit user confirmation before they run.
+        /// </summary>
+        public bool RequiresConfirmation { get; set; }
     }
 
     /// <summary>

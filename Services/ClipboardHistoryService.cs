@@ -175,25 +175,25 @@ namespace AIA.Services
         {
             try
             {
+                // The OS clipboard sequence number changes exactly when the clipboard content is
+                // replaced, so we never decode an image just to detect changes.
+                var sequence = GetClipboardSequenceNumber();
+
                 if (WpfClipboard.ContainsText())
                 {
                     var text = WpfClipboard.GetText();
-                    return $"TEXT:{text.GetHashCode()}";
+                    return $"TEXT:{sequence}:{text.GetHashCode()}";
                 }
-                
+
                 if (WpfClipboard.ContainsImage())
                 {
-                    var image = WpfClipboard.GetImage();
-                    if (image != null)
-                    {
-                        return $"IMAGE:{image.PixelWidth}x{image.PixelHeight}:{image.GetHashCode()}";
-                    }
+                    return $"IMAGE:{sequence}";
                 }
-                
+
                 if (WpfClipboard.ContainsFileDropList())
                 {
                     var files = WpfClipboard.GetFileDropList();
-                    return $"FILES:{string.Join(",", files.Cast<string>()).GetHashCode()}";
+                    return $"FILES:{sequence}:{string.Join(",", files.Cast<string>()).GetHashCode()}";
                 }
 
                 return string.Empty;
@@ -203,6 +203,9 @@ namespace AIA.Services
                 return string.Empty;
             }
         }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern uint GetClipboardSequenceNumber();
 
         private void CaptureClipboardContent(AppSettings settings)
         {
@@ -252,7 +255,7 @@ namespace AIA.Services
                             {
                                 AssetType = DataAssetType.ClipboardImage,
                                 Name = $"Image ({image.PixelWidth}x{image.PixelHeight})",
-                                Description = $"{image.PixelWidth} × {image.PixelHeight} pixels",
+                                Description = $"{image.PixelWidth} Ã— {image.PixelHeight} pixels",
                                 FullImage = image,
                                 Thumbnail = CreateThumbnail(image),
                                 CapturedAt = DateTime.Now

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -17,8 +18,8 @@ namespace AIA.Services.AI
     public interface IAIProviderClient
     {
         AIProviderType ProviderType { get; }
-        Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request);
-        IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request);
+        Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request, CancellationToken cancellationToken = default);
         bool ValidateConfiguration(AIProvider provider);
     }
 
@@ -42,7 +43,7 @@ namespace AIA.Services.AI
             return !string.IsNullOrEmpty(provider.ApiKey) && !string.IsNullOrEmpty(provider.ModelId);
         }
 
-        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request)
+        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var messages = new List<object>();
 
@@ -61,9 +62,11 @@ namespace AIA.Services.AI
                 ["model"] = provider.ModelId,
                 ["messages"] = messages,
                 ["temperature"] = request.Temperature,
-                ["max_tokens"] = request.MaxTokens,
+                [GetTokenParameterName(provider)] = request.MaxTokens,
                 ["stream"] = true
             };
+
+            ApplyReasoningCompatibility(requestBody, provider);
 
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -72,21 +75,21 @@ namespace AIA.Services.AI
             httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", provider.ApiKey);
             httpRequest.Content = content;
 
-            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 yield return $"[Error: {response.StatusCode} - {errorContent}]";
                 yield break;
             }
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var reader = new StreamReader(stream);
 
             while (!reader.EndOfStream)
             {
-                var line = await reader.ReadLineAsync();
+                var line = await reader.ReadLineAsync(cancellationToken);
                 if (string.IsNullOrEmpty(line)) continue;
                 if (!line.StartsWith("data: ")) continue;
 
@@ -111,7 +114,7 @@ namespace AIA.Services.AI
             }
         }
 
-        public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request)
+        public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -132,8 +135,10 @@ namespace AIA.Services.AI
                     ["model"] = provider.ModelId,
                     ["messages"] = messages,
                     ["temperature"] = request.Temperature,
-                    ["max_tokens"] = request.MaxTokens
+                    [GetTokenParameterName(provider)] = request.MaxTokens
                 };
+
+                ApplyReasoningCompatibility(requestBody, provider);
 
                 if (request.Tools != null && request.Tools.Count > 0)
                 {
@@ -192,8 +197,8 @@ namespace AIA.Services.AI
                 httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", provider.ApiKey);
                 httpRequest.Content = content;
 
-                var response = await _httpClient.SendAsync(httpRequest);
-                var responseContent = await response.Content.ReadAsStringAsync();
+                using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -294,6 +299,31 @@ namespace AIA.Services.AI
             
             // Standard text message
             return new { role = msg.Role, content = msg.Content };
+        }
+
+        private static bool IsReasoningModel(AIProvider provider)
+        {
+            var model = provider.ModelId?.ToLowerInvariant() ?? string.Empty;
+            return model.StartsWith("o1") || model.StartsWith("o3") || model.StartsWith("o4") || model.StartsWith("gpt-5");
+        }
+
+        private static string GetTokenParameterName(AIProvider provider) =>
+            IsReasoningModel(provider) ? "max_completion_tokens" : "max_tokens";
+
+        /// <summary>
+        /// Reasoning models reject <c>max_tokens</c> and non-default temperature values.
+        /// </summary>
+        private static void ApplyReasoningCompatibility(Dictionary<string, object> body, AIProvider provider)
+        {
+            if (!IsReasoningModel(provider))
+                return;
+
+            body.Remove("temperature");
+
+            if (body.Remove("max_tokens", out var tokenLimit))
+            {
+                body["max_completion_tokens"] = tokenLimit;
+            }
         }
 
         #region OpenAI Response Models
@@ -404,7 +434,7 @@ namespace AIA.Services.AI
                 && !string.IsNullOrEmpty(provider.DeploymentName);
         }
 
-        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request)
+        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var messages = new List<object>();
 
@@ -430,27 +460,27 @@ namespace AIA.Services.AI
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var endpoint = provider.Endpoint.TrimEnd('/');
-            var apiUrl = $"{endpoint}/openai/deployments/{provider.DeploymentName}/chat/completions?api-version=2024-02-15-preview";
+            var apiUrl = $"{endpoint}/openai/deployments/{provider.DeploymentName}/chat/completions?api-version=2025-01-01-preview";
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, apiUrl);
             httpRequest.Headers.Add("api-key", provider.ApiKey);
             httpRequest.Content = content;
 
-            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 yield return $"[Error: {response.StatusCode} - {errorContent}]";
                 yield break;
             }
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var reader = new StreamReader(stream);
 
             while (!reader.EndOfStream)
             {
-                var line = await reader.ReadLineAsync();
+                var line = await reader.ReadLineAsync(cancellationToken);
                 if (string.IsNullOrEmpty(line)) continue;
                 if (!line.StartsWith("data: ")) continue;
 
@@ -475,7 +505,7 @@ namespace AIA.Services.AI
             }
         }
 
-        public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request)
+        public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -552,14 +582,14 @@ namespace AIA.Services.AI
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var endpoint = provider.Endpoint.TrimEnd('/');
-                var apiUrl = $"{endpoint}/openai/deployments/{provider.DeploymentName}/chat/completions?api-version=2024-02-15-preview";
+                var apiUrl = $"{endpoint}/openai/deployments/{provider.DeploymentName}/chat/completions?api-version=2025-01-01-preview";
 
                 using var httpRequest = new HttpRequestMessage(HttpMethod.Post, apiUrl);
                 httpRequest.Headers.Add("api-key", provider.ApiKey);
                 httpRequest.Content = content;
 
-                var response = await _httpClient.SendAsync(httpRequest);
-                var responseContent = await response.Content.ReadAsStringAsync();
+                using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -769,7 +799,7 @@ namespace AIA.Services.AI
             return !string.IsNullOrEmpty(provider.ApiKey) && !string.IsNullOrEmpty(provider.ModelId);
         }
 
-        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request)
+        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var contents = new List<object>();
 
@@ -807,21 +837,21 @@ namespace AIA.Services.AI
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, apiUrl);
             httpRequest.Content = content;
 
-            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 yield return $"[Error: {response.StatusCode} - {errorContent}]";
                 yield break;
             }
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var reader = new StreamReader(stream);
 
             while (!reader.EndOfStream)
             {
-                var line = await reader.ReadLineAsync();
+                var line = await reader.ReadLineAsync(cancellationToken);
                 if (string.IsNullOrEmpty(line)) continue;
                 if (!line.StartsWith("data: ")) continue;
 
@@ -845,7 +875,7 @@ namespace AIA.Services.AI
             }
         }
 
-        public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request)
+        public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -929,7 +959,7 @@ namespace AIA.Services.AI
                 var apiUrl = $"{BaseUrl}/models/{provider.ModelId}:generateContent?key={provider.ApiKey}";
 
                 var response = await _httpClient.PostAsync(apiUrl, content);
-                var responseContent = await response.Content.ReadAsStringAsync();
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1132,14 +1162,9 @@ namespace AIA.Services.AI
             return !string.IsNullOrEmpty(provider.ApiKey) && !string.IsNullOrEmpty(provider.ModelId);
         }
 
-        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request)
+        public async IAsyncEnumerable<string> GenerateStreamAsync(AIProvider provider, AIRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var messages = new List<object>();
-
-            foreach (var msg in request.Messages)
-            {
-                messages.Add(FormatMessage(msg));
-            }
+            var messages = BuildMessages(request.Messages);
 
             var requestBody = new Dictionary<string, object>
             {
@@ -1162,21 +1187,21 @@ namespace AIA.Services.AI
             httpRequest.Headers.Add("anthropic-version", "2023-06-01");
             httpRequest.Content = content;
 
-            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 yield return $"[Error: {response.StatusCode} - {errorContent}]";
                 yield break;
             }
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var reader = new StreamReader(stream);
 
             while (!reader.EndOfStream)
             {
-                var line = await reader.ReadLineAsync();
+                var line = await reader.ReadLineAsync(cancellationToken);
                 if (string.IsNullOrEmpty(line)) continue;
                 if (!line.StartsWith("data: ")) continue;
 
@@ -1203,16 +1228,11 @@ namespace AIA.Services.AI
             }
         }
 
-        public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request)
+        public async Task<AIResponse> GenerateAsync(AIProvider provider, AIRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var messages = new List<object>();
-
-                foreach (var msg in request.Messages)
-                {
-                    messages.Add(FormatMessage(msg));
-                }
+                var messages = BuildMessages(request.Messages);
 
                 var requestBody = new Dictionary<string, object>
                 {
@@ -1281,8 +1301,8 @@ namespace AIA.Services.AI
                 httpRequest.Headers.Add("anthropic-version", "2023-06-01");
                 httpRequest.Content = content;
 
-                var response = await _httpClient.SendAsync(httpRequest);
-                var responseContent = await response.Content.ReadAsStringAsync();
+                using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1319,71 +1339,98 @@ namespace AIA.Services.AI
         }
 
         /// <summary>
-        /// Format a message for the Anthropic API, handling multimodal content
+        /// Builds Anthropic messages. Consecutive same-role messages are merged because the API
+        /// requires alternating roles and expects all tool_result blocks in a single user message.
         /// </summary>
-        private static object FormatMessage(AIMessage msg)
+        private static List<object> BuildMessages(IEnumerable<AIMessage> messages)
         {
-            if (msg.ToolCallId != null)
+            var roles = new List<string>();
+            var contents = new List<object>();
+
+            void Append(string role, object content)
             {
-                return new
+                if (roles.Count > 0 && roles[roles.Count - 1] == role)
                 {
-                    role = "user",
-                    content = new[]
-                    {
-                        new
-                        {
-                            type = "tool_result",
-                            tool_use_id = msg.ToolCallId,
-                            content = msg.Content
-                        }
-                    }
-                };
-            }
-            
-            if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
-            {
-                var contentBlocks = new List<object>();
-                if (!string.IsNullOrEmpty(msg.Content))
-                {
-                    contentBlocks.Add(new { type = "text", text = msg.Content });
+                    var previous = contents[contents.Count - 1];
+                    var blocks = previous as List<object> ?? new List<object> { ToTextBlock(previous) };
+
+                    if (content is List<object> newBlocks)
+                        blocks.AddRange(newBlocks);
+                    else
+                        blocks.Add(ToTextBlock(content));
+
+                    contents[contents.Count - 1] = blocks;
+                    return;
                 }
-                foreach (var tc in msg.ToolCalls)
-                {
-                    contentBlocks.Add(new { type = "tool_use", id = tc.Id, name = tc.Name, input = tc.Arguments });
-                }
-                return new { role = "assistant", content = contentBlocks };
+
+                roles.Add(role);
+                contents.Add(content);
             }
-            
-            // Handle multimodal messages with images
-            if (msg.HasImages)
+
+            foreach (var msg in messages)
             {
-                var contentBlocks = new List<object>();
-                
-                // Add images first (Claude prefers images before text)
-                foreach (var image in msg.Images!)
+                if (msg.ToolCallId != null)
                 {
-                    contentBlocks.Add(new
+                    Append("user", new List<object>
                     {
-                        type = "image",
-                        source = new
-                        {
-                            type = "base64",
-                            media_type = image.MimeType,
-                            data = image.Base64Data
-                        }
+                        new { type = "tool_result", tool_use_id = msg.ToolCallId, content = msg.Content }
                     });
+                    continue;
                 }
-                
-                // Add text content
-                if (!string.IsNullOrEmpty(msg.Content))
+
+                if (msg.ToolCalls != null && msg.ToolCalls.Count > 0)
                 {
-                    contentBlocks.Add(new { type = "text", text = msg.Content });
+                    var blocks = new List<object>();
+                    if (!string.IsNullOrEmpty(msg.Content))
+                        blocks.Add(new { type = "text", text = msg.Content });
+
+                    foreach (var toolCall in msg.ToolCalls)
+                        blocks.Add(new { type = "tool_use", id = toolCall.Id, name = toolCall.Name, input = toolCall.Arguments });
+
+                    Append("assistant", blocks);
+                    continue;
                 }
-                
-                return new { role = msg.Role, content = contentBlocks };
+
+                if (msg.HasImages)
+                {
+                    var blocks = new List<object>();
+
+                    foreach (var image in msg.Images!)
+                    {
+                        blocks.Add(new
+                        {
+                            type = "image",
+                            source = new
+                            {
+                                type = "base64",
+                                media_type = image.MimeType,
+                                data = image.Base64Data
+                            }
+                        });
+                    }
+
+                    if (!string.IsNullOrEmpty(msg.Content))
+                        blocks.Add(new { type = "text", text = msg.Content });
+
+                    Append(msg.Role, blocks);
+                    continue;
+                }
+
+                Append(msg.Role, msg.Content);
             }
-            
-            return new { role = msg.Role, content = msg.Content };
+
+            var result = new List<object>();
+            for (var i = 0; i < roles.Count; i++)
+            {
+                result.Add(new { role = roles[i], content = contents[i] });
+            }
+
+            return result;
+        }
+
+        private static object ToTextBlock(object content)
+        {
+            return content is string text ? new { type = "text", text } : content;
         }
 
         private static string ExtractTextContent(AnthropicResponse response)

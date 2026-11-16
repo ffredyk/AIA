@@ -4,7 +4,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AIA.Models;
 using AIA.Plugins.SDK;
+using AIA.Services;
 
 namespace AIA.Plugins.Host
 {
@@ -19,7 +21,9 @@ namespace AIA.Plugins.Host
         private readonly PluginServiceRegistry _serviceRegistry;
         private readonly PluginConfigurationStore _configStore;
         private readonly Dictionary<string, PluginContext> _pluginContexts = new();
+        private readonly Dictionary<string, PluginInstanceSettings> _instanceSettings = new(StringComparer.OrdinalIgnoreCase);
         private bool _disposed;
+        private bool _shutdown;
 
         public ObservableCollection<PluginInfo> Plugins { get; } = new();
         public IPluginServiceRegistry ServiceRegistry => _serviceRegistry;
@@ -30,13 +34,13 @@ namespace AIA.Plugins.Host
         public event EventHandler<PluginEventArgs>? PluginUnloaded;
         public event EventHandler<PluginErrorEventArgs>? PluginError;
 
-        public PluginManager(string pluginsDirectory, IPluginHostServices hostServices)
+        public PluginManager(string pluginsDirectory, IPluginHostServices hostServices, string? configurationDirectory = null)
         {
             _hostServices = hostServices ?? throw new ArgumentNullException(nameof(hostServices));
             _logger = new PluginHostLogger();
             _loader = new PluginLoader(pluginsDirectory, _logger);
             _serviceRegistry = new PluginServiceRegistry();
-            _configStore = new PluginConfigurationStore(pluginsDirectory);
+            _configStore = new PluginConfigurationStore(string.IsNullOrEmpty(configurationDirectory) ? pluginsDirectory : configurationDirectory);
         }
 
         /// <summary>
@@ -48,6 +52,7 @@ namespace AIA.Plugins.Host
 
             // Load configuration
             await _configStore.LoadAsync();
+            await LoadInstanceSettingsAsync();
 
             // Discover plugins
             var discovered = _loader.DiscoverPlugins();
@@ -68,8 +73,9 @@ namespace AIA.Plugins.Host
                     continue;
                 }
 
-                // Grant permissions based on configuration
-                var grantedPermissions = config.GrantedPermissions;
+                // Permissions are the plugin's declared set intersected with the user's choices.
+                var grantedPermissions = ComputeGrantedPermissions(pluginInfo, GetInstanceSettings(pluginInfo.Id));
+                config.GrantedPermissions = grantedPermissions;
 
                 var loaded = await _loader.LoadPluginAsync(pluginInfo.AssemblyPath, grantedPermissions);
                 if (loaded != null && loaded.Instance != null)
@@ -88,6 +94,9 @@ namespace AIA.Plugins.Host
             }
 
             _logger.Info($"Loaded {Plugins.Count(p => p.Instance != null)} plugin(s)");
+
+            // Persist defaults for newly discovered plugins so the settings UI can show them.
+            await AppSettingsService.SavePluginInstanceSettingsAsync(_instanceSettings.Values.ToList());
         }
 
         /// <summary>
@@ -234,13 +243,82 @@ namespace AIA.Plugins.Host
         }
 
         /// <summary>
-        /// Updates permissions for a plugin (will take effect on next restart)
+        /// Persists the user's permission choices for a plugin and applies them immediately.
         /// </summary>
-        public async Task UpdatePluginPermissionsAsync(string pluginId, PluginPermissions permissions)
+        public async Task SaveInstanceSettingsAsync(PluginInstanceSettings settings)
         {
+            _instanceSettings[settings.PluginId] = settings;
+            await AppSettingsService.SavePluginInstanceSettingsAsync(_instanceSettings.Values.ToList());
+            await ApplyPermissionsAsync(settings.PluginId);
+        }
+
+        /// <summary>
+        /// Recomputes and applies effective permissions for a plugin.
+        /// </summary>
+        public async Task ApplyPermissionsAsync(string pluginId)
+        {
+            var pluginInfo = Plugins.FirstOrDefault(p => p.Id == pluginId);
+            if (pluginInfo == null)
+                return;
+
+            var granted = ComputeGrantedPermissions(pluginInfo, GetInstanceSettings(pluginId));
+            pluginInfo.GrantedPermissions = granted;
+
             var config = _configStore.GetPluginConfig(pluginId);
-            config.GrantedPermissions = permissions;
+            config.GrantedPermissions = granted;
             await _configStore.SaveAsync();
+
+            _logger.Info($"Permissions for '{pluginInfo.Name}': {granted}");
+        }
+
+        private static PluginPermissions ComputeGrantedPermissions(PluginInfo pluginInfo, PluginInstanceSettings settings)
+        {
+            // Data scopes are what the plugin exists for; capability permissions (network, file
+            // system, COM, UI) require the user's explicit consent.
+            const PluginPermissions dataScopes =
+                PluginPermissions.AllTasks | PluginPermissions.AllReminders |
+                PluginPermissions.AllDataBanks | PluginPermissions.AllDataAssets |
+                PluginPermissions.AllChats | PluginPermissions.PluginServices;
+
+            var granted = pluginInfo.RequiredPermissions & dataScopes;
+
+            if (settings.HasNetworkAccess)
+                granted |= pluginInfo.RequiredPermissions & PluginPermissions.Network;
+
+            if (settings.HasFileSystemAccess)
+                granted |= pluginInfo.RequiredPermissions & PluginPermissions.FileSystem;
+
+            if (settings.HasComAccess)
+                granted |= pluginInfo.RequiredPermissions & PluginPermissions.ComAutomation;
+
+            if (settings.HasUIAccess || settings.HasNotificationAccess)
+                granted |= pluginInfo.RequiredPermissions & PluginPermissions.UI;
+
+            return granted;
+        }
+
+        private async Task LoadInstanceSettingsAsync()
+        {
+            var list = await AppSettingsService.LoadPluginInstanceSettingsAsync();
+            _instanceSettings.Clear();
+            foreach (var settings in list)
+            {
+                _instanceSettings[settings.PluginId] = settings;
+            }
+        }
+
+        /// <summary>
+        /// Gets (and creates on first use) the user permission settings for a plugin.
+        /// </summary>
+        public PluginInstanceSettings GetInstanceSettings(string pluginId)
+        {
+            if (!_instanceSettings.TryGetValue(pluginId, out var settings))
+            {
+                settings = new PluginInstanceSettings { PluginId = pluginId };
+                _instanceSettings[pluginId] = settings;
+            }
+
+            return settings;
         }
 
         /// <summary>
@@ -256,6 +334,10 @@ namespace AIA.Plugins.Host
         /// </summary>
         public async Task ShutdownAsync()
         {
+            if (_shutdown)
+                return;
+
+            _shutdown = true;
             _logger.Info("Shutting down plugin manager...");
 
             // Stop all running plugins in reverse order
@@ -320,7 +402,11 @@ namespace AIA.Plugins.Host
             if (_disposed) return;
             _disposed = true;
 
-            ShutdownAsync().GetAwaiter().GetResult();
+            if (!_shutdown)
+            {
+                ShutdownAsync().GetAwaiter().GetResult();
+            }
+
             GC.SuppressFinalize(this);
         }
     }

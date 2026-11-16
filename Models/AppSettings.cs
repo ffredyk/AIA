@@ -10,7 +10,7 @@ namespace AIA.Models
     public class AppSettings : INotifyPropertyChanged
     {
         private bool _runOnStartup = false;
-        private string _overlayShortcut = "Win+Q";
+        private string _overlayShortcut = "Alt+Q";
         private bool _minimizeToTrayOnClose = true;
         private bool _showInTaskbar = false;
         private bool _checkForUpdatesOnStartup = true;
@@ -325,6 +325,7 @@ namespace AIA.Models
         private bool _isEnabled = true;
         private bool _hasFileSystemAccess = false;
         private bool _hasNetworkAccess = false;
+        private bool _hasComAccess = false;
         private bool _hasNotificationAccess = true;
         private bool _hasUIAccess = true;
 
@@ -364,6 +365,15 @@ namespace AIA.Models
         {
             get => _hasNetworkAccess;
             set { _hasNetworkAccess = value; OnPropertyChanged(nameof(HasNetworkAccess)); }
+        }
+
+        /// <summary>
+        /// Whether the plugin may use COM automation (e.g. Microsoft Outlook)
+        /// </summary>
+        public bool HasComAccess
+        {
+            get => _hasComAccess;
+            set { _hasComAccess = value; OnPropertyChanged(nameof(HasComAccess)); }
         }
 
         /// <summary>

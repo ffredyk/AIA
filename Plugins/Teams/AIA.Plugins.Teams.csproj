@@ -36,7 +36,7 @@
   <!-- Copy plugin to main app's Plugins folder after build -->
   <Target Name="CopyPluginToOutput" AfterTargets="Build">
     <PropertyGroup>
-      <PluginOutputDir>$(SolutionDir)bin\$(Configuration)\$(TargetFramework)\Plugins\Teams\</PluginOutputDir>
+      <PluginOutputDir>$(MSBuildThisFileDirectory)..\..\bin\$(Configuration)\$(TargetFramework)\Plugins\Teams\</PluginOutputDir>
     </PropertyGroup>
     <MakeDir Directories="$(PluginOutputDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginOutputDir)" />

@@ -14,7 +14,13 @@ namespace AIA.Plugins.Host
     {
         public string PluginId { get; set; } = string.Empty;
         public bool IsEnabled { get; set; } = true;
-        public PluginPermissions GrantedPermissions { get; set; } = PluginPermissions.All;
+
+        /// <summary>
+        /// Effective permissions last computed by the host. The source of truth is the plugin's
+        /// declared <c>RequiredPermissions</c> intersected with the user's choices in
+        /// plugin-instance-settings.json; this value is persisted for diagnostics only.
+        /// </summary>
+        public PluginPermissions GrantedPermissions { get; set; } = PluginPermissions.None;
         public Dictionary<string, object?> CustomSettings { get; set; } = new();
     }
 
@@ -87,7 +93,7 @@ namespace AIA.Plugins.Host
                 {
                     PluginId = pluginId,
                     IsEnabled = true,
-                    GrantedPermissions = PluginPermissions.All
+                    GrantedPermissions = PluginPermissions.None
                 };
                 _configurations[pluginId] = config;
             }

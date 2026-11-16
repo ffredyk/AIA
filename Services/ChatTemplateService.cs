@@ -13,15 +13,8 @@ namespace AIA.Services
     /// </summary>
     public class ChatTemplateService
     {
-        private static readonly string SettingsFolder;
-        private static readonly string TemplatesFile;
-
-        static ChatTemplateService()
-        {
-            var exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            SettingsFolder = Path.Combine(exeDirectory, "settings");
-            TemplatesFile = Path.Combine(SettingsFolder, "chat-templates.json");
-        }
+        private static string SettingsFolder => AppPaths.SettingsFolder;
+        private static string TemplatesFile => Path.Combine(SettingsFolder, "chat-templates.json");
 
         private static void EnsureDirectoryExists()
         {
@@ -61,8 +54,7 @@ namespace AIA.Services
             EnsureDirectoryExists();
 
             var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(templates, options);
-            await File.WriteAllTextAsync(TemplatesFile, json);
+            await JsonFileStore.WriteAsync(TemplatesFile, templates, options);
         }
 
         /// <summary>
@@ -196,8 +188,7 @@ namespace AIA.Services
 
             var settingsFile = Path.Combine(SettingsFolder, "chat-template-settings.json");
             var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(settings, options);
-            await File.WriteAllTextAsync(settingsFile, json);
+            await JsonFileStore.WriteAsync(settingsFile, settings, options);
         }
     }
 }

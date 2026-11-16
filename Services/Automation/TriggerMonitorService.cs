@@ -41,6 +41,11 @@ namespace AIA.Services.Automation
         /// </summary>
         public event EventHandler<TriggerFiredEventArgs>? TriggerFired;
 
+        /// <summary>
+        /// Raised when a trigger cannot be registered (e.g. hotkey already in use).
+        /// </summary>
+        public event EventHandler<string>? TriggerRegistrationFailed;
+
         public TriggerMonitorService(AutomationService automationService)
         {
             _automationService = automationService;
@@ -265,7 +270,9 @@ namespace AIA.Services.Automation
             }
             catch (HotkeyAlreadyRegisteredException)
             {
-                // Hotkey is already in use
+                var message = $"Hotkey {trigger.Modifiers}+{trigger.Key} for automation '{automationId}' is already in use by another application.";
+                System.Diagnostics.Debug.WriteLine(message);
+                TriggerRegistrationFailed?.Invoke(this, message);
             }
         }
 
@@ -294,7 +301,24 @@ namespace AIA.Services.Automation
             {
                 Filter = trigger.FileFilter,
                 IncludeSubdirectories = trigger.IncludeSubdirectories,
+                InternalBufferSize = 64 * 1024,
                 EnableRaisingEvents = true
+            };
+
+            watcher.Error += (s, e) =>
+            {
+                // Windows drops watcher events and stops reporting after a buffer overflow.
+                System.Diagnostics.Debug.WriteLine($"File watcher error for '{trigger.WatchPath}': {e.GetException().Message}");
+                try
+                {
+                    UnregisterFileWatcher(automationId);
+                    if (Directory.Exists(trigger.WatchPath))
+                        RegisterFileWatcher(automationId, trigger);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to re-register file watcher: {ex.Message}");
+                }
             };
 
             if (trigger.ChangeTypes.HasFlag(FileChangeType.Created))

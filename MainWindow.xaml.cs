@@ -104,6 +104,40 @@ namespace AIA
 
             // Get automation service from ViewModel and wire up events
             WireUpAutomationService();
+            WireUpAiToolConfirmation();
+        }
+
+        private void WireUpAiToolConfirmation()
+        {
+            try
+            {
+                Models.OverlayViewModel.Singleton.AIOrchestration.ToolsService.ConfirmToolExecution = ConfirmAiToolExecution;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to wire AI tool confirmation: {ex.Message}");
+            }
+        }
+
+        private bool ConfirmAiToolExecution(AIA.Models.AI.AITool tool, Dictionary<string, object> arguments)
+        {
+            var details = string.Join(", ", arguments.Select(kv => $"{kv.Key}={kv.Value}"));
+            if (details.Length > 300)
+                details = details.Substring(0, 300) + "...";
+
+            bool Prompt()
+            {
+                var result = System.Windows.MessageBox.Show(
+                    $"The assistant wants to run '{tool.Name}'.\n\n{details}\n\nAllow this action?",
+                    "AI Action Confirmation",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question,
+                    MessageBoxResult.No);
+
+                return result == MessageBoxResult.Yes;
+            }
+
+            return Dispatcher.CheckAccess() ? Prompt() : Dispatcher.Invoke(Prompt);
         }
 
         private void WireUpAutomationService()
@@ -116,7 +150,13 @@ namespace AIA
                 _automationService.ExecutionStarted += OnAutomationExecutionStarted;
                 _automationService.ExecutionCompleted += OnAutomationExecutionCompleted;
                 _automationService.ConfirmationRequired += OnAutomationConfirmationRequired;
+                _automationService.TriggerRegistrationFailed += OnAutomationTriggerRegistrationFailed;
             }
+        }
+
+        private void OnAutomationTriggerRegistrationFailed(object? sender, string message)
+        {
+            Dispatcher.Invoke(() => ShowToast(message, WpfColor.FromArgb(220, 255, 68, 68)));
         }
 
         private void OnAutomationExecutionStarted(object? sender, Models.Automation.AutomationExecution execution)
@@ -599,6 +639,7 @@ namespace AIA
         {
             var appSettings = await AppSettingsService.LoadAppSettingsAsync();
             ApplyBackgroundOpacity(appSettings.OverlayOpacity);
+            ShowInTaskbar = appSettings.ShowInTaskbar;
         }
 
         private void AnimateSlideIn()
@@ -736,6 +777,14 @@ namespace AIA
 
         protected override void OnClosing(CancelEventArgs e)
         {
+            var settings = Models.OverlayViewModel.Singleton.AppSettings;
+            if (!settings.MinimizeToTrayOnClose)
+            {
+                // User opted out of tray behaviour: let the window close and the app exit.
+                base.OnClosing(e);
+                return;
+            }
+
             e.Cancel = true;
             AnimateSlideOut(() => Hide());
         }

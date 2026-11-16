@@ -137,6 +137,9 @@ namespace AIA.Plugins.SDK
         /// <summary>Access to register and consume plugin services</summary>
         PluginServices = 1 << 13,
 
+        /// <summary>Access to plugin UI integrations (tabs, toolbar buttons, toasts, dialogs)</summary>
+        UI = 1 << 14,
+
         /// <summary>All task permissions</summary>
         AllTasks = ReadTasks | WriteTasks,
         /// <summary>All reminder permissions</summary>
@@ -148,6 +151,6 @@ namespace AIA.Plugins.SDK
         /// <summary>All chat permissions</summary>
         AllChats = ReadChats | WriteChats,
         /// <summary>All permissions</summary>
-        All = AllTasks | AllReminders | AllDataBanks | AllDataAssets | AllChats | Network | FileSystem | ComAutomation | PluginServices
+        All = AllTasks | AllReminders | AllDataBanks | AllDataAssets | AllChats | Network | FileSystem | ComAutomation | PluginServices | UI
     }
 }

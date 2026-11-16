@@ -13,6 +13,7 @@ namespace AIA.Models
     {
         private string _role;
         private string _content;
+        private DateTime _timestamp = DateTime.Now;
         private ObservableCollection<ChatImageAttachment> _attachedImages = new();
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -39,6 +40,22 @@ namespace AIA.Models
                 {
                     _content = value;
                     OnPropertyChanged(nameof(Content));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Timestamp of the message
+        /// </summary>
+        public DateTime Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                if (_timestamp != value)
+                {
+                    _timestamp = value;
+                    OnPropertyChanged(nameof(Timestamp));
                 }
             }
         }
