@@ -21,6 +21,7 @@ namespace AIA.Models
         private int _maxBackupCount = 5;
         private string _language = string.Empty; // Empty = use system language
         private double _overlayOpacity = 1.0; // Default: fully opaque
+        private MiniTaskOverlaySettings _miniTaskOverlay = new();
         private WindowsIntegrationSettings _windowsIntegration = new();
         
         // Clipboard history settings
@@ -149,6 +150,15 @@ namespace AIA.Models
         {
             get => _overlayOpacity;
             set { _overlayOpacity = Math.Max(0.1, Math.Min(1.0, value)); OnPropertyChanged(nameof(OverlayOpacity)); }
+        }
+
+        /// <summary>
+        /// Settings for the always-on compact task list overlay
+        /// </summary>
+        public MiniTaskOverlaySettings MiniTaskOverlay
+        {
+            get => _miniTaskOverlay;
+            set { _miniTaskOverlay = value ?? new MiniTaskOverlaySettings(); OnPropertyChanged(nameof(MiniTaskOverlay)); }
         }
 
         /// <summary>
