@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -962,4 +962,16 @@
   <data name="Status_HotkeySetFormat" xml:space="preserve"><value>Hotkey set to {0}. Click Save to apply.</value></data>
   <data name="Status_HotkeyResetFormat" xml:space="preserve"><value>Hotkey reset to {0}. Click Save to apply.</value></data>
   <data name="Status_CopyingData" xml:space="preserve"><value>Copying existing data to the new folder...</value></data>
+	<data name="Settings_MiniTaskOverlay" xml:space="preserve"><value>Task List Overlay</value></data>
+	<data name="Settings_MiniTaskOverlayEnabled" xml:space="preserve"><value>Show compact task list</value></data>
+	<data name="Settings_MiniTaskOverlayEnabledDesc" xml:space="preserve"><value>Always-on list in the upper-right corner of the screen under the cursor</value></data>
+	<data name="Settings_MiniTaskOverlayDrawer" xml:space="preserve"><value>Drawer mode</value></data>
+	<data name="Settings_MiniTaskOverlayDrawerDesc" xml:space="preserve"><value>Show only a small ball on the edge until the cursor moves over it</value></data>
+	<data name="Settings_MiniTaskOverlayInteractable" xml:space="preserve"><value>Interactable mode</value></data>
+	<data name="Settings_MiniTaskOverlayInteractableDesc" xml:space="preserve"><value>Keep the list visible and allow clicking tasks</value></data>
+	<data name="Settings_MiniTaskOverlayRelocate" xml:space="preserve"><value>Relocate mode</value></data>
+	<data name="Settings_MiniTaskOverlayRelocateDesc" xml:space="preserve"><value>Collapse into a ball and move to the other screen side instead of fading</value></data>
+	<data name="Settings_MiniTaskOverlayOpacity" xml:space="preserve"><value>Opacity</value></data>
+	<data name="Settings_MiniTaskOverlayShortcut" xml:space="preserve"><value>Interactable mode shortcut</value></data>
+	<data name="Settings_MiniTaskOverlayShortcutDesc" xml:space="preserve"><value>Global shortcut that toggles interactable mode</value></data>
 </root>

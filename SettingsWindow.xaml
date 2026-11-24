@@ -202,6 +202,124 @@
                             </StackPanel>
                         </Border>
                         
+                        <!-- Always-on Task List Overlay -->
+                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlay}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
+
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlayEnabled}" Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlayEnabledDesc}"
+                                                   Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox x:Name="ChkMiniTaskOverlayEnabled" Grid.Column="1" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <CheckBox x:Name="ChkMiniTaskOverlayDrawer" Margin="0,12,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlayDrawer}" Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlayDrawerDesc}"
+                                                   Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <CheckBox x:Name="ChkMiniTaskOverlayInteractable" Margin="0,10,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlayInteractable}" Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlayInteractableDesc}"
+                                                   Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <CheckBox x:Name="ChkMiniTaskOverlayRelocate" Margin="0,10,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlayRelocate}" Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{local:Localize Settings_MiniTaskOverlayRelocateDesc}"
+                                                   Foreground="#999999" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <Grid Margin="0,14,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{local:Localize Settings_MiniTaskOverlayOpacity}" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" x:Name="TxtMiniOverlayOpacityValue" Text="90%" Foreground="White" FontWeight="SemiBold" Margin="12,0,0,0"/>
+                                </Grid>
+                                <Slider x:Name="SldrMiniTaskOverlayOpacity" Minimum="0.2" Maximum="1.0" Value="0.9"
+                                        SmallChange="0.05" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.05"
+                                        TickPlacement="BottomRight" Height="24" Foreground="#0078D4"
+                                        ValueChanged="SldrMiniTaskOverlayOpacity_ValueChanged"/>
+
+                                <TextBlock Text="{local:Localize Settings_MiniTaskOverlayShortcut}" Foreground="White" FontWeight="SemiBold" Margin="0,12,0,2"/>
+                                <TextBlock Text="{local:Localize Settings_MiniTaskOverlayShortcutDesc}"
+                                           Foreground="#999999" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox x:Name="MiniHotkeyTextBox"
+                                             IsReadOnly="True"
+                                             Background="#3E3E42"
+                                             Foreground="White"
+                                             BorderBrush="#555555"
+                                             BorderThickness="1"
+                                             Padding="12,8"
+                                             FontSize="14"
+                                             FontWeight="SemiBold"
+                                             Cursor="Hand"
+                                             PreviewKeyDown="MiniHotkeyTextBox_PreviewKeyDown"
+                                             PreviewKeyUp="MiniHotkeyTextBox_PreviewKeyUp"
+                                             GotFocus="MiniHotkeyTextBox_GotFocus"
+                                             LostFocus="MiniHotkeyTextBox_LostFocus"
+                                             ToolTip="{local:Localize Settings_ClickToCapture}">
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsFocused" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#0078D4"/>
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
+
+                                    <ui:Button Grid.Column="1"
+                                               Margin="8,0,0,0"
+                                               Padding="10,6"
+                                               ToolTip="{local:Localize Settings_ClearHotkey}"
+                                               Click="BtnMiniClearHotkey_Click">
+                                        <ui:SymbolIcon Symbol="Dismiss20" Foreground="White" FontSize="14"/>
+                                    </ui:Button>
+
+                                    <ui:Button Grid.Column="2"
+                                               Margin="4,0,0,0"
+                                               Padding="10,6"
+                                               ToolTip="{local:Localize Settings_ResetToDefault}"
+                                               Click="BtnMiniResetHotkey_Click">
+                                        <ui:SymbolIcon Symbol="ArrowReset20" Foreground="White" FontSize="14"/>
+                                    </ui:Button>
+                                </Grid>
+
+                                <TextBlock x:Name="TxtMiniShortcutStatus"
+                                           Foreground="#999999"
+                                           FontSize="11"
+                                           Margin="0,4,0,0"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
                         <!-- Windows Integration Section -->
                         <TextBlock Text="{local:Localize Settings_WindowsIntegration}" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,24,0,12"/>
 

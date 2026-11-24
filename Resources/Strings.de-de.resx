@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1015,4 +1015,16 @@
   <data name="Status_HotkeySetFormat" xml:space="preserve"><value>Hotkey set to {0}. Click Save to apply.</value></data>
   <data name="Status_HotkeyResetFormat" xml:space="preserve"><value>Hotkey reset to {0}. Click Save to apply.</value></data>
   <data name="Status_CopyingData" xml:space="preserve"><value>Copying existing data to the new folder...</value></data>
+	<data name="Settings_MiniTaskOverlay" xml:space="preserve"><value>Aufgabenlisten-Overlay</value></data>
+	<data name="Settings_MiniTaskOverlayEnabled" xml:space="preserve"><value>Kompakte Aufgabenliste anzeigen</value></data>
+	<data name="Settings_MiniTaskOverlayEnabledDesc" xml:space="preserve"><value>Immer sichtbare Liste oben rechts auf dem Bildschirm unter dem Cursor</value></data>
+	<data name="Settings_MiniTaskOverlayDrawer" xml:space="preserve"><value>Drawer-Modus</value></data>
+	<data name="Settings_MiniTaskOverlayDrawerDesc" xml:space="preserve"><value>Nur einen kleinen Ball am Rand anzeigen, bis der Cursor darüber fährt</value></data>
+	<data name="Settings_MiniTaskOverlayInteractable" xml:space="preserve"><value>Interaktiver Modus</value></data>
+	<data name="Settings_MiniTaskOverlayInteractableDesc" xml:space="preserve"><value>Liste sichtbar halten und Klicks auf Aufgaben erlauben</value></data>
+	<data name="Settings_MiniTaskOverlayRelocate" xml:space="preserve"><value>Verschiebemodus</value></data>
+	<data name="Settings_MiniTaskOverlayRelocateDesc" xml:space="preserve"><value>Zu einem Ball zusammenklappen und auf die andere Bildschirmseite wechseln statt auszublenden</value></data>
+	<data name="Settings_MiniTaskOverlayOpacity" xml:space="preserve"><value>Deckkraft</value></data>
+	<data name="Settings_MiniTaskOverlayShortcut" xml:space="preserve"><value>Tastenkürzel für den interaktiven Modus</value></data>
+	<data name="Settings_MiniTaskOverlayShortcutDesc" xml:space="preserve"><value>Globales Tastenkürzel zum Umschalten des interaktiven Modus</value></data>
 </root>

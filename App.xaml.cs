@@ -20,6 +20,7 @@ namespace AIA
         private PluginManager? _pluginManager;
         private HotkeyService? _hotkeyService;
         private AppSettings? _appSettings;
+        private MiniTaskOverlayHost? _miniTaskOverlayHost;
 
         /// <summary>
         /// Gets the plugin manager instance
@@ -30,6 +31,11 @@ namespace AIA
         /// Gets the hotkey service instance
         /// </summary>
         public HotkeyService? HotkeyService => _hotkeyService;
+
+        /// <summary>
+        /// Gets the compact task list overlay host
+        /// </summary>
+        public MiniTaskOverlayHost? MiniTaskOverlayHost => _miniTaskOverlayHost;
 
         /// <summary>
         /// Gets the current App instance
@@ -92,6 +98,10 @@ namespace AIA
 
             // Initialize hotkey service
             InitializeHotkeyService();
+
+            // Create the always-on compact task list after the main window exists
+            Dispatcher.BeginInvoke(new Action(InitializeMiniTaskOverlay),
+                System.Windows.Threading.DispatcherPriority.ApplicationIdle);
 
             // Initialize plugin system
             await InitializePluginsAsync();
@@ -200,6 +210,39 @@ namespace AIA
         }
 
         /// <summary>
+        /// Applies compact task list overlay settings without restarting the app.
+        /// </summary>
+        public void RefreshMiniTaskOverlaySettings(AppSettings settings)
+        {
+            _miniTaskOverlayHost?.ApplySettings(settings);
+        }
+
+        /// <summary>
+        /// Updates the shortcut that toggles the compact task list's interactable mode.
+        /// </summary>
+        public bool UpdateMiniTaskOverlayHotkey(string hotkeyString)
+        {
+            return _miniTaskOverlayHost?.UpdateHotkey(hotkeyString) ?? false;
+        }
+
+        private void InitializeMiniTaskOverlay()
+        {
+            if (_appSettings == null)
+                return;
+
+            _miniTaskOverlayHost = new MiniTaskOverlayHost();
+            _miniTaskOverlayHost.HotkeyRegistrationFailed += (_, shortcut) =>
+            {
+                notifyIcon?.ShowBalloonTip(
+                    5000,
+                    "AIA task overlay shortcut unavailable",
+                    $"The shortcut '{shortcut}' is already in use. Open Settings → General to choose another.",
+                    ToolTipIcon.Warning);
+            };
+            _miniTaskOverlayHost.Initialize(_appSettings);
+        }
+
+        /// <summary>
         /// Applies focus protection settings without restarting the app
         /// </summary>
         public void RefreshWindowsIntegrationSettings(AppSettings settings)
@@ -267,6 +310,7 @@ namespace AIA
         {
             try
             {
+                _miniTaskOverlayHost?.Dispose();
                 _hotkeyService?.Dispose();
 
                 // Shut plugins down synchronously: WPF does not await async handlers.

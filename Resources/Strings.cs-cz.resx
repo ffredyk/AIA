@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1017,4 +1017,16 @@
   <data name="Status_HotkeySetFormat" xml:space="preserve"><value>Hotkey set to {0}. Click Save to apply.</value></data>
   <data name="Status_HotkeyResetFormat" xml:space="preserve"><value>Hotkey reset to {0}. Click Save to apply.</value></data>
   <data name="Status_CopyingData" xml:space="preserve"><value>Copying existing data to the new folder...</value></data>
+	<data name="Settings_MiniTaskOverlay" xml:space="preserve"><value>Překryv seznamu úkolů</value></data>
+	<data name="Settings_MiniTaskOverlayEnabled" xml:space="preserve"><value>Zobrazit kompaktní seznam úkolů</value></data>
+	<data name="Settings_MiniTaskOverlayEnabledDesc" xml:space="preserve"><value>Vždy viditelný seznam v pravém horním rohu obrazovky pod kurzorem</value></data>
+	<data name="Settings_MiniTaskOverlayDrawer" xml:space="preserve"><value>Režim šuplíku</value></data>
+	<data name="Settings_MiniTaskOverlayDrawerDesc" xml:space="preserve"><value>Zobrazit pouze malý míček na okraji, dokud na něj kurzor nenajede</value></data>
+	<data name="Settings_MiniTaskOverlayInteractable" xml:space="preserve"><value>Interaktivní režim</value></data>
+	<data name="Settings_MiniTaskOverlayInteractableDesc" xml:space="preserve"><value>Ponechat seznam viditelný a umožnit klikání na úkoly</value></data>
+	<data name="Settings_MiniTaskOverlayRelocate" xml:space="preserve"><value>Režim přesunu</value></data>
+	<data name="Settings_MiniTaskOverlayRelocateDesc" xml:space="preserve"><value>Sbalit do míčku a přesunout na druhou stranu obrazovky místo zmizení</value></data>
+	<data name="Settings_MiniTaskOverlayOpacity" xml:space="preserve"><value>Průhlednost</value></data>
+	<data name="Settings_MiniTaskOverlayShortcut" xml:space="preserve"><value>Klávesová zkratka interaktivního režimu</value></data>
+	<data name="Settings_MiniTaskOverlayShortcutDesc" xml:space="preserve"><value>Globální zkratka pro přepnutí interaktivního režimu</value></data>
 </root>

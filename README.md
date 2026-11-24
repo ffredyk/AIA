@@ -194,6 +194,8 @@ The AI assistant can perform actions on your behalf:
 
 ### 🖥️ Modern UI/UX
 - **Fullscreen Overlay**: Quick-access overlay with smooth slide animations
+- **Always-on Task List**: Compact, transparent task list in the upper-right corner of the active screen, with largest-unit countdowns and auto-hide on cursor proximity
+- **Task List Modes**: Drawer (edge ball that expands on hover), interactable (stays visible and accepts clicks), and relocate (collapses into a ball and moves to the opposite screen side)
 - **System Tray Integration**: Runs in background with tray icon
 - **Dark Theme**: Modern dark theme using WPF-UI Fluent Design
 - **Fluent Design**: Windows 11 Fluent Design System aesthetics
@@ -310,6 +312,7 @@ Plugin assemblies are still loaded from `<install dir>\Plugins`; their configura
 | Shortcut | Action |
 |----------|--------|
 | `Alt+Q` | Toggle overlay (customizable, default) |
+| `Alt+Shift+Q` | Toggle compact task list interactable mode (customizable) |
 | `Escape` | Close overlay |
 | `Ctrl+N` | New task (when in Tasks tab) |
 | `Ctrl+R` | New reminder (when in Reminders tab) |
@@ -868,6 +871,13 @@ All paths are relative to the data root (`%LOCALAPPDATA%\AIA` by default). Write
 | **Overlay** | | |
 | Overlay Shortcut | Global hotkey | Alt+Q |
 | Overlay Opacity | Overlay background transparency | 100% |
+| **Task List Overlay** | | |
+| Show compact task list | Always-on task list in the upper-right corner | On |
+| Drawer mode | Show only an edge ball until hovered | Off |
+| Interactable mode | Keep visible and allow clicking tasks | Off |
+| Relocate mode | Collapse and move to the opposite screen side | Off |
+| Opacity | Task list overlay transparency | 90% |
+| Interactable Shortcut | Global hotkey for interactable mode | Alt+Shift+Q |
 | **Windows Integration** | | |
 | Protect Focus | Avoid stealing focus from games and protected apps | On |
 | Protect Fullscreen Apps | Detect fullscreen/borderless windows and known game windows | On |

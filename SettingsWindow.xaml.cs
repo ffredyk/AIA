@@ -25,12 +25,16 @@ namespace AIA
 
         // Hotkey capture state
         private bool _isCapturingHotkey;
+        private bool _isCapturingMiniHotkey;
         private ModifierKeys _capturedModifiers = ModifierKeys.None;
         private Key _capturedKey = Key.None;
         private ModifierKeys _pendingModifiers = ModifierKeys.Alt;
         private Key _pendingKey = Key.Q;
+        private ModifierKeys _miniPendingModifiers = ModifierKeys.Alt | ModifierKeys.Shift;
+        private Key _miniPendingKey = Key.Q;
 
         private const string DefaultHotkeyString = "Alt+Q";
+        private const string DefaultMiniHotkeyString = "Alt+Shift+Q";
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -101,7 +105,21 @@ namespace AIA
             // Overlay opacity
             SldrOverlayOpacity.Value = _appSettings.OverlayOpacity;
             UpdateOpacityDisplay();
-            
+
+            // Compact task list overlay
+            var miniOverlay = _appSettings.MiniTaskOverlay ?? new MiniTaskOverlaySettings();
+            ChkMiniTaskOverlayEnabled.IsChecked = miniOverlay.IsEnabled;
+            ChkMiniTaskOverlayDrawer.IsChecked = miniOverlay.DrawerMode;
+            ChkMiniTaskOverlayInteractable.IsChecked = miniOverlay.InteractableMode;
+            ChkMiniTaskOverlayRelocate.IsChecked = miniOverlay.RelocateMode;
+            SldrMiniTaskOverlayOpacity.Value = miniOverlay.Opacity;
+            UpdateMiniOverlayOpacityDisplay();
+
+            var (miniModifiers, miniKey) = HotkeyService.ParseHotkeyString(miniOverlay.Shortcut);
+            _miniPendingModifiers = miniModifiers;
+            _miniPendingKey = miniKey;
+            UpdateMiniHotkeyDisplay();
+
             // Windows integration
             var windowsIntegration = _appSettings.WindowsIntegration ?? new WindowsIntegrationSettings();
             ChkEnableWindowsIntegration.IsChecked = windowsIntegration.Enabled;
@@ -392,6 +410,156 @@ namespace AIA
 
         #endregion
 
+        #region Compact Task List Shortcut
+
+        private void MiniHotkeyTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (_isCapturingMiniHotkey)
+                return;
+
+            _isCapturingMiniHotkey = true;
+            _isCapturingHotkey = false;
+            _capturedKey = Key.None;
+            _capturedModifiers = HotkeyService.GetModifiersFromKeyboard();
+
+            App.Current.MiniTaskOverlayHost?.SuspendHotkey();
+
+            MiniHotkeyTextBox.Background = new SolidColorBrush(WpfColor.FromRgb(0x40, 0x40, 0x45));
+            MiniHotkeyTextBox.Text = LocalizationService.Instance.GetString("Settings_PressKeys");
+            MiniHotkeyTextBox.FontStyle = FontStyles.Italic;
+            MiniHotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0x66, 0x66, 0x66));
+            UpdateMiniHotkeyStatus(LocalizationService.Instance.GetString("Status_PressKeysCombination"), false);
+        }
+
+        private void MiniHotkeyTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            _isCapturingMiniHotkey = false;
+            App.Current.MiniTaskOverlayHost?.ResumeHotkey();
+            MiniHotkeyTextBox.Background = new SolidColorBrush(WpfColor.FromRgb(0x3E, 0x3E, 0x42));
+            UpdateMiniHotkeyDisplay();
+        }
+
+        private void MiniHotkeyTextBox_PreviewKeyDown(object sender, WpfKeyEventArgs e)
+        {
+            if (!_isCapturingMiniHotkey)
+                return;
+
+            e.Handled = true;
+
+            var key = e.Key == Key.System ? e.SystemKey : e.Key;
+            _capturedModifiers = HotkeyService.GetModifiersFromKeyboard();
+
+            if (HotkeyService.IsModifierKey(key))
+            {
+                if (_capturedModifiers != ModifierKeys.None)
+                {
+                    MiniHotkeyTextBox.Text = HotkeyService.FormatHotkey(_capturedModifiers, Key.None) + " + ...";
+                    MiniHotkeyTextBox.FontStyle = FontStyles.Normal;
+                    MiniHotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0xFF, 0xFF, 0xFF));
+                }
+                return;
+            }
+
+            _capturedKey = key;
+            _miniPendingModifiers = _capturedModifiers;
+            _miniPendingKey = _capturedKey;
+            _isCapturingMiniHotkey = false;
+
+            UpdateMiniHotkeyDisplay();
+
+            var hotkeyString = HotkeyService.FormatHotkey(_miniPendingModifiers, _miniPendingKey);
+            UpdateMiniHotkeyStatus(string.Format(LocalizationService.Instance.GetString("Status_HotkeySetFormat"), hotkeyString), true);
+
+            MiniHotkeyTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+        }
+
+        private void MiniHotkeyTextBox_PreviewKeyUp(object sender, WpfKeyEventArgs e)
+        {
+            if (!_isCapturingMiniHotkey)
+                return;
+
+            e.Handled = true;
+            _capturedModifiers = HotkeyService.GetModifiersFromKeyboard();
+
+            if (_capturedKey == Key.None && _capturedModifiers == ModifierKeys.None)
+            {
+                MiniHotkeyTextBox.Text = LocalizationService.Instance.GetString("Settings_PressKeys");
+                MiniHotkeyTextBox.FontStyle = FontStyles.Italic;
+                MiniHotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0x66, 0x66, 0x66));
+            }
+        }
+
+        private void BtnMiniClearHotkey_Click(object sender, RoutedEventArgs e)
+        {
+            _miniPendingModifiers = ModifierKeys.None;
+            _miniPendingKey = Key.None;
+            _isCapturingMiniHotkey = false;
+            UpdateMiniHotkeyDisplay();
+            UpdateMiniHotkeyStatus(LocalizationService.Instance.GetString("Status_HotkeyCleared"), true);
+        }
+
+        private void BtnMiniResetHotkey_Click(object sender, RoutedEventArgs e)
+        {
+            var (modifiers, key) = HotkeyService.ParseHotkeyString(DefaultMiniHotkeyString);
+            _miniPendingModifiers = modifiers;
+            _miniPendingKey = key;
+            _isCapturingMiniHotkey = false;
+            UpdateMiniHotkeyDisplay();
+            UpdateMiniHotkeyStatus(string.Format(LocalizationService.Instance.GetString("Status_HotkeyResetFormat"), DefaultMiniHotkeyString), true);
+        }
+
+        private void UpdateMiniHotkeyDisplay()
+        {
+            if (_isCapturingMiniHotkey || MiniHotkeyTextBox == null)
+                return;
+
+            MiniHotkeyTextBox.FontStyle = FontStyles.Normal;
+            MiniHotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0xFF, 0xFF, 0xFF));
+
+            if (_miniPendingKey == Key.None)
+            {
+                MiniHotkeyTextBox.Text = LocalizationService.Instance.GetString("Settings_NoHotkeySet");
+                MiniHotkeyTextBox.Foreground = new SolidColorBrush(WpfColor.FromRgb(0x88, 0x88, 0x88));
+                return;
+            }
+
+            MiniHotkeyTextBox.Text = HotkeyService.FormatHotkey(_miniPendingModifiers, _miniPendingKey);
+        }
+
+        private void UpdateMiniHotkeyStatus(string message, bool success, bool isError = false)
+        {
+            TxtMiniShortcutStatus.Text = message;
+            TxtMiniShortcutStatus.Foreground = new SolidColorBrush(isError
+                ? WpfColor.FromRgb(255, 102, 102)
+                : success
+                    ? WpfColor.FromRgb(30, 183, 95)
+                    : WpfColor.FromRgb(0, 120, 212));
+        }
+
+        private void ApplyMiniHotkey()
+        {
+            if (_miniPendingKey == Key.None)
+            {
+                App.Current.UpdateMiniTaskOverlayHotkey(string.Empty);
+                _appSettings.MiniTaskOverlay.Shortcut = string.Empty;
+                UpdateMiniHotkeyStatus(LocalizationService.Instance.GetString("Status_HotkeyCleared"), true);
+                return;
+            }
+
+            var hotkeyString = HotkeyService.FormatHotkey(_miniPendingModifiers, _miniPendingKey);
+            if (App.Current.UpdateMiniTaskOverlayHotkey(hotkeyString))
+            {
+                _appSettings.MiniTaskOverlay.Shortcut = hotkeyString;
+                UpdateMiniHotkeyStatus($"{LocalizationService.Instance.GetString("Status_HotkeyApplied")} {hotkeyString}", true);
+            }
+            else
+            {
+                UpdateMiniHotkeyStatus(LocalizationService.Instance.GetString("Status_HotkeyRegisterFailed"), false, true);
+            }
+        }
+
+        #endregion
+
         #region Event Handlers
 
         private void CmbLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -409,6 +577,20 @@ namespace AIA
         private void SldrOverlayOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             UpdateOpacityDisplay();
+        }
+
+        private void SldrMiniTaskOverlayOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateMiniOverlayOpacityDisplay();
+        }
+
+        private void UpdateMiniOverlayOpacityDisplay()
+        {
+            if (TxtMiniOverlayOpacityValue == null)
+                return;
+
+            var opacityPercent = (int)(SldrMiniTaskOverlayOpacity.Value * 100);
+            TxtMiniOverlayOpacityValue.Text = $"{opacityPercent}%";
         }
 
         private void ChkEnableWindowsIntegration_Changed(object sender, RoutedEventArgs e)
@@ -613,6 +795,7 @@ namespace AIA
         {
             // Apply hotkey changes first
             ApplyHotkey();
+            ApplyMiniHotkey();
             
             // Collect settings from UI - hotkey is already stored in _appSettings when applied
             _appSettings.MinimizeToTrayOnClose = ChkMinimizeToTray.IsChecked ?? true;
@@ -620,6 +803,14 @@ namespace AIA
             _appSettings.AutoInstallUpdates = ChkAutoInstallUpdates.IsChecked ?? false;
             _appSettings.EnableAutoBackup = ChkAutoBackup.IsChecked ?? false;
             _appSettings.OverlayOpacity = SldrOverlayOpacity.Value;
+
+            var miniOverlay = _appSettings.MiniTaskOverlay ?? new MiniTaskOverlaySettings();
+            miniOverlay.IsEnabled = ChkMiniTaskOverlayEnabled.IsChecked ?? true;
+            miniOverlay.DrawerMode = ChkMiniTaskOverlayDrawer.IsChecked ?? false;
+            miniOverlay.InteractableMode = ChkMiniTaskOverlayInteractable.IsChecked ?? false;
+            miniOverlay.RelocateMode = ChkMiniTaskOverlayRelocate.IsChecked ?? false;
+            miniOverlay.Opacity = SldrMiniTaskOverlayOpacity.Value;
+            _appSettings.MiniTaskOverlay = miniOverlay;
 
             var windowsIntegration = _appSettings.WindowsIntegration ?? new WindowsIntegrationSettings();
             windowsIntegration.Enabled = ChkEnableWindowsIntegration.IsChecked ?? true;
@@ -700,6 +891,9 @@ namespace AIA
         {
             // Apply focus protection immediately without restarting
             App.Current.RefreshWindowsIntegrationSettings(_appSettings);
+
+            // Apply compact task list changes immediately
+            App.Current.RefreshMiniTaskOverlaySettings(_appSettings);
 
             // Refresh the overlay opacity immediately if the main window is open
             if (Owner is MainWindow mainWindow)
