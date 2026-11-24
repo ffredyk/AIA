@@ -68,6 +68,9 @@ namespace AIA.Models
         /// </summary>
         public event EventHandler<string>? SaveFailed;
 
+        private bool _tasksLoadFailed;
+        private bool _remindersLoadFailed;
+
         // AI Orchestration service
         private AIOrchestrationService? _aiOrchestrationService;
 
@@ -667,7 +670,8 @@ namespace AIA.Models
         /// </summary>
         public async Task SaveChatsAsync()
         {
-            await ChatSessionService.SaveChatsAsync(ActiveChats);
+            var chats = ActiveChats.ToList();
+            await ChatSessionService.SaveChatsAsync(chats).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1098,33 +1102,40 @@ namespace AIA.Models
 
         private async Task LoadTasksAndRemindersAsync()
         {
-            var loadFailed = false;
-
             try
             {
                 var tasks = await TaskReminderService.LoadTasksAsync();
-                var reminders = await TaskReminderService.LoadRemindersAsync();
-
                 foreach (var task in tasks)
                 {
                     Tasks.Add(task);
                 }
+            }
+            catch (DataLoadException ex)
+            {
+                _tasksLoadFailed = true;
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                SaveFailed?.Invoke(this, $"Task data could not be loaded. The file was preserved at '{ex.QuarantinedPath}'.");
+            }
+
+            try
+            {
+                var reminders = await TaskReminderService.LoadRemindersAsync();
                 foreach (var reminder in reminders)
                 {
                     Reminders.Add(reminder);
                 }
-
-                if (Tasks.Count > 0 || Reminders.Count > 0)
-                {
-                    // Process recurring tasks
-                    await ProcessRecurringTasksAsync();
-                }
             }
             catch (DataLoadException ex)
             {
-                loadFailed = true;
+                _remindersLoadFailed = true;
                 System.Diagnostics.Debug.WriteLine(ex.Message);
-                SaveFailed?.Invoke(this, $"Task data could not be loaded. The file was preserved at '{ex.QuarantinedPath}'.");
+                SaveFailed?.Invoke(this, $"Reminder data could not be loaded. The file was preserved at '{ex.QuarantinedPath}'.");
+            }
+
+            if (Tasks.Count > 0 || Reminders.Count > 0)
+            {
+                // Process recurring tasks
+                await ProcessRecurringTasksAsync();
             }
 
             // Load task templates
@@ -1141,7 +1152,7 @@ namespace AIA.Models
                 System.Diagnostics.Debug.WriteLine($"Failed to load task templates: {ex.Message}");
             }
 
-            if (!loadFailed && !TaskReminderService.HasStoredData)
+            if (!_tasksLoadFailed && !_remindersLoadFailed && !TaskReminderService.HasStoredData)
             {
                 // Genuine first run - initialize with sample data
                 InitializeSampleTasks();
@@ -1157,7 +1168,18 @@ namespace AIA.Models
         /// </summary>
         public async Task SaveTasksAndRemindersAsync()
         {
-            await TaskReminderService.SaveAllAsync(Tasks, Reminders);
+            var tasks = Tasks.ToList();
+            var reminders = Reminders.ToList();
+
+            if (!_tasksLoadFailed)
+            {
+                await TaskReminderService.SaveTasksAsync(tasks).ConfigureAwait(false);
+            }
+
+            if (!_remindersLoadFailed)
+            {
+                await TaskReminderService.SaveRemindersAsync(reminders).ConfigureAwait(false);
+            }
         }
 
         /// <summary>

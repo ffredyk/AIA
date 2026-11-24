@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AIA.Plugins.SDK;
+using AIA.Services;
 
 namespace AIA.Plugins.Host
 {
@@ -45,11 +46,9 @@ namespace AIA.Plugins.Host
             {
                 try
                 {
-                    var json = await File.ReadAllTextAsync(_configFilePath);
-                    var configs = JsonSerializer.Deserialize<List<PluginConfiguration>>(json, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                    var configs = await JsonFileStore.ReadAsync<List<PluginConfiguration>>(
+                        _configFilePath,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }).ConfigureAwait(false);
 
                     _configurations.Clear();
                     if (configs != null)
@@ -60,9 +59,10 @@ namespace AIA.Plugins.Host
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // If config is corrupted, start fresh
+                    System.Diagnostics.Debug.WriteLine($"Failed to load plugin configuration: {ex.Message}");
+                    JsonFileStore.Quarantine(_configFilePath);
                     _configurations.Clear();
                 }
             }
@@ -71,18 +71,8 @@ namespace AIA.Plugins.Host
         public async Task SaveAsync()
         {
             var configs = new List<PluginConfiguration>(_configurations.Values);
-            var json = JsonSerializer.Serialize(configs, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-
-            var directory = Path.GetDirectoryName(_configFilePath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            await File.WriteAllTextAsync(_configFilePath, json);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            await JsonFileStore.WriteAsync(_configFilePath, configs, options).ConfigureAwait(false);
         }
 
         public PluginConfiguration GetPluginConfig(string pluginId)
@@ -162,28 +152,44 @@ namespace AIA.Plugins.Host
                 WriteIndented = true
             });
 
-            var directory = Path.GetDirectoryName(_settingsFilePath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            var semaphore = JsonFileStore.GetLock(_settingsFilePath);
+            await semaphore.WaitAsync().ConfigureAwait(false);
+            try
             {
-                Directory.CreateDirectory(directory);
+                await SecretProtector.WriteEncryptedFileAsync(_settingsFilePath, json).ConfigureAwait(false);
             }
-
-            await File.WriteAllTextAsync(_settingsFilePath, json);
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         public async Task LoadAsync()
         {
-            if (File.Exists(_settingsFilePath))
+            if (!File.Exists(_settingsFilePath))
+                return;
+
+            try
             {
-                try
+                var json = await SecretProtector.ReadEncryptedFileAsync(_settingsFilePath).ConfigureAwait(false);
+                if (json == null)
                 {
-                    var json = await File.ReadAllTextAsync(_settingsFilePath);
-                    _settings = JsonSerializer.Deserialize<Dictionary<string, object?>>(json) ?? new();
+                    // Legacy plaintext settings migrates on the next save.
+                    var raw = await File.ReadAllTextAsync(_settingsFilePath).ConfigureAwait(false);
+                    var trimmed = raw.TrimStart('\uFEFF', ' ', '\t', '\r', '\n');
+                    if (!trimmed.StartsWith("{", StringComparison.Ordinal))
+                        throw new InvalidDataException("Plugin settings are not valid plaintext JSON.");
+
+                    json = trimmed;
                 }
-                catch
-                {
-                    _settings = new();
-                }
+
+                _settings = JsonSerializer.Deserialize<Dictionary<string, object?>>(json) ?? new();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load plugin settings: {ex.Message}");
+                JsonFileStore.Quarantine(_settingsFilePath);
+                _settings = new();
             }
         }
     }

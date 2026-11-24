@@ -197,6 +197,10 @@ namespace AIA.Services
         private void OnHotkeyPressed(object? sender, HotkeyEventArgs e)
         {
             e.Handled = true;
+
+            if (WindowsIntegrationService.Current.ShouldSuppressHotkey(HotkeyPurpose.Overlay))
+                return;
+
             ToggleInteractable();
         }
     }

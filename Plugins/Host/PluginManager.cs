@@ -74,7 +74,7 @@ namespace AIA.Plugins.Host
                 }
 
                 // Permissions are the plugin's declared set intersected with the user's choices.
-                var grantedPermissions = ComputeGrantedPermissions(pluginInfo, GetInstanceSettings(pluginInfo.Id));
+                var grantedPermissions = ComputeGrantedPermissions(pluginInfo, GetInstanceSettings(pluginInfo));
                 config.GrantedPermissions = grantedPermissions;
 
                 var loaded = await _loader.LoadPluginAsync(pluginInfo.AssemblyPath, grantedPermissions);
@@ -261,7 +261,7 @@ namespace AIA.Plugins.Host
             if (pluginInfo == null)
                 return;
 
-            var granted = ComputeGrantedPermissions(pluginInfo, GetInstanceSettings(pluginId));
+            var granted = ComputeGrantedPermissions(pluginInfo, GetInstanceSettings(pluginInfo));
             pluginInfo.GrantedPermissions = granted;
 
             var config = _configStore.GetPluginConfig(pluginId);
@@ -320,6 +320,31 @@ namespace AIA.Plugins.Host
 
             return settings;
         }
+
+        /// <summary>
+        /// Gets settings for a discovered plugin. Built-in plugins are trusted with the
+        /// capabilities they declare on first discovery; third-party plugins still start denied.
+        /// </summary>
+        private PluginInstanceSettings GetInstanceSettings(PluginInfo pluginInfo)
+        {
+            if (_instanceSettings.TryGetValue(pluginInfo.Id, out var settings))
+                return settings;
+
+            settings = new PluginInstanceSettings { PluginId = pluginInfo.Id };
+
+            if (pluginInfo.IsBuiltIn)
+            {
+                settings.HasNetworkAccess = HasPermission(pluginInfo, PluginPermissions.Network);
+                settings.HasFileSystemAccess = HasPermission(pluginInfo, PluginPermissions.FileSystem);
+                settings.HasComAccess = HasPermission(pluginInfo, PluginPermissions.ComAutomation);
+            }
+
+            _instanceSettings[pluginInfo.Id] = settings;
+            return settings;
+        }
+
+        private static bool HasPermission(PluginInfo pluginInfo, PluginPermissions permission) =>
+            (pluginInfo.RequiredPermissions & permission) != 0;
 
         /// <summary>
         /// Gets the context for a specific plugin

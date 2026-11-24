@@ -1,6 +1,7 @@
 <Window x:Class="AIA.Views.MiniTaskOverlayWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:AIA"
         Title="AIA Tasks"
         Width="252"
         Height="212"
@@ -115,7 +116,7 @@
             <StackPanel>
                 <Grid Margin="12,8,12,5">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="TASKS"
+                        <TextBlock Text="{local:Localize MiniTaskOverlay_Tasks}"
                                    Foreground="#D8D8DE"
                                    FontSize="10"
                                    FontWeight="Bold"
@@ -169,7 +170,7 @@
                                     <Button Grid.Column="1"
                                             Style="{StaticResource BareButtonStyle}"
                                             Tag="{Binding}"
-                                            ToolTip="Toggle complete"
+                                            ToolTip="{local:Localize MiniTaskOverlay_ToggleComplete}"
                                             Click="TaskStatus_Click"
                                             Margin="0,0,6,0">
                                         <TextBlock Text="{Binding StatusGlyph}"
@@ -209,7 +210,7 @@
                            Visibility="Collapsed"/>
 
                 <TextBlock x:Name="EmptyText"
-                           Text="No active tasks"
+                           Text="{local:Localize MiniTaskOverlay_NoActiveTasks}"
                            Foreground="#7A7A84"
                            FontSize="11"
                            Margin="12,4,12,4"

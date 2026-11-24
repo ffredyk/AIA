@@ -974,4 +974,14 @@
 	<data name="Settings_MiniTaskOverlayOpacity" xml:space="preserve"><value>Opacity</value></data>
 	<data name="Settings_MiniTaskOverlayShortcut" xml:space="preserve"><value>Interactable mode shortcut</value></data>
 	<data name="Settings_MiniTaskOverlayShortcutDesc" xml:space="preserve"><value>Global shortcut that toggles interactable mode</value></data>
+  <data name="MiniTaskOverlay_Tasks" xml:space="preserve"><value>TASKS</value></data>
+  <data name="MiniTaskOverlay_NoActiveTasks" xml:space="preserve"><value>No active tasks</value></data>
+  <data name="MiniTaskOverlay_ToggleComplete" xml:space="preserve"><value>Toggle complete</value></data>
+  <data name="MiniTaskOverlay_ModePinned" xml:space="preserve"><value>PINNED</value></data>
+  <data name="MiniTaskOverlay_ModeDrawer" xml:space="preserve"><value>DRAWER</value></data>
+  <data name="MiniTaskOverlay_ModeAutoMove" xml:space="preserve"><value>AUTO-MOVE</value></data>
+  <data name="MiniTaskOverlay_ModeAutoHide" xml:space="preserve"><value>AUTO-HIDE</value></data>
+  <data name="MiniTaskOverlay_ActiveTaskSingular" xml:space="preserve"><value>{0} active task</value></data>
+  <data name="MiniTaskOverlay_ActiveTaskCount" xml:space="preserve"><value>{0} active tasks</value></data>
+  <data name="MiniTaskOverlay_MoreTasks" xml:space="preserve"><value>+{0} more</value></data>
 </root>

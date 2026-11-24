@@ -245,8 +245,15 @@ namespace AIA
 
         private async void BtnSave(object sender, RoutedEventArgs e)
         {
-            await _orchestrationService.SaveConfigurationAsync();
-            StatusText.Text = "Configuration saved!";
+            try
+            {
+                await _orchestrationService.SaveConfigurationAsync();
+                StatusText.Text = "Configuration saved!";
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"Could not save configuration: {ex.Message}";
+            }
         }
 
         private void BtnClose(object sender, RoutedEventArgs e)
@@ -263,8 +270,19 @@ namespace AIA
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            // Auto-save on close
-            _ = _orchestrationService.SaveConfigurationAsync();
+            // Auto-save on close without blocking the UI thread.
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _orchestrationService.SaveConfigurationAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to save AI configuration on close: {ex.Message}");
+                }
+            });
+
             base.OnClosing(e);
         }
     }

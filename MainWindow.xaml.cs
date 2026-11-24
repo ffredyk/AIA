@@ -105,6 +105,21 @@ namespace AIA
             // Get automation service from ViewModel and wire up events
             WireUpAutomationService();
             WireUpAiToolConfirmation();
+
+            viewModel.SaveFailed += OnSaveFailed;
+        }
+
+        private void OnSaveFailed(object? sender, string message)
+        {
+            if (Dispatcher.CheckAccess())
+            {
+                ShowToast(message, WpfColor.FromArgb(220, 255, 68, 68));
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                    ShowToast(message, WpfColor.FromArgb(220, 255, 68, 68))));
+            }
         }
 
         private void WireUpAiToolConfirmation()

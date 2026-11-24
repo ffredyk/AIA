@@ -516,6 +516,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "get_current_screenshots",
+                RequiresConfirmation = true,
                 Description = "Get information about currently captured screenshots/data assets",
                 Parameters = new Dictionary<string, AIToolParameter>(),
                 Handler = GetCurrentScreenshotsHandler
@@ -532,6 +533,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "get_screenshot_base64",
+                RequiresConfirmation = true,
                 Description = "Get a screenshot in base64-encoded PNG format for visual analysis. Use the screenshot ID from list_available_screenshots. This allows you to see and analyze what's on the user's screen - you can identify UI elements, read text, describe images, help with visual problems, etc. Always use this when the user asks about their screen or shows you something visually.",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -606,6 +608,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "get_clipboard_text",
+                RequiresConfirmation = true,
                 Description = "Get the current text content from the system clipboard",
                 Parameters = new Dictionary<string, AIToolParameter>(),
                 Handler = GetClipboardTextHandler
@@ -615,6 +618,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "get_clipboard_history",
+                RequiresConfirmation = true,
                 Description = "Get the clipboard history - a list of recently copied items including text, images, and file paths. Returns up to the configured maximum number of items.",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {
@@ -639,6 +643,7 @@ namespace AIA.Services.AI
             RegisterTool(new AITool
             {
                 Name = "get_clipboard_image_base64",
+                RequiresConfirmation = true,
                 Description = "**IMPORTANT: You CAN see clipboard images!** Get a clipboard image in base64-encoded PNG format for visual analysis. Use the clipboard item ID from get_clipboard_history. This allows you to see and analyze what was copied to the clipboard - you can identify content, read text from images, describe what was copied, etc. Always use this when the user asks about images in their clipboard history.",
                 Parameters = new Dictionary<string, AIToolParameter>
                 {

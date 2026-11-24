@@ -1027,4 +1027,14 @@
 	<data name="Settings_MiniTaskOverlayOpacity" xml:space="preserve"><value>Deckkraft</value></data>
 	<data name="Settings_MiniTaskOverlayShortcut" xml:space="preserve"><value>Tastenkürzel für den interaktiven Modus</value></data>
 	<data name="Settings_MiniTaskOverlayShortcutDesc" xml:space="preserve"><value>Globales Tastenkürzel zum Umschalten des interaktiven Modus</value></data>
+  <data name="MiniTaskOverlay_Tasks" xml:space="preserve"><value>AUFGABEN</value></data>
+  <data name="MiniTaskOverlay_NoActiveTasks" xml:space="preserve"><value>Keine aktiven Aufgaben</value></data>
+  <data name="MiniTaskOverlay_ToggleComplete" xml:space="preserve"><value>Abschluss umschalten</value></data>
+  <data name="MiniTaskOverlay_ModePinned" xml:space="preserve"><value>ANGEHEFTET</value></data>
+  <data name="MiniTaskOverlay_ModeDrawer" xml:space="preserve"><value>SCHUBLADE</value></data>
+  <data name="MiniTaskOverlay_ModeAutoMove" xml:space="preserve"><value>AUTO-VERSCHIEBEN</value></data>
+  <data name="MiniTaskOverlay_ModeAutoHide" xml:space="preserve"><value>AUTO-AUSBLENDEN</value></data>
+  <data name="MiniTaskOverlay_ActiveTaskSingular" xml:space="preserve"><value>{0} aktive Aufgabe</value></data>
+  <data name="MiniTaskOverlay_ActiveTaskCount" xml:space="preserve"><value>{0} aktive Aufgaben</value></data>
+  <data name="MiniTaskOverlay_MoreTasks" xml:space="preserve"><value>+{0} weitere</value></data>
 </root>

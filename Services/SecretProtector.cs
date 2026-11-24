@@ -37,7 +37,7 @@ namespace AIA.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to encrypt secret: {ex.Message}");
-                return plainText;
+                throw new CryptographicException("Failed to protect a secret at rest.", ex);
             }
         }
 

@@ -78,7 +78,7 @@ namespace AIA.Services
             EnsureDirectoryExists();
 
             var taskDtos = tasks.Select(ConvertToDto).ToList();
-            await JsonFileStore.WriteAsync(TasksFile, taskDtos, GetJsonOptions());
+            await JsonFileStore.WriteAsync(TasksFile, taskDtos, GetJsonOptions()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -86,8 +86,8 @@ namespace AIA.Services
         /// </summary>
         public static async Task SaveAllAsync(IEnumerable<TaskItem> tasks, IEnumerable<ReminderItem> reminders)
         {
-            await SaveTasksAsync(tasks);
-            await SaveRemindersAsync(reminders);
+            await SaveTasksAsync(tasks).ConfigureAwait(false);
+            await SaveRemindersAsync(reminders).ConfigureAwait(false);
         }
 
         private static TaskItemDto ConvertToDto(TaskItem task)
@@ -193,7 +193,7 @@ namespace AIA.Services
             EnsureDirectoryExists();
 
             var reminderDtos = reminders.Select(ConvertToDto).ToList();
-            await JsonFileStore.WriteAsync(RemindersFile, reminderDtos, GetJsonOptions());
+            await JsonFileStore.WriteAsync(RemindersFile, reminderDtos, GetJsonOptions()).ConfigureAwait(false);
         }
 
         private static ReminderItemDto ConvertToDto(ReminderItem reminder)
