@@ -59,7 +59,7 @@ namespace AIA.Services
         public static async Task SaveAppSettingsAsync(AppSettings settings)
         {
             EnsureDirectoryExists();
-            await JsonFileStore.WriteAsync(AppSettingsFile, settings, GetJsonOptions());
+            await JsonFileStore.WriteAsync(AppSettingsFile, settings, GetJsonOptions()).ConfigureAwait(false);
         }
 
         private static JsonSerializerOptions GetJsonOptions()
@@ -95,7 +95,7 @@ namespace AIA.Services
         public static async Task SavePluginSettingsAsync(PluginSettings settings)
         {
             EnsureDirectoryExists();
-            await JsonFileStore.WriteAsync(PluginSettingsFile, settings, GetJsonOptions());
+            await JsonFileStore.WriteAsync(PluginSettingsFile, settings, GetJsonOptions()).ConfigureAwait(false);
         }
 
         public static async Task<List<PluginInstanceSettings>> LoadPluginInstanceSettingsAsync()
@@ -122,7 +122,7 @@ namespace AIA.Services
         public static async Task SavePluginInstanceSettingsAsync(List<PluginInstanceSettings> settings)
         {
             EnsureDirectoryExists();
-            await JsonFileStore.WriteAsync(PluginInstanceSettingsFile, settings, GetJsonOptions());
+            await JsonFileStore.WriteAsync(PluginInstanceSettingsFile, settings, GetJsonOptions()).ConfigureAwait(false);
         }
 
         #endregion

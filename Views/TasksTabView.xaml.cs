@@ -4,6 +4,7 @@ using System.Windows.Input;
 using AIA.Models;
 using AIA.Dialogs;
 using WpfMessageBox = System.Windows.MessageBox;
+using TaskStatus = AIA.Models.TaskStatus;
 using WpfMenuItem = System.Windows.Controls.MenuItem;
 using WpfContextMenu = System.Windows.Controls.ContextMenu;
 
@@ -86,17 +87,47 @@ namespace AIA.Views
 
         private void BtnBulkChangeStatus(object sender, RoutedEventArgs e)
         {
-            // TODO: Show status selection dialog and apply to selected tasks
+            if (ViewModel == null) return;
+
+            if (ChoiceDialog.Show(
+                Window.GetWindow(this),
+                "Change status",
+                "Set the status for selected tasks:",
+                Enum.GetValues<TaskStatus>(),
+                value => value.ToString(),
+                out var status))
+            {
+                ViewModel.BulkChangeStatus(status);
+            }
         }
 
         private void BtnBulkChangePriority(object sender, RoutedEventArgs e)
         {
-            // TODO: Show priority selection dialog and apply to selected tasks
+            if (ViewModel == null) return;
+
+            if (ChoiceDialog.Show(
+                Window.GetWindow(this),
+                "Change priority",
+                "Set the priority for selected tasks:",
+                Enum.GetValues<TaskPriority>(),
+                value => value.ToString(),
+                out var priority))
+            {
+                ViewModel.BulkChangePriority(priority);
+            }
         }
 
         private void BtnBulkAddTag(object sender, RoutedEventArgs e)
         {
-            // TODO: Show tag input dialog and apply to selected tasks
+            if (ViewModel == null) return;
+
+            var tag = TextInputDialog.Show(
+                Window.GetWindow(this),
+                "Add tag",
+                "Tag name:");
+
+            if (tag != null)
+                ViewModel.BulkAddTag(tag);
         }
 
         private void BtnBulkArchive(object sender, RoutedEventArgs e)
@@ -297,7 +328,15 @@ namespace AIA.Views
 
         private void BtnAddTag(object sender, RoutedEventArgs e)
         {
-            // TODO: Show tag input dialog
+            if (ViewModel?.SelectedTask == null) return;
+
+            var tag = TextInputDialog.Show(
+                Window.GetWindow(this),
+                "Add tag",
+                "Tag name:");
+
+            if (tag != null)
+                ViewModel.AddTagToTask(ViewModel.SelectedTask, tag);
         }
 
         private void BtnRemoveTag(object sender, RoutedEventArgs e)
@@ -321,7 +360,37 @@ namespace AIA.Views
 
         private void BtnAddDependency(object sender, RoutedEventArgs e)
         {
-            // TODO: Show task selection dialog for dependencies
+            if (ViewModel?.SelectedTask == null) return;
+
+            var selectedTask = ViewModel.SelectedTask;
+            var candidates = ViewModel.Tasks
+                .Where(task =>
+                    task.Id != selectedTask.Id &&
+                    !task.IsArchived &&
+                    !selectedTask.DependencyTaskIds.Contains(task.Id))
+                .OrderBy(task => task.Title)
+                .ToList();
+
+            if (candidates.Count == 0)
+            {
+                WpfMessageBox.Show(
+                    "There are no other tasks available to depend on.",
+                    "Add dependency",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            if (ChoiceDialog.Show(
+                Window.GetWindow(this),
+                "Add dependency",
+                "Choose a task that must be completed first:",
+                candidates,
+                task => task.Title,
+                out var dependency))
+            {
+                ViewModel.AddTaskDependency(selectedTask, dependency);
+            }
         }
 
         private void BtnRemoveDependency(object sender, RoutedEventArgs e)

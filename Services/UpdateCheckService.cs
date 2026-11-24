@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,13 @@ namespace AIA.Services
             var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
             client.DefaultRequestHeaders.UserAgent.ParseAdd("AIA-Desktop-App");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+
+            var token = Environment.GetEnvironmentVariable("AIA_GITHUB_TOKEN");
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Trim());
+            }
+
             return client;
         }
 

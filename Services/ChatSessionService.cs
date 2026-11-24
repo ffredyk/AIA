@@ -75,7 +75,7 @@ namespace AIA.Services
                 }
             }
 
-            await JsonFileStore.WriteAsync(ChatsFile, chatDtos, GetJsonOptions());
+            await JsonFileStore.WriteAsync(ChatsFile, chatDtos, GetJsonOptions()).ConfigureAwait(false);
         }
 
         private static async Task EnsureImageFileAsync(ChatImageDto dto)

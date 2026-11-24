@@ -1006,6 +1006,9 @@ namespace AIA
                 {
                     System.Diagnostics.Debug.WriteLine("Timed out while saving settings on close.");
                 }
+
+                ApplyLiveSettings();
+                App.Current.MiniTaskOverlayHost?.ResumeHotkey();
             }
             catch (Exception ex)
             {

@@ -21,6 +21,8 @@ namespace AIA
         private HotkeyService? _hotkeyService;
         private AppSettings? _appSettings;
         private MiniTaskOverlayHost? _miniTaskOverlayHost;
+        private Mutex? _singleInstanceMutex;
+        private bool _ownsSingleInstance;
 
         /// <summary>
         /// Gets the plugin manager instance
@@ -45,6 +47,19 @@ namespace AIA
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            _singleInstanceMutex = new Mutex(true, "AIA.Desktop.SingleInstance", out var createdNew);
+            _ownsSingleInstance = createdNew;
+            if (!createdNew)
+            {
+                System.Windows.MessageBox.Show(
+                    "AIA is already running. Use the existing tray icon instead.",
+                    "AIA",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                Shutdown();
+                return;
+            }
 
             AppPaths.Initialize(message => System.Diagnostics.Debug.WriteLine(message));
 
@@ -100,7 +115,7 @@ namespace AIA
             InitializeHotkeyService();
 
             // Create the always-on compact task list after the main window exists
-            Dispatcher.BeginInvoke(new Action(InitializeMiniTaskOverlay),
+            _ = Dispatcher.BeginInvoke(new Action(InitializeMiniTaskOverlay),
                 System.Windows.Threading.DispatcherPriority.ApplicationIdle);
 
             // Initialize plugin system
@@ -308,6 +323,13 @@ namespace AIA
 
         protected override void OnExit(ExitEventArgs e)
         {
+            if (!_ownsSingleInstance)
+            {
+                _singleInstanceMutex?.Dispose();
+                base.OnExit(e);
+                return;
+            }
+
             try
             {
                 _miniTaskOverlayHost?.Dispose();
@@ -318,7 +340,7 @@ namespace AIA
                 {
                     try
                     {
-                        _pluginManager.ShutdownAsync().Wait(TimeSpan.FromSeconds(5));
+                        Task.Run(() => _pluginManager.ShutdownAsync()).Wait(TimeSpan.FromSeconds(5));
                     }
                     catch (Exception ex)
                     {
@@ -347,6 +369,17 @@ namespace AIA
             finally
             {
                 notifyIcon?.Dispose();
+
+                try
+                {
+                    _singleInstanceMutex?.ReleaseMutex();
+                }
+                catch
+                {
+                    // Another instance owns the mutex.
+                }
+
+                _singleInstanceMutex?.Dispose();
                 base.OnExit(e);
             }
         }

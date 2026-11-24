@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using AIA.Models;
+using AIA.Services;
 using Application = System.Windows.Application;
 using Brush = System.Windows.Media.Brush;
 using Color = System.Windows.Media.Color;
@@ -100,13 +101,7 @@ namespace AIA.Views
 
         private void ApplySettingsState()
         {
-            ModeHint.Text = _settings.InteractableMode
-                ? "PINNED"
-                : _settings.DrawerMode
-                    ? "DRAWER"
-                    : _settings.RelocateMode
-                        ? "AUTO-MOVE"
-                        : "AUTO-HIDE";
+            UpdateModeHint();
             ModeHint.Foreground = _settings.InteractableMode
                 ? new SolidColorBrush(Color.FromRgb(0x5A, 0xB8, 0xFF))
                 : new SolidColorBrush(Color.FromRgb(0x7A, 0x7A, 0x84));
@@ -133,6 +128,19 @@ namespace AIA.Views
             {
                 ApplyOpacityTarget(animate: true);
             }
+        }
+
+        private void UpdateModeHint()
+        {
+            var key = _settings.InteractableMode
+                ? "MiniTaskOverlay_ModePinned"
+                : _settings.DrawerMode
+                    ? "MiniTaskOverlay_ModeDrawer"
+                    : _settings.RelocateMode
+                        ? "MiniTaskOverlay_ModeAutoMove"
+                        : "MiniTaskOverlay_ModeAutoHide";
+
+            ModeHint.Text = LocalizationService.Instance.GetString(key);
         }
 
         private void MiniTaskOverlayWindow_SourceInitialized(object? sender, EventArgs e)
@@ -206,9 +214,20 @@ namespace AIA.Views
 
                 if (!_settings.IsEnabled)
                 {
+                    ApplyClickThrough(true);
                     SetOverlayVisible(false);
                     return;
                 }
+
+                if (WindowsIntegrationService.Current.ShouldSuppressHotkey(HotkeyPurpose.Overlay) ||
+                    (Application.Current?.MainWindow is MainWindow mainWindow && mainWindow.IsVisible))
+                {
+                    ApplyClickThrough(true);
+                    SetOverlayVisible(false);
+                    return;
+                }
+
+                ApplyClickThrough(!_settings.InteractableMode);
 
                 if (_settings.InteractableMode)
                 {
@@ -216,12 +235,6 @@ namespace AIA.Views
                         EnsureCardVisible(animate: true);
 
                     SetOverlayVisible(true);
-                    return;
-                }
-
-                if (Application.Current?.MainWindow is MainWindow mainWindow && mainWindow.IsVisible)
-                {
-                    SetOverlayVisible(false);
                     return;
                 }
 
@@ -656,14 +669,20 @@ namespace AIA.Views
                     _entries.Add(new MiniTaskEntry(task));
             }
 
+            UpdateModeHint();
+
             TaskCountText.Text = activeTasks.Count.ToString();
             BallCountText.Text = activeTasks.Count > 99 ? "99" : activeTasks.Count.ToString();
-            Ball.ToolTip = activeTasks.Count == 1
-                ? "1 active task"
-                : $"{activeTasks.Count} active tasks";
+            Ball.ToolTip = string.Format(
+                LocalizationService.Instance.GetString(activeTasks.Count == 1
+                    ? "MiniTaskOverlay_ActiveTaskSingular"
+                    : "MiniTaskOverlay_ActiveTaskCount"),
+                activeTasks.Count);
 
             MoreText.Text = activeTasks.Count > visibleTasks.Count
-                ? $"+{activeTasks.Count - visibleTasks.Count} more"
+                ? string.Format(
+                    LocalizationService.Instance.GetString("MiniTaskOverlay_MoreTasks"),
+                    activeTasks.Count - visibleTasks.Count)
                 : string.Empty;
             MoreText.Visibility = activeTasks.Count > visibleTasks.Count
                 ? Visibility.Visible
@@ -677,7 +696,7 @@ namespace AIA.Views
                 : Visibility.Visible;
         }
 
-        private void TaskStatus_Click(object sender, RoutedEventArgs e)
+        private async void TaskStatus_Click(object sender, RoutedEventArgs e)
         {
             if (!_settings.InteractableMode)
                 return;
@@ -685,17 +704,35 @@ namespace AIA.Views
             if (sender is FrameworkElement element && element.Tag is MiniTaskEntry entry)
             {
                 var task = entry.Task;
-                if (task.Status == TaskStatus.Completed)
+                var completed = task.Status != TaskStatus.Completed;
+
+                if (completed)
+                {
+                    task.Status = TaskStatus.Completed;
+                }
+                else
                 {
                     task.Status = TaskStatus.NotStarted;
                     task.CompletedDate = null;
                 }
-                else
+
+                try
                 {
-                    task.Status = TaskStatus.Completed;
+                    if (completed && task.IsRecurring)
+                    {
+                        await _viewModel.ProcessRecurringTasksAsync();
+                    }
+                    else
+                    {
+                        _viewModel.QueueTasksSave();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to update task from mini overlay: {ex.Message}");
+                    _viewModel.QueueTasksSave();
                 }
 
-                _viewModel.QueueTasksSave();
                 RefreshEntries();
             }
         }

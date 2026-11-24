@@ -447,12 +447,9 @@ namespace AIA.Services.Automation
             if (automation.Status != AutomationStatus.Active && automation.Status != AutomationStatus.Paused)
                 return false;
 
-            // Check concurrent execution limit (running + reserved)
-            var runningCount = RunningExecutions.Count(e => e.AutomationId == automation.Id);
-            if (_pendingExecutions.TryGetValue(automation.Id, out var reserved))
-                runningCount += reserved;
-
-            if (runningCount >= automation.Limits.MaxConcurrentExecutions)
+            // _pendingExecutions includes both queued and currently running executions.
+            var activeCount = _pendingExecutions.TryGetValue(automation.Id, out var reserved) ? reserved : 0;
+            if (activeCount >= automation.Limits.MaxConcurrentExecutions)
                 return false;
 
             // Check rate limits over sliding windows

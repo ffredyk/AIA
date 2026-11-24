@@ -68,8 +68,8 @@ namespace AIA.Services
             {
                 Directory.CreateDirectory(DefaultDataRoot);
                 TryMigrateLegacyData(log);
-                ApplyStoragePathPointer(log);
                 ApplyDataStorageOverride(log);
+                ApplyStoragePathPointer(log);
                 EnsureDirectories();
             }
             catch (Exception ex)
@@ -241,7 +241,16 @@ namespace AIA.Services
         /// </summary>
         public static void CopyDataTo(string destination)
         {
-            var destinationRoot = Path.GetFullPath(Environment.ExpandEnvironmentVariables(destination.Trim()));
+            var destinationRoot = Path.TrimEndingDirectorySeparator(
+                Path.GetFullPath(Environment.ExpandEnvironmentVariables(destination.Trim())));
+            var sourceRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(DataRoot));
+
+            if (destinationRoot.Equals(sourceRoot, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            if (destinationRoot.StartsWith(sourceRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("The new data folder cannot be inside the current data folder.");
+
             Directory.CreateDirectory(destinationRoot);
 
             foreach (var folder in new[] { "settings", "userdata", "databanks", "ai-config", "automations", "screenshots", "Plugins" })

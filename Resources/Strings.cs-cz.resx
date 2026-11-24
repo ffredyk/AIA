@@ -1029,4 +1029,14 @@
 	<data name="Settings_MiniTaskOverlayOpacity" xml:space="preserve"><value>Průhlednost</value></data>
 	<data name="Settings_MiniTaskOverlayShortcut" xml:space="preserve"><value>Klávesová zkratka interaktivního režimu</value></data>
 	<data name="Settings_MiniTaskOverlayShortcutDesc" xml:space="preserve"><value>Globální zkratka pro přepnutí interaktivního režimu</value></data>
+  <data name="MiniTaskOverlay_Tasks" xml:space="preserve"><value>ÚKOLY</value></data>
+  <data name="MiniTaskOverlay_NoActiveTasks" xml:space="preserve"><value>Žádné aktivní úkoly</value></data>
+  <data name="MiniTaskOverlay_ToggleComplete" xml:space="preserve"><value>Přepnout dokončení</value></data>
+  <data name="MiniTaskOverlay_ModePinned" xml:space="preserve"><value>PŘIPNUTO</value></data>
+  <data name="MiniTaskOverlay_ModeDrawer" xml:space="preserve"><value>ZÁSUVKA</value></data>
+  <data name="MiniTaskOverlay_ModeAutoMove" xml:space="preserve"><value>AUTOMATICKÝ PŘESUN</value></data>
+  <data name="MiniTaskOverlay_ModeAutoHide" xml:space="preserve"><value>AUTOMATICKÉ SKRYTÍ</value></data>
+  <data name="MiniTaskOverlay_ActiveTaskSingular" xml:space="preserve"><value>{0} aktivní úkol</value></data>
+  <data name="MiniTaskOverlay_ActiveTaskCount" xml:space="preserve"><value>{0} aktivních úkolů</value></data>
+  <data name="MiniTaskOverlay_MoreTasks" xml:space="preserve"><value>+{0} dalších</value></data>
 </root>

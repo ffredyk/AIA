@@ -194,7 +194,7 @@ The AI assistant can perform actions on your behalf:
 
 ### 🖥️ Modern UI/UX
 - **Fullscreen Overlay**: Quick-access overlay with smooth slide animations
-- **Always-on Task List**: Compact, transparent task list in the upper-right corner of the active screen, with largest-unit countdowns and auto-hide on cursor proximity
+- **Always-on Task List**: Compact, transparent task list in the upper-right corner of the active screen, with largest-unit countdowns and auto-hide on cursor proximity; hides automatically when a protected app, fullscreen game, or presentation is focused
 - **Task List Modes**: Drawer (edge ball that expands on hover), interactable (stays visible and accepts clicks), and relocate (collapses into a ball and moves to the opposite screen side)
 - **System Tray Integration**: Runs in background with tray icon
 - **Dark Theme**: Modern dark theme using WPF-UI Fluent Design
@@ -580,7 +580,7 @@ Plugins must declare required permissions:
 | `PluginServices` | Inter-plugin communication |
 | `UI` | Register tabs/toolbar buttons, show toasts and dialogs |
 
-Data permissions requested by a plugin are granted automatically. Capability permissions (`Network`, `FileSystem`, `ComAutomation`, `UI`) must be approved by the user in **Settings → Plugins → Permissions**; newly discovered plugins start with those capabilities denied.
+Data permissions requested by a plugin are granted automatically. Capability permissions (`Network`, `FileSystem`, `ComAutomation`, `UI`) must be approved by the user in **Settings → Plugins → Permissions**; newly discovered third-party plugins start with those capabilities denied. Built-in plugins are trusted with the capabilities they declare on first discovery and can still be restricted in the same dialog.
 
 ### Built-in Plugins
 
@@ -844,7 +844,7 @@ All data is stored locally in the application directory:
 - **AI Config**: `ai-config/providers.json` (API keys DPAPI-encrypted), `ai-config/settings.json`
 - **Automations**: `automations/automation_*.json`, `automations/settings.json`
 - **Automation History**: `automations/history/*.json`
-- **Plugin Settings**: `settings/plugin-settings.json`, `settings/plugin-instance-settings.json`, `Plugins/plugins.config.json`
+- **Plugin Settings**: `settings/plugin-settings.json`, `settings/plugin-instance-settings.json`, `Plugins/plugins.config.json`; per-plugin settings files are DPAPI-encrypted
 
 All paths are relative to the data root (`%LOCALAPPDATA%\AIA` by default). Writes are serialized and atomic; an unreadable data file is renamed to `*.corrupt-<timestamp>` instead of being overwritten.
 
@@ -970,10 +970,10 @@ All paths are relative to the data root (`%LOCALAPPDATA%\AIA` by default). Write
 - **Local-Only**: All data stored locally on your machine under `%LOCALAPPDATA%\AIA`
 - **No Telemetry**: No data sent to AIA developers
 - **Secrets at Rest**: AI provider API keys are encrypted with Windows DPAPI (current user scope)
-- **Plugin Permissions**: Plugins receive only the data scopes they declare; sensitive capabilities (network, file system, COM automation, UI) require explicit approval in Settings → Plugins → Permissions
-- **AI Tool Safeguards**: Destructive AI tools (file writes/reads, deletions, clipboard changes, triggering automations) ask for confirmation; AI file access is confined to `Documents\AIA` and the app data folder; tool output is treated as untrusted input
+- **Plugin Permissions**: Plugins receive only declared data scopes; third-party capability permissions (network, file system, COM automation, UI) require approval in Settings → Plugins → Permissions. Built-in plugins are trusted on first discovery and can still be restricted there.
+- **AI Tool Safeguards**: Destructive AI tools (file writes/reads, deletions, clipboard reads/changes, screenshot reads, triggering automations) ask for confirmation; AI file access is confined to `Documents\AIA` and the app data folder; tool output is treated as untrusted input
 - **Automation Permissions**: Fine-grained control over what automations can do, with confirmations and timeouts for sensitive actions
-- **Update Check**: Report-only GitHub release lookup; nothing is downloaded or installed automatically
+- **Update Check**: Report-only GitHub release lookup; nothing is downloaded or installed automatically. Private repositories can supply `AIA_GITHUB_TOKEN` with release read access.
 
 ---
 

@@ -120,17 +120,34 @@ namespace AIA.Services.AI
 
             var providersJson = providersNode.ToJsonString(options);
             var semaphore = JsonFileStore.GetLock(ProvidersFile);
-            await semaphore.WaitAsync();
+            await semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                await JsonFileStore.WriteAtomicAsync(ProvidersFile, providersJson);
+                await JsonFileStore.WriteAtomicAsync(ProvidersFile, providersJson).ConfigureAwait(false);
             }
             finally
             {
                 semaphore.Release();
             }
 
-            await JsonFileStore.WriteAsync(SettingsFile, Settings, options);
+            await JsonFileStore.WriteAsync(SettingsFile, Settings, options).ConfigureAwait(false);
+        }
+
+        private void QueueSaveConfiguration()
+        {
+            _ = SaveConfigurationSafelyAsync();
+        }
+
+        private async Task SaveConfigurationSafelyAsync()
+        {
+            try
+            {
+                await SaveConfigurationAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to save AI configuration: {ex.Message}");
+            }
         }
 
         private static JsonSerializerOptions GetJsonOptions()
@@ -141,13 +158,13 @@ namespace AIA.Services.AI
         public void AddProvider(AIProvider provider)
         {
             Providers.Add(provider);
-            _ = SaveConfigurationAsync();
+            QueueSaveConfiguration();
         }
 
         public void RemoveProvider(AIProvider provider)
         {
             Providers.Remove(provider);
-            _ = SaveConfigurationAsync();
+            QueueSaveConfiguration();
         }
 
         public void SetDefaultProvider(AIProvider provider)
@@ -156,7 +173,7 @@ namespace AIA.Services.AI
             {
                 p.IsDefault = p.Id == provider.Id;
             }
-            _ = SaveConfigurationAsync();
+            QueueSaveConfiguration();
         }
 
         #endregion
