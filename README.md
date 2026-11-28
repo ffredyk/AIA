@@ -214,6 +214,15 @@ The AI assistant can perform actions on your behalf:
 - **Built-in Plugins**:
   - **Outlook Integration**: Sync flagged emails, view email list, mark complete
   - **Teams Integration**: View meetings, messages, join calls
+  - **Discord Integration**: Browse channels, read recent messages, send replies
+  - **Slack Integration**: Browse channels, read recent messages, send replies
+  - **Jira Integration**: Track assigned issues, create issues, add comments
+  - **GitHub Integration**: Assigned issues, review requests, notifications
+  - **Azure DevOps Integration**: Work items and reviewer pull requests
+  - **Trello / Asana / ClickUp**: Assigned cards and tasks with due dates
+  - **Notion / Confluence**: Search pages, comment, capture into AIA
+  - **Google Account**: Shared OAuth sign-in for Google plugins
+  - **Gmail / Google Calendar / Google Chat**: Mail, events, spaces and messages
 - **Hot-Loading**: Load/unload plugins without restarting
 - **Settings Integration**: Plugins can add their own settings panels
 - **UI Integration**:
@@ -239,6 +248,12 @@ The AI assistant can perform actions on your behalf:
 - **Runtime**: .NET 10.0 Runtime
 - **Optional**: Microsoft Outlook (for Outlook plugin)
 - **Optional**: Microsoft Teams (for Teams plugin)
+- **Optional**: Discord account with a bot token (for Discord plugin)
+- **Optional**: Slack workspace with a bot token (for Slack plugin)
+- **Optional**: Jira Cloud site with an API token (for Jira plugin)
+- **Optional**: GitHub PAT, Azure DevOps PAT, Trello API key/token, Asana PAT, ClickUp token, Notion integration token, or Confluence site/email/API token
+- **Optional**: Google Cloud OAuth client (Desktop app) for Gmail, Google Calendar, and Google Chat
+- **Optional**: Google Workspace account with Chat API enabled (for Google Chat plugin)
 - **Optional**: AI Provider API keys (OpenAI, Azure, Google, Anthropic)
 
 ---
@@ -544,18 +559,35 @@ Plugin Architecture
 │   ├── IPlugin             # Main plugin interface
 │   ├── PluginBase          # Base implementation
 │   ├── IPluginContext      # Runtime context
-│   └── Services/           # Host service interfaces
-│       ├── ITaskService
-│       ├── IReminderService
-│       ├── IDataBankService
-│       ├── IChatService
-│       ├── IDataAssetService
-│       ├── ILoggerService
-│       ├── ISettingsService
-│       └── IUIService
+│   ├── Services/           # Host service interfaces
+│   │   ├── ITaskService
+│   │   ├── IReminderService
+│   │   ├── IDataBankService
+│   │   ├── IChatService
+│   │   ├── IDataAssetService
+│   │   ├── ILoggerService
+│   │   ├── ISettingsService
+│   │   └── IUIService
+│   ├── OAuth/              # OAuth PKCE flow, token store, token provider
+│   ├── Sync/               # Two-way task/reminder sync engine
+│   └── UI/                 # RelayCommand, PluginUiFactory, UI thread helpers
 └── Plugins/
     ├── Outlook/            # Microsoft Outlook integration
-    └── Teams/              # Microsoft Teams integration
+    ├── Teams/              # Microsoft Teams integration
+    ├── Discord/            # Discord integration (bot token)
+    ├── Slack/              # Slack integration (bot token)
+    ├── Jira/               # Jira Cloud integration (email + API token)
+    ├── GitHub/             # GitHub integration (PAT)
+    ├── AzureDevOps/        # Azure DevOps integration (PAT)
+    ├── Trello/             # Trello integration (API key + token)
+    ├── Asana/              # Asana integration (PAT)
+    ├── ClickUp/            # ClickUp integration (personal token)
+    ├── Notion/             # Notion integration (integration token)
+    ├── Confluence/         # Confluence integration (email + API token)
+    ├── GoogleAccount/      # Shared Google OAuth provider
+    ├── GoogleGmail/        # Gmail integration
+    ├── GoogleCalendar/     # Google Calendar integration
+    └── GoogleChat/         # Google Chat integration
 ```
 
 ### Plugin Permissions
@@ -610,6 +642,270 @@ Requirements:
 - Microsoft Teams / Outlook Calendar
 - Optional: Microsoft Graph API configuration
 - `ComAutomation`, `Network` permissions
+
+#### Discord Integration (`AIA.Plugins.Discord`)
+
+Features:
+- Browse text channels from the Discord servers the bot can see
+- Read recent messages in a channel
+- Send messages as the bot
+- Open the selected channel or the Discord app
+
+Requirements:
+- Discord bot token from https://discord.com/developers/applications
+- Bot permissions: View Channels, Read Message History, Send Messages
+- `Network`, `UI` permissions
+
+Configure the token directly in the Discord tab; it is stored with the host's encrypted plugin settings.
+
+#### Slack Integration (`AIA.Plugins.Slack`)
+
+Features:
+- Browse public and private channels the bot can see
+- Read recent channel messages with resolved user names
+- Send messages as the bot
+- Open the selected channel or the Slack app
+
+Requirements:
+- Slack bot token (`xoxb-...`) from https://api.slack.com/apps
+- Bot scopes: `channels:read`, `channels:history`, `chat:write`, `users:read`
+- Invite the bot to private channels before reading them
+- `Network`, `UI` permissions
+
+#### Jira Integration (`AIA.Plugins.Jira`)
+
+Features:
+- List Jira issues assigned to you that are not done
+- View issue summary, description, status, priority, project, assignee and due date
+- Create issues in a project
+- Add comments to issues
+- Open issues or the Jira site in the browser
+
+Requirements:
+- Jira Cloud site URL (for example `https://your-domain.atlassian.net`)
+- Atlassian account email and API token from https://id.atlassian.com/manage-profile/security/api-tokens
+- `Network`, `UI` permissions
+
+#### GitHub Integration (`AIA.Plugins.GitHub`)
+
+Features:
+- Assigned open issues
+- Open pull requests where you are requested as a reviewer
+- Unread notifications
+- Open items in the browser, comment on issues and pull requests, mark notifications read
+- Create AIA tasks and reminders from items
+
+Requirements:
+- GitHub PAT. Classic tokens need `repo` and `notifications`; fine-grained tokens need Issues and Notifications read/write.
+- Optional GitHub Enterprise API base URL. Leave empty for `https://api.github.com`.
+- `Network`, `UI`, task/reminder permissions
+
+Sync:
+- AIA task completion closes/reopens linked issues. Pull requests and notifications are one-way links.
+- Due dates are not synced.
+
+#### Azure DevOps Integration (`AIA.Plugins.AzureDevOps`)
+
+Features:
+- Assigned work items that are not Closed/Removed
+- Active pull requests where you are a reviewer
+- Open items, comment on work items
+- Create AIA tasks and reminders
+
+Requirements:
+- Organization URL, for example `https://dev.azure.com/your-org`
+- PAT with Work Items read/write and Code read
+- `Network`, `UI`, task/reminder permissions
+
+Sync:
+- Completion maps to work item state Closed/Active.
+- Due date maps to `Microsoft.VSTS.Scheduling.DueDate`. Pull requests are one-way links.
+
+#### Trello Integration (`AIA.Plugins.Trello`)
+
+Features:
+- Cards assigned to you, with board and list names
+- Open cards, add comments, toggle due complete
+- Create AIA tasks and reminders
+
+Requirements:
+- Trello API key and token with read/write access
+- `Network`, `UI`, task/reminder permissions
+
+Sync:
+- `dueComplete` maps to AIA completion; card due date maps to AIA due date.
+
+#### Asana Integration (`AIA.Plugins.Asana`)
+
+Features:
+- Tasks assigned to you across workspaces
+- Open tasks, add comments, complete tasks
+- Create AIA tasks and reminders
+
+Requirements:
+- Asana personal access token
+- `Network`, `UI`, task/reminder permissions
+
+Sync:
+- Task `completed` maps to AIA completion; `due_on`/`due_at` maps to AIA due date.
+
+#### ClickUp Integration (`AIA.Plugins.ClickUp`)
+
+Features:
+- Tasks assigned to you across teams
+- Open tasks, add comments, complete tasks
+- Create AIA tasks and reminders
+
+Requirements:
+- ClickUp personal API token
+- A closed or done status must exist in the task list for completion sync
+- `Network`, `UI`, task/reminder permissions
+
+Sync:
+- Closed/done status maps to AIA completion; due date maps to AIA due date.
+
+#### Notion Integration (`AIA.Plugins.Notion`)
+
+Features:
+- Search pages and databases shared with the integration
+- Open items, add comments when the integration has comment capability
+- Create AIA tasks and reminders
+
+Requirements:
+- Notion integration token
+- Share each page or database with the integration
+- Optional sync property mapping: completed property name and type (`checkbox` or `status`), plus a date property name
+- `Network`, `UI`, task/reminder permissions
+
+Sync:
+- Two-way only for database pages with configured properties. Other pages are one-way links.
+
+#### Confluence Integration (`AIA.Plugins.Confluence`)
+
+Features:
+- Search pages with CQL, defaulting to recently modified pages
+- Open pages, add comments
+- Create AIA tasks and reminders
+
+Requirements:
+- Confluence site URL, Atlassian account email, API token
+- `Network`, `UI`, task/reminder permissions
+
+Sync:
+- Pages have no completion or due date; links are one-way.
+
+#### Google Account Integration (`AIA.Plugins.GoogleAccount`)
+
+Features:
+- One OAuth client and one sign-in shared by Gmail, Google Calendar, and Google Chat
+- Enable services independently; scopes are requested incrementally
+- Sign out clears cached tokens for all Google plugins
+
+Requirements:
+- Google Cloud OAuth client of type **Desktop app**
+- Client ID and client secret
+- While the OAuth consent screen is in testing mode, add your Google account as a test user
+- Authorized redirect: loopback `http://127.0.0.1` (the plugin binds an ephemeral port)
+- `Network`, `UI`, `PluginServices` permissions
+
+Scopes:
+- Gmail: `gmail.readonly`, `gmail.modify`
+- Calendar: `calendar.readonly`, `calendar.events`
+- Chat: `chat.spaces.readonly`, `chat.messages.readonly`, `chat.messages.create`
+- Identity: `openid`, `email`, `profile`
+
+#### Gmail Integration (`AIA.Plugins.GoogleGmail`)
+
+Features:
+- Unread messages with sender, subject, snippet, and date
+- Open in Gmail, mark read
+- Create AIA tasks and reminders
+
+Requirements:
+- Google Account signed in with Gmail enabled
+- `Network`, `UI`, `PluginServices`, task/reminder permissions
+
+Sync:
+- Read state maps to AIA completion: AIA completed marks the message read, reopening marks it unread, and reading the message in Gmail completes the linked AIA task.
+
+#### Google Calendar Integration (`AIA.Plugins.GoogleCalendar`)
+
+Features:
+- Upcoming events from the primary calendar
+- Open events, create AIA tasks and reminders
+- Reminder due date defaults to event start
+
+Requirements:
+- Google Account signed in with Calendar enabled
+- `Network`, `UI`, `PluginServices`, task/reminder permissions
+
+Sync:
+- AIA due date maps to event start in both directions. Completion is not applicable.
+
+#### Google Chat Integration (`AIA.Plugins.GoogleChat`)
+
+Features:
+- Spaces and recent messages
+- Send messages, open spaces in Google Chat
+- Create AIA tasks and reminders
+
+Requirements:
+- Google Account signed in with Chat enabled
+- Google Workspace account with the Chat API enabled
+- `Network`, `UI`, `PluginServices`, task/reminder permissions
+
+Sync:
+- Spaces and messages have no completion or due date; links are one-way.
+
+#### Two-Way Task And Reminder Sync
+
+Only items explicitly sent to AIA from a plugin are linked. The sync engine keeps the link record in encrypted plugin settings.
+
+Synced fields:
+- Completion / closed state
+- Due date
+
+Conflict policy:
+- Source changed only: update AIA.
+- AIA changed only: update source.
+- Both changed: AIA wins.
+
+Not synced: title, body, priority, comments.
+
+| Plugin | Completion to AIA | AIA completed to source | Due date |
+|--------|-------------------|--------------------------|----------|
+| GitHub | Yes (issues) | Close/reopen issue | No |
+| Azure DevOps | Yes | Closed/Active | Yes |
+| Trello | Yes | `dueComplete` | Yes |
+| Asana | Yes | `completed` | Yes |
+| ClickUp | Yes | Closed/done status | Yes |
+| Notion | Database pages only | Configured property | Database pages only |
+| Confluence | No | No | No |
+| Gmail | Read state | Mark read/unread | No |
+| Google Calendar | No | No | Event start |
+| Google Chat | No | No | No |
+
+Manual validation checklist for each plugin:
+1. Save credentials or complete Google sign-in.
+2. Connect and load items.
+3. Open an item in the browser.
+4. Perform one write action (comment, mark read, complete, or send).
+5. Create an AIA task and a reminder from an item.
+6. Change completion and due date on both sides and refresh.
+7. Sign out or clear credentials and confirm the setup message returns.
+
+### Suggested Plugins
+
+Work-related integrations still worth adding:
+
+| App | Why it is a good fit |
+|-----|----------------------|
+| Linear | Fast issue search and creation for engineering teams |
+| Zoom | Upcoming meetings and one-click join, similar to the Teams meetings tab |
+| Mattermost / Zulip / Rocket.Chat | Self-hosted Slack alternatives with the same channel/message model |
+| Salesforce / ServiceNow | Case and ticket queues for support-oriented workflows |
+| HubSpot / Pipedrive | CRM follow-ups and deal tasks |
+| Google Drive / Dropbox | Find files and attach them to data bank entries |
 
 ### Creating a Plugin
 
@@ -779,7 +1075,23 @@ AIA/
 │   │   ├── PluginHostServices.cs
 │   │   └── Services/
 │   ├── Outlook/                        # Outlook plugin project
-│   └── Teams/                          # Teams plugin project
+│   ├── Teams/                          # Teams plugin project
+│   ├── Discord/                        # Discord plugin project
+│   ├── Slack/                          # Slack plugin project
+│   ├── Jira/                           # Jira plugin project
+│   ├── GitHub/                         # GitHub plugin project
+│   ├── AzureDevOps/                    # Azure DevOps plugin project
+│   ├── Trello/                         # Trello plugin project
+│   ├── Asana/                          # Asana plugin project
+│   ├── ClickUp/                        # ClickUp plugin project
+│   ├── Notion/                         # Notion plugin project
+│   ├── Confluence/                     # Confluence plugin project
+│   ├── GoogleAccount/                  # Shared Google OAuth provider
+│   ├── GoogleGmail/                    # Gmail plugin project
+│   ├── GoogleCalendar/                 # Google Calendar plugin project
+│   └── GoogleChat/                     # Google Chat plugin project
+├── Tests/
+│   └── AIA.Plugins.Tests/              # OAuth and sync unit tests
 ├── Resources/
 │   ├── SharedStyles.xaml               # Common styles
 │   ├── PluginTemplates.xaml            # Plugin UI templates
@@ -800,6 +1112,9 @@ dotnet build --configuration Release
 
 # Build all projects (including plugins)
 dotnet build AIA.sln
+
+# Run plugin OAuth and sync tests
+dotnet test Tests\AIA.Plugins.Tests\AIA.Plugins.Tests.csproj
 ```
 
 ### Dependencies
