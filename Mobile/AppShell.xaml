@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:pages="clr-namespace:AIA.Mobile.Pages"
+       x:Class="AIA.Mobile.AppShell"
+       Title="AIA"
+       FlyoutBehavior="Disabled">
+
+    <TabBar>
+        <ShellContent Title="Tasks" ContentTemplate="{DataTemplate pages:TasksPage}" Route="tasks" />
+        <ShellContent Title="Reminders" ContentTemplate="{DataTemplate pages:RemindersPage}" Route="reminders" />
+        <ShellContent Title="Calendar" ContentTemplate="{DataTemplate pages:CalendarPage}" Route="calendar" />
+        <ShellContent Title="Settings" ContentTemplate="{DataTemplate pages:SettingsPage}" Route="settings" />
+    </TabBar>
+</Shell>

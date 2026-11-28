@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../Shared/AIA.Sync.Contracts/AIA.Sync.Contracts.csproj" />
+  <Project Path="../Shared/AIA.Sync.Core/AIA.Sync.Core.csproj" />
+  <Project Path="AIA.Mobile.csproj" />
+</Solution>

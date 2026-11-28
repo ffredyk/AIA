@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AIA.Mobile.Pages.TasksPage"
+             Title="Tasks">
+    <Grid RowDefinitions="Auto,*" Padding="12">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Margin="0,0,0,8">
+            <Button Grid.Column="0" Text="Sync" Clicked="BtnSync" FontSize="12" Padding="12,6" />
+            <Label x:Name="StatusLabel" Grid.Column="1" VerticalTextAlignment="Center" FontSize="11"
+                   TextColor="{StaticResource MutedText}" LineBreakMode="TailTruncation" />
+            <Button Grid.Column="2" Text="New task" Clicked="BtnNew" FontSize="12" Padding="12,6" />
+        </Grid>
+
+        <RefreshView x:Name="Refresh" Grid.Row="1" Refreshing="OnRefreshing">
+            <CollectionView x:Name="TasksList" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="No tasks yet. Tap New task." TextColor="{StaticResource MutedText}"
+                           HorizontalTextAlignment="Center" Margin="0,40,0,0" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BackgroundColor="{StaticResource PanelBackground}" StrokeShape="RoundRectangle 8"
+                                Padding="12" Margin="0,0,0,8">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                                <VerticalStackLayout Grid.Column="0" Spacing="3">
+                                    <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="14" />
+                                    <Label Text="{Binding Description}" FontSize="11" TextColor="{StaticResource MutedText}"
+                                           LineBreakMode="TailTruncation" MaxLines="2" />
+                                    <Label Text="{Binding DueDate, StringFormat='Due {0:g}'}" FontSize="11"
+                                           TextColor="#66B3FF" />
+                                    <Label Text="{Binding Status}" FontSize="10" TextColor="{StaticResource MutedText}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1" Text="Done" FontSize="10" Padding="8,4"
+                                        Clicked="BtnComplete" CommandParameter="{Binding .}" />
+                                <Button Grid.Column="2" Text="Delete" FontSize="10" Padding="8,4"
+                                        BackgroundColor="#993333" Clicked="BtnDelete" CommandParameter="{Binding .}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

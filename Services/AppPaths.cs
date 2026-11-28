@@ -12,6 +12,7 @@ namespace AIA.Services
     public static class AppPaths
     {
         public const string AppFolderName = "AIA";
+        public const string DataRootEnvironmentVariable = "AIA_DATA_ROOT";
 
         private const string MigrationMarker = ".migrated";
         private const string StoragePathPointer = "data-path.txt";
@@ -29,9 +30,14 @@ namespace AIA.Services
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppFolderName);
 
         /// <summary>
-        /// Effective data root (default root or a custom path from settings).
+        /// Effective data root. An explicit AIA_DATA_ROOT value wins, then a custom path from
+        /// settings, then the default %LOCALAPPDATA% location.
         /// </summary>
-        public static string DataRoot => _dataRoot ?? DefaultDataRoot;
+        public static string DataRoot =>
+            _dataRoot ??
+            (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(DataRootEnvironmentVariable))
+                ? DefaultDataRoot
+                : Environment.GetEnvironmentVariable(DataRootEnvironmentVariable)!);
 
         public static string SettingsFolder => Path.Combine(DataRoot, "settings");
         public static string UserDataFolder => Path.Combine(DataRoot, "userdata");

@@ -10,7 +10,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  desktop:
 
     runs-on: windows-latest
 
@@ -24,3 +24,27 @@ jobs:
       run: dotnet restore AIA.sln
     - name: Build
       run: dotnet build AIA.sln --no-restore --configuration Release
+    - name: Test sync core
+      run: dotnet test Tests/AIA.Sync.Tests/AIA.Sync.Tests.csproj --no-restore --configuration Release
+
+  android:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: microsoft
+        java-version: '17'
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    - name: Install MAUI Android workload
+      run: dotnet workload install maui-android
+    - name: Build Android app
+      run: dotnet build Mobile/AIA.Mobile.csproj -f net10.0-android --configuration Release

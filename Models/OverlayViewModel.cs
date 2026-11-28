@@ -70,6 +70,7 @@ namespace AIA.Models
 
         private bool _tasksLoadFailed;
         private bool _remindersLoadFailed;
+        private bool _calendarEventsLoadFailed;
 
         // AI Orchestration service
         private AIOrchestrationService? _aiOrchestrationService;
@@ -185,6 +186,10 @@ namespace AIA.Models
         public ObservableCollection<TaskItem> Tasks { get; set; } = new ObservableCollection<TaskItem>();
 
         public ObservableCollection<ReminderItem> Reminders { get; set; } = new ObservableCollection<ReminderItem>();
+
+        public ObservableCollection<CalendarEventItem> CalendarEvents { get; set; } = new ObservableCollection<CalendarEventItem>();
+
+        public ObservableCollection<CalendarEventItem> SortedCalendarEvents { get; set; } = new ObservableCollection<CalendarEventItem>();
 
         // Chat message templates collection
         public ObservableCollection<ChatMessageTemplate> ChatMessageTemplates
@@ -1132,6 +1137,21 @@ namespace AIA.Models
                 SaveFailed?.Invoke(this, $"Reminder data could not be loaded. The file was preserved at '{ex.QuarantinedPath}'.");
             }
 
+            try
+            {
+                var events = await CalendarEventService.LoadEventsAsync();
+                foreach (var calendarEvent in events)
+                {
+                    CalendarEvents.Add(calendarEvent);
+                }
+            }
+            catch (DataLoadException ex)
+            {
+                _calendarEventsLoadFailed = true;
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                SaveFailed?.Invoke(this, $"Calendar data could not be loaded. The file was preserved at '{ex.QuarantinedPath}'.");
+            }
+
             if (Tasks.Count > 0 || Reminders.Count > 0)
             {
                 // Process recurring tasks
@@ -1161,15 +1181,17 @@ namespace AIA.Models
             }
 
             ApplyTaskFilter();
+            RefreshCalendarEvents();
         }
 
         /// <summary>
-        /// Saves all tasks and reminders to disk
+        /// Saves tasks, reminders, and calendar events to disk.
         /// </summary>
         public async Task SaveTasksAndRemindersAsync()
         {
             var tasks = Tasks.ToList();
             var reminders = Reminders.ToList();
+            var calendarEvents = CalendarEvents.ToList();
 
             if (!_tasksLoadFailed)
             {
@@ -1179,6 +1201,11 @@ namespace AIA.Models
             if (!_remindersLoadFailed)
             {
                 await TaskReminderService.SaveRemindersAsync(reminders).ConfigureAwait(false);
+            }
+
+            if (!_calendarEventsLoadFailed)
+            {
+                await CalendarEventService.SaveEventsAsync(calendarEvents).ConfigureAwait(false);
             }
         }
 
@@ -1910,6 +1937,72 @@ namespace AIA.Models
         public void CheckReminderNotifications()
         {
             _reminderNotificationService.CheckReminders();
+        }
+
+        #endregion
+
+        #region Calendar Methods
+
+        public void AddCalendarEvent(CalendarEventItem calendarEvent)
+        {
+            if (calendarEvent == null) return;
+
+            CalendarEvents.Add(calendarEvent);
+            RefreshCalendarEvents();
+            QueueTasksSave();
+        }
+
+        public void DeleteCalendarEvent(CalendarEventItem calendarEvent)
+        {
+            if (calendarEvent == null) return;
+
+            CalendarEvents.Remove(calendarEvent);
+            RefreshCalendarEvents();
+            QueueTasksSave();
+        }
+
+        public void UpdateCalendarEvent(CalendarEventItem calendarEvent)
+        {
+            if (calendarEvent == null) return;
+
+            var existing = CalendarEvents.FirstOrDefault(e => e.Id == calendarEvent.Id);
+            if (existing == null)
+            {
+                CalendarEvents.Add(calendarEvent);
+            }
+            else
+            {
+                existing.Title = calendarEvent.Title;
+                existing.Description = calendarEvent.Description;
+                existing.Location = calendarEvent.Location;
+                existing.Start = calendarEvent.Start;
+                existing.End = calendarEvent.End;
+                existing.IsAllDay = calendarEvent.IsAllDay;
+                existing.RecurrenceType = calendarEvent.RecurrenceType;
+                existing.RecurrenceInterval = calendarEvent.RecurrenceInterval;
+                existing.RecurrenceEndDate = calendarEvent.RecurrenceEndDate;
+                existing.ReminderMinutesBefore = calendarEvent.ReminderMinutesBefore;
+            }
+
+            RefreshCalendarEvents();
+            QueueTasksSave();
+        }
+
+        /// <summary>
+        /// Rebuilds the sorted agenda list. Call after editing an event.
+        /// </summary>
+        public void RefreshCalendarEvents()
+        {
+            var sorted = CalendarEvents
+                .OrderBy(e => e.Start)
+                .ThenBy(e => e.Title)
+                .ToList();
+
+            SortedCalendarEvents.Clear();
+            foreach (var item in sorted)
+            {
+                SortedCalendarEvents.Add(item);
+            }
         }
 
         #endregion

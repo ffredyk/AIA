@@ -924,6 +924,160 @@
                 </ScrollViewer>
             </TabItem>
             
+            <!-- Mobile Tab -->
+            <TabItem Header="{local:Localize Settings_Mobile}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="640" HorizontalAlignment="Left">
+
+                        <TextBlock Text="{local:Localize Settings_MobileSync}" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="White" Margin="0,0,0,6"/>
+                        <TextBlock Text="{local:Localize Settings_MobileSyncDescription}" Foreground="#999999"
+                                   FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+                        <Border Padding="12,10" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{local:Localize Settings_MobileEnable}" Foreground="White" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{local:Localize Settings_MobileEnableDesc}" Foreground="#999999"
+                                               FontSize="11" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <CheckBox x:Name="ChkMobileSyncEnabled" Grid.Column="1" VerticalAlignment="Center"
+                                          Checked="ChkMobileSyncEnabled_Changed" Unchecked="ChkMobileSyncEnabled_Changed"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Padding="12" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,12">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock x:Name="TxtMobileStatus" Text="{local:Localize Settings_MobileStopped}"
+                                                   Foreground="White" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="TxtMobileLocalUrl" Foreground="#66B3FF" FontSize="11" Margin="0,2,0,0"/>
+                                        <TextBlock x:Name="TxtMobilePublicUrlStatus" Foreground="#999999" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <ui:Button Grid.Column="1" Padding="12,6" Click="BtnRefreshMobileStatus_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="ArrowSync20" FontSize="14"/>
+                                            <TextBlock Text="{local:Localize Settings_MobileRefresh}" Margin="6,0,0,0"/>
+                                        </StackPanel>
+                                    </ui:Button>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="140"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="{local:Localize Settings_MobileBindAddress}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtMobileBindAddress" Background="#3E3E42" Foreground="White"
+                                         BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="{local:Localize Settings_MobilePort}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtMobilePort" Background="#3E3E42" Foreground="White"
+                                         BorderBrush="#555555" Padding="8"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <CheckBox x:Name="ChkMobileAllowLan" Content="{local:Localize Settings_MobileAllowLan}"
+                                  Foreground="White" Margin="0,0,0,8"/>
+                        <TextBlock Text="{local:Localize Settings_MobileAllowLanDesc}" Foreground="#999999"
+                                   FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="{local:Localize Settings_MobilePublicUrl}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                        <TextBox x:Name="TxtMobilePublicUrl" Background="#3E3E42" Foreground="White"
+                                 BorderBrush="#555555" Padding="8" Margin="0,0,0,12"/>
+                        <TextBlock Text="{local:Localize Settings_MobilePublicUrlDesc}" Foreground="#999999"
+                                   FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+                        <CheckBox x:Name="ChkMobileUseHttps" Content="{local:Localize Settings_MobileUseHttps}"
+                                  Foreground="White" Margin="0,0,0,8"/>
+                        <TextBlock Text="{local:Localize Settings_MobileHttpsDesc}" Foreground="#999999"
+                                   FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                        <TextBlock Text="{local:Localize Settings_MobileCertificatePath}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                        <TextBox x:Name="TxtMobileCertificatePath" Background="#3E3E42" Foreground="White"
+                                 BorderBrush="#555555" Padding="8" Margin="0,0,0,8"/>
+
+                        <TextBlock Text="{local:Localize Settings_MobileCertificatePassword}" Foreground="#999999" FontSize="11" Margin="0,0,0,4"/>
+                        <PasswordBox x:Name="PwdMobileCertificatePassword" Background="#3E3E42" Foreground="White"
+                                     BorderBrush="#555555" Padding="8" Margin="0,0,0,12"/>
+
+                        <CheckBox x:Name="ChkMobileMirrorDueReminders" Content="{local:Localize Settings_MobileMirrorDueReminders}"
+                                  Foreground="White" Margin="0,0,0,16"/>
+
+                        <TextBlock Text="{local:Localize Settings_MobilePairing}" FontSize="14" FontWeight="SemiBold"
+                                   Foreground="White" Margin="0,0,0,8"/>
+                        <Border Padding="12" CornerRadius="6" Background="#2D2D30" Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="180" Height="180" Background="White" CornerRadius="4" Padding="6">
+                                    <Image x:Name="ImgPairingQr" Stretch="Uniform"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="16,0,0,0">
+                                    <TextBlock Text="{local:Localize Settings_MobilePairingHint}" Foreground="#999999"
+                                               FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="TxtPairingCode" FontSize="26" FontWeight="SemiBold" Foreground="White"/>
+                                    <TextBlock x:Name="TxtPairingExpiry" Foreground="#999999" FontSize="11" Margin="0,4,0,8"/>
+                                    <ui:Button Click="BtnGeneratePairing_Click" Padding="12,6" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="QrCode20" FontSize="14"/>
+                                            <TextBlock Text="{local:Localize Settings_MobileGenerateCode}" Margin="6,0,0,0"/>
+                                        </StackPanel>
+                                    </ui:Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="{local:Localize Settings_MobileDevices}" FontSize="14" FontWeight="SemiBold"
+                                   Foreground="White" Margin="0,0,0,8"/>
+                        <Border CornerRadius="6" Background="#2D2D30" Padding="8">
+                            <ItemsControl x:Name="MobileDevicesList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="8,6" BorderBrush="#3E3E42" BorderThickness="0,0,0,1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding DeviceName}" Foreground="White" FontWeight="SemiBold"/>
+                                                    <TextBlock Foreground="#999999" FontSize="11">
+                                                        <Run Text="{Binding LastSeenUtc, StringFormat={}{0:g}}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <ui:Button Grid.Column="1" Tag="{Binding DeviceId}"
+                                                           Click="BtnRevokeMobileDevice_Click" Padding="10,5"
+                                                           Content="{local:Localize Settings_MobileRevoke}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+
+                        <TextBlock Text="{local:Localize Settings_MobileSecurity}" Foreground="#FFA500"
+                                   FontSize="11" TextWrapping="Wrap" Margin="0,12,0,0"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <!-- Data Tab -->
             <TabItem Header="{local:Localize Settings_Data}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">

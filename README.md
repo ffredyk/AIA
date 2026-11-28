@@ -67,6 +67,22 @@
   - Configurable check intervals
   - Optional sound alerts
 
+### 📅 Calendar
+- **Agenda View**: See upcoming events in a sorted list
+- **Event Editor**: Title, description, location, all-day, start/end, recurrence, reminder offset
+- **Local Storage**: Events persist in `userdata/calendar-events.json`
+- **Mobile Sync**: Calendar events sync with the Android companion app
+
+### 📱 Android Companion
+- **Two-Way Sync**: Tasks, reminders, and calendar events over HTTPS
+- **Offline First**: Local SQLite store with revision-based conflict handling
+- **Pairing**: One-time code and QR deep link, per-device revocable tokens
+- **Phone Calendar**: Mirror events and due reminders into a local `AIA` calendar
+- **Notifications**: Local reminder and event notifications
+- **Public Access**: Designed for Cloudflare Tunnel, Tailscale Funnel, or a reverse proxy
+
+See [docs/mobile-sync.md](docs/mobile-sync.md) for setup and security details.
+
 ### 🗂️ Data Banks
 - **Organized Categories**: Create custom categories with color coding
 - **Multiple Entry Types**:
@@ -236,7 +252,8 @@ The AI assistant can perform actions on your behalf:
 ## System Requirements
 
 - **Operating System**: Windows 10 (Build 22000+) or Windows 11
-- **Runtime**: .NET 10.0 Runtime
+- **Runtime**: .NET 10.0 Runtime + ASP.NET Core Runtime 10 for mobile sync
+- **Optional**: .NET 10 SDK, `maui-android` workload, JDK 17, Android SDK for the Android app
 - **Optional**: Microsoft Outlook (for Outlook plugin)
 - **Optional**: Microsoft Teams (for Teams plugin)
 - **Optional**: AI Provider API keys (OpenAI, Azure, Google, Anthropic)
@@ -247,7 +264,9 @@ The AI assistant can perform actions on your behalf:
 
 ### Prerequisites
 
-1. Install [.NET 10.0 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
+1. Install [.NET 10.0 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) and the ASP.NET Core Runtime 10
+   (the mobile sync API uses the ASP.NET Core shared framework). A self-contained AIA build includes both.
+2. Optional Android app: install the .NET 10 SDK, run `dotnet workload install maui-android`, and install JDK 17.
 
 ### From Source
 
@@ -289,13 +308,15 @@ On first run, AIA creates its data directory under `%LOCALAPPDATA%\AIA` (older b
 ├── userdata/               # User data
 │   ├── tasks.json          # Task data
 │   ├── reminders.json      # Reminder data
+│   ├── calendar-events.json # Calendar events
+│   ├── sync-journal.json   # Mobile sync revisions/tombstones
 │   ├── chats.json          # Chat history
 │   └── chat-images/        # Persisted chat image attachments
 ├── backups/                # Application backups
 └── Plugins/                # Plugin configuration and per-plugin data
 ```
 
-Plugin assemblies are still loaded from `<install dir>\Plugins`; their configuration lives under `%LOCALAPPDATA%\AIA\Plugins`. A custom data location can be set in **Settings → Data** (requires a restart).
+Plugin assemblies are still loaded from `<install dir>\Plugins`; their configuration lives under `%LOCALAPPDATA%\AIA\Plugins`. A custom data location can be set in **Settings → Data** (requires a restart). Mobile device tokens live in `%LOCALAPPDATA%\AIA\settings\mobile-sync-devices.json` and are DPAPI-encrypted.
 
 ---
 
@@ -836,7 +857,8 @@ dotnet build AIA.sln
 
 All data is stored locally in the application directory:
 
-- **Tasks & Reminders**: `userdata/tasks.json`, `userdata/reminders.json`
+- **Tasks, Reminders & Calendar**: `userdata/tasks.json`, `userdata/reminders.json`, `userdata/calendar-events.json`
+- **Mobile Sync**: `userdata/sync-journal.json` and DPAPI-encrypted `settings/mobile-sync-devices.json`
 - **Chats**: `userdata/chats.json` (messages incl. image references) + `userdata/chat-images/*.png`
 - **Data Banks**: `databanks/metadata.json` + files in `databanks/files/`
 - **Screenshots**: `screenshots/*.png`
@@ -981,14 +1003,14 @@ All paths are relative to the data root (`%LOCALAPPDATA%\AIA` by default). Write
 
 ### Planned Features
 - [ ] Cloud sync (optional)
-- [ ] Mobile companion app
+- [x] Mobile companion app (Android, local/HTTPS sync)
+- [x] Calendar integration (desktop calendar + Android sync)
 - [ ] More built-in plugins (GitHub, Slack, Discord)
 - [ ] Advanced task analytics and insights
 - [ ] Voice commands
 - [ ] Multi-monitor support
 - [ ] Themes and customization
 - [ ] Natural language task/reminder creation
-- [ ] Calendar integration
 - [ ] Collaboration features
 
 ---

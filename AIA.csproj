@@ -31,28 +31,48 @@
   <ItemGroup>
     <PackageReference Include="NHotkey.Wpf" Version="3.0.0" />
     <PackageReference Include="PdfPig" Version="0.1.10" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
     <PackageReference Include="WPF-UI" Version="4.0.3" />
   </ItemGroup>
 
   <!-- Reference the SDK project for plugin host functionality -->
   <ItemGroup>
     <ProjectReference Include="Plugins\SDK\AIA.Plugins.SDK.csproj" />
+    <ProjectReference Include="Shared\AIA.Sync.Contracts\AIA.Sync.Contracts.csproj" />
+    <ProjectReference Include="Shared\AIA.Sync.Core\AIA.Sync.Core.csproj" />
   </ItemGroup>
 
-  <!-- Exclude all plugin subfolders from compilation - they are now separate projects -->
+  <!-- Embedded mobile sync API. Adds the ASP.NET Core shared framework requirement. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- Exclude all plugin, shared, mobile, and test subfolders from the WPF compile -->
   <ItemGroup>
     <Compile Remove="Plugins\Outlook\**" />
     <Compile Remove="Plugins\Teams\**" />
     <Compile Remove="Plugins\SDK\**" />
+    <Compile Remove="Shared\**" />
+    <Compile Remove="Mobile\**" />
+    <Compile Remove="Tests\**" />
     <None Remove="Plugins\Outlook\**" />
     <None Remove="Plugins\Teams\**" />
     <None Remove="Plugins\SDK\**" />
+    <None Remove="Shared\**" />
+    <None Remove="Mobile\**" />
+    <None Remove="Tests\**" />
     <EmbeddedResource Remove="Plugins\Outlook\**" />
     <EmbeddedResource Remove="Plugins\Teams\**" />
     <EmbeddedResource Remove="Plugins\SDK\**" />
+    <EmbeddedResource Remove="Shared\**" />
+    <EmbeddedResource Remove="Mobile\**" />
+    <EmbeddedResource Remove="Tests\**" />
     <Page Remove="Plugins\Outlook\**" />
     <Page Remove="Plugins\Teams\**" />
     <Page Remove="Plugins\SDK\**" />
+    <Page Remove="Shared\**" />
+    <Page Remove="Mobile\**" />
+    <Page Remove="Tests\**" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\Strings.de-de.resx">
