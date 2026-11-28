@@ -1037,4 +1037,52 @@
   <data name="MiniTaskOverlay_ActiveTaskSingular" xml:space="preserve"><value>{0} aktive Aufgabe</value></data>
   <data name="MiniTaskOverlay_ActiveTaskCount" xml:space="preserve"><value>{0} aktive Aufgaben</value></data>
   <data name="MiniTaskOverlay_MoreTasks" xml:space="preserve"><value>+{0} weitere</value></data>
+  <data name="Tab_Calendar" xml:space="preserve"><value>Kalender</value></data>
+  <data name="Calendar_NewEvent" xml:space="preserve"><value>Neuer Termin</value></data>
+  <data name="Calendar_EditEvent" xml:space="preserve"><value>Termin bearbeiten</value></data>
+  <data name="Calendar_DeleteEvent" xml:space="preserve"><value>Termin löschen</value></data>
+  <data name="Calendar_EventTitle" xml:space="preserve"><value>Termin</value></data>
+  <data name="Calendar_EventDetails" xml:space="preserve"><value>Termindetails</value></data>
+  <data name="Calendar_Title" xml:space="preserve"><value>Titel</value></data>
+  <data name="Calendar_TitlePlaceholder" xml:space="preserve"><value>Titel eingeben</value></data>
+  <data name="Calendar_Description" xml:space="preserve"><value>Beschreibung</value></data>
+  <data name="Calendar_Location" xml:space="preserve"><value>Ort</value></data>
+  <data name="Calendar_LocationPlaceholder" xml:space="preserve"><value>Ort eingeben</value></data>
+  <data name="Calendar_AllDay" xml:space="preserve"><value>Ganztägig</value></data>
+  <data name="Calendar_Start" xml:space="preserve"><value>Beginn</value></data>
+  <data name="Calendar_StartTime" xml:space="preserve"><value>Startzeit</value></data>
+  <data name="Calendar_End" xml:space="preserve"><value>Ende</value></data>
+  <data name="Calendar_EndTime" xml:space="preserve"><value>Endzeit</value></data>
+  <data name="Calendar_ReminderMinutes" xml:space="preserve"><value>Erinnerung (Minuten vorher)</value></data>
+  <data name="RecurrenceType_None" xml:space="preserve"><value>Keine</value></data>
+  <data name="Tasks_RepeatEvery" xml:space="preserve"><value>Wiederholen alle</value></data>
+  <data name="Settings_Mobile" xml:space="preserve"><value>Mobil</value></data>
+  <data name="Settings_MobileSync" xml:space="preserve"><value>Mobilsynchronisierung</value></data>
+  <data name="Settings_MobileSyncDescription" xml:space="preserve"><value>AIA-Android-App über LAN oder einen öffentlichen HTTPS-Tunnel verbinden.</value></data>
+  <data name="Settings_MobileEnable" xml:space="preserve"><value>Mobilsynchronisierung aktivieren</value></data>
+  <data name="Settings_MobileEnableDesc" xml:space="preserve"><value>Startet die eingebettete API, wenn Einstellungen gespeichert werden.</value></data>
+  <data name="Settings_MobileStopped" xml:space="preserve"><value>Gestoppt</value></data>
+  <data name="Settings_MobileRunning" xml:space="preserve"><value>Aktiv</value></data>
+  <data name="Settings_MobileRefresh" xml:space="preserve"><value>Aktualisieren</value></data>
+  <data name="Settings_MobileBindAddress" xml:space="preserve"><value>Bindeadresse</value></data>
+  <data name="Settings_MobilePort" xml:space="preserve"><value>Port</value></data>
+  <data name="Settings_MobileAllowLan" xml:space="preserve"><value>LAN-Zugriff erlauben</value></data>
+  <data name="Settings_MobileAllowLanDesc" xml:space="preserve"><value>Wenn deaktiviert, bindet der Server nur Loopback für Tunnelbetrieb.</value></data>
+  <data name="Settings_MobilePublicUrl" xml:space="preserve"><value>Öffentliche Basis-URL</value></data>
+  <data name="Settings_MobilePublicUrlDesc" xml:space="preserve"><value>HTTPS-URL für den Pairing-QR-Code, z. B. eine Cloudflare-Tunnel-URL.</value></data>
+  <data name="Settings_MobileUseHttps" xml:space="preserve"><value>HTTPS verwenden</value></data>
+  <data name="Settings_MobileHttpsDesc" xml:space="preserve"><value>Nur mit PFX-Zertifikat aktivieren. Öffentliche Bereitstellungen sollten TLS am Tunnel oder Reverse-Proxy beenden.</value></data>
+  <data name="Settings_MobileCertificatePath" xml:space="preserve"><value>Zertifikatspfad</value></data>
+  <data name="Settings_MobileCertificatePassword" xml:space="preserve"><value>Zertifikatspasswort</value></data>
+  <data name="Settings_MobileMirrorDueReminders" xml:space="preserve"><value>Fällige Erinnerungen im Telefonkalender spiegeln</value></data>
+  <data name="Settings_MobilePairing" xml:space="preserve"><value>Kopplung</value></data>
+  <data name="Settings_MobilePairingHint" xml:space="preserve"><value>QR-Code in der Android-App scannen oder Code manuell eingeben. Der Code läuft nach 5 Minuten ab.</value></data>
+  <data name="Settings_MobileGenerateCode" xml:space="preserve"><value>Code erzeugen</value></data>
+  <data name="Settings_MobileDevices" xml:space="preserve"><value>Verbundene Geräte</value></data>
+  <data name="Settings_MobileRevoke" xml:space="preserve"><value>Widerrufen</value></data>
+  <data name="Settings_MobileSecurity" xml:space="preserve"><value>Niemals unverschlüsseltes HTTP ins Internet stellen. HTTPS am Tunnel oder Reverse-Proxy verwenden.</value></data>
+  <data name="Settings_MobileNoPublicUrl" xml:space="preserve"><value>Keine öffentliche URL konfiguriert</value></data>
+  <data name="Settings_MobileStartFirst" xml:space="preserve"><value>Zuerst die Mobilsynchronisierung starten.</value></data>
+  <data name="Settings_MobileCodeExpires" xml:space="preserve"><value>Läuft ab um {0}</value></data>
+  <data name="Settings_MobileRevokeConfirm" xml:space="preserve"><value>Dieses Gerät widerrufen?</value></data>
 </root>

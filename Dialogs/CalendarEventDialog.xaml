@@ -1,0 +1,103 @@
+<ui:FluentWindow x:Class="AIA.Dialogs.CalendarEventDialog"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:local="clr-namespace:AIA"
+                Title="{local:Localize Calendar_EventTitle}"
+                Width="560" Height="660"
+                WindowStartupLocation="CenterOwner"
+                ResizeMode="NoResize"
+                Background="#1E1E1E">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{local:Localize Calendar_EventDetails}" FontSize="16" FontWeight="SemiBold"
+                   Foreground="White" Margin="0,0,0,16"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="{local:Localize Calendar_Title}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                <ui:TextBox x:Name="TxtTitle" PlaceholderText="{local:Localize Calendar_TitlePlaceholder}" Margin="0,0,0,12"/>
+
+                <TextBlock Text="{local:Localize Calendar_Description}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                <TextBox x:Name="TxtDescription" Height="80" TextWrapping="Wrap" AcceptsReturn="True"
+                         Background="#2D2D30" Foreground="White" BorderBrush="#555555" Padding="8" Margin="0,0,0,12"/>
+
+                <TextBlock Text="{local:Localize Calendar_Location}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                <ui:TextBox x:Name="TxtLocation" PlaceholderText="{local:Localize Calendar_LocationPlaceholder}" Margin="0,0,0,12"/>
+
+                <CheckBox x:Name="ChkAllDay" Content="{local:Localize Calendar_AllDay}" Foreground="White"
+                          Margin="0,0,0,12" Checked="ChkAllDay_Changed" Unchecked="ChkAllDay_Changed"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{local:Localize Calendar_Start}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                        <DatePicker x:Name="DpStart" Background="#2D2D30"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="{local:Localize Calendar_StartTime}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                        <ui:TextBox x:Name="TxtStartTime" Text="09:00" PlaceholderText="HH:mm"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="{local:Localize Calendar_EndTime}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                        <ui:TextBox x:Name="TxtEndTime" Text="10:00" PlaceholderText="HH:mm"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="{local:Localize Calendar_End}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                <DatePicker x:Name="DpEnd" Background="#2D2D30" Margin="0,0,0,12"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{local:Localize Tasks_RecurrenceType}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbRecurrence" Background="#2D2D30" Foreground="White">
+                            <ComboBoxItem Content="{local:Localize RecurrenceType_None}" Tag="None" IsSelected="True"/>
+                            <ComboBoxItem Content="{local:Localize RecurrenceType_Daily}" Tag="Daily"/>
+                            <ComboBoxItem Content="{local:Localize RecurrenceType_Weekly}" Tag="Weekly"/>
+                            <ComboBoxItem Content="{local:Localize RecurrenceType_Monthly}" Tag="Monthly"/>
+                            <ComboBoxItem Content="{local:Localize RecurrenceType_Yearly}" Tag="Yearly"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="{local:Localize Tasks_RepeatEvery}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                        <ui:NumberBox x:Name="NumInterval" Value="1" Minimum="1" Maximum="365" Background="#2D2D30"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="{local:Localize Calendar_ReminderMinutes}" Foreground="#CCCCCC" FontSize="11" Margin="0,0,0,4"/>
+                <ui:NumberBox x:Name="NumReminder" Value="15" Minimum="0" Maximum="10080" Background="#2D2D30"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <ui:Button Grid.Column="1" Content="{local:Localize Common_OK}" Appearance="Primary"
+                       Click="BtnOK" Padding="24,8" Margin="0,0,8,0"/>
+            <ui:Button Grid.Column="2" Content="{local:Localize Common_Cancel}" Click="BtnCancel" Padding="24,8"/>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

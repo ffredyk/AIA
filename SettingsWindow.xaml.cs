@@ -2,18 +2,22 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using AIA.Models;
 using AIA.Plugins.Host;
 using AIA.Services;
+using QRCoder;
 
 // Resolve ambiguous references
 using WpfKeyEventArgs = System.Windows.Input.KeyEventArgs;
 using WpfColor = System.Windows.Media.Color;
+using WpfMessageBox = System.Windows.MessageBox;
 
 namespace AIA
 {
@@ -165,6 +169,19 @@ namespace AIA
             ChkAutoBackup.IsChecked = _appSettings.EnableAutoBackup;
             TxtBackupInterval.Text = _appSettings.AutoBackupIntervalHours.ToString();
             TxtMaxBackups.Text = _appSettings.MaxBackupCount.ToString();
+
+            // Mobile tab
+            var mobile = _appSettings.MobileSync ?? new MobileSyncSettings();
+            ChkMobileSyncEnabled.IsChecked = mobile.Enabled;
+            TxtMobileBindAddress.Text = mobile.BindAddress;
+            TxtMobilePort.Text = mobile.Port.ToString();
+            ChkMobileAllowLan.IsChecked = mobile.AllowLan;
+            TxtMobilePublicUrl.Text = mobile.PublicBaseUrl;
+            ChkMobileUseHttps.IsChecked = mobile.UseHttps;
+            TxtMobileCertificatePath.Text = mobile.CertificatePath;
+            PwdMobileCertificatePassword.Password = SecretProtector.Unprotect(mobile.CertificatePassword);
+            ChkMobileMirrorDueReminders.IsChecked = mobile.MirrorDueReminders;
+            _ = RefreshMobileStatusAsync();
         }
 
         private void LoadSystemInfo()
@@ -778,6 +795,9 @@ namespace AIA
 
                 ApplyLiveSettings();
 
+                await App.Current.ApplyMobileSyncSettingsAsync();
+                await RefreshMobileStatusAsync();
+
                 StatusText.Text = LocalizationService.Instance.GetString("Status_SettingsSaved");
             }
             catch (Exception ex)
@@ -885,6 +905,26 @@ namespace AIA
             liveNotificationSettings.ExpiredCheckSeconds = _appSettings.NotificationSettings.ExpiredCheckSeconds;
 
             OverlayViewModel.Singleton.ApplyNotificationSettings();
+
+            // Mobile sync settings
+            var mobile = _appSettings.MobileSync ?? new MobileSyncSettings();
+            mobile.Enabled = ChkMobileSyncEnabled.IsChecked ?? false;
+            mobile.AllowLan = ChkMobileAllowLan.IsChecked ?? false;
+            mobile.BindAddress = (TxtMobileBindAddress.Text ?? string.Empty).Trim();
+            if (mobile.AllowLan && (mobile.BindAddress is "" or "127.0.0.1" or "localhost"))
+                mobile.BindAddress = "0.0.0.0";
+            if (!mobile.AllowLan && mobile.BindAddress is "0.0.0.0" or "::")
+                mobile.BindAddress = "127.0.0.1";
+
+            if (int.TryParse(TxtMobilePort.Text, out var mobilePort))
+                mobile.Port = mobilePort;
+
+            mobile.PublicBaseUrl = TxtMobilePublicUrl.Text?.Trim() ?? string.Empty;
+            mobile.UseHttps = ChkMobileUseHttps.IsChecked ?? false;
+            mobile.CertificatePath = TxtMobileCertificatePath.Text?.Trim() ?? string.Empty;
+            mobile.CertificatePassword = SecretProtector.Protect(PwdMobileCertificatePassword.Password);
+            mobile.MirrorDueReminders = ChkMobileMirrorDueReminders.IsChecked ?? true;
+            _appSettings.MobileSync = mobile;
         }
 
         private void ApplyLiveSettings()
@@ -905,6 +945,141 @@ namespace AIA
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        #endregion
+
+        #region Mobile Sync
+
+        private void ChkMobileSyncEnabled_Changed(object sender, RoutedEventArgs e)
+        {
+            // The server is (re)started when settings are saved.
+        }
+
+        private async void BtnRefreshMobileStatus_Click(object sender, RoutedEventArgs e)
+        {
+            await RefreshMobileStatusAsync();
+        }
+
+        private async Task RefreshMobileStatusAsync()
+        {
+            var mobile = _appSettings.MobileSync ?? new MobileSyncSettings();
+            var server = App.Current.MobileSyncServer;
+
+            if (server == null)
+            {
+                TxtMobileStatus.Text = LocalizationService.Instance.GetString("Settings_MobileStopped");
+                TxtMobileStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(0x99, 0x99, 0x99));
+                TxtMobileLocalUrl.Text = mobile.LocalBaseUrl;
+                TxtMobilePublicUrlStatus.Text = string.IsNullOrWhiteSpace(mobile.PublicBaseUrl)
+                    ? LocalizationService.Instance.GetString("Settings_MobileNoPublicUrl")
+                    : mobile.PublicBaseUrl;
+
+                if (!string.IsNullOrWhiteSpace(settingsError))
+                {
+                    TxtMobileStatus.Text = settingsError;
+                    TxtMobileStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(0xFF, 0x44, 0x44));
+                }
+
+                MobileDevicesList.ItemsSource = null;
+                return;
+            }
+
+            TxtMobileStatus.Text = LocalizationService.Instance.GetString("Settings_MobileRunning");
+            TxtMobileStatus.Foreground = new SolidColorBrush(WpfColor.FromRgb(0x1E, 0xB7, 0x5F));
+            TxtMobileLocalUrl.Text = server.LocalBaseUrl;
+            TxtMobilePublicUrlStatus.Text = string.IsNullOrWhiteSpace(mobile.PublicBaseUrl)
+                ? LocalizationService.Instance.GetString("Settings_MobileNoPublicUrl")
+                : mobile.PublicBaseUrl;
+
+            try
+            {
+                MobileDevicesList.ItemsSource = await server.Devices.GetDevicesAsync();
+            }
+            catch (Exception ex)
+            {
+                TxtMobileStatus.Text = ex.Message;
+            }
+        }
+
+        private string? settingsError => App.Current.MobileSyncServer?.LastError;
+
+        private void BtnGeneratePairing_Click(object sender, RoutedEventArgs e)
+        {
+            var server = App.Current.MobileSyncServer;
+            if (server == null)
+            {
+                WpfMessageBox.Show(
+                    LocalizationService.Instance.GetString("Settings_MobileStartFirst"),
+                    LocalizationService.Instance.GetString("Settings_Mobile"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                var payload = server.CreatePairingPayload();
+                var uri = new Uri(payload);
+                var code = ExtractQuery(uri.Query, "code");
+                TxtPairingCode.Text = code;
+                TxtPairingExpiry.Text = string.Format(
+                    LocalizationService.Instance.GetString("Settings_MobileCodeExpires"),
+                    DateTime.Now.AddMinutes(5).ToString("HH:mm"));
+                ImgPairingQr.Source = CreateQrImage(payload);
+            }
+            catch (Exception ex)
+            {
+                TxtPairingCode.Text = string.Empty;
+                TxtPairingExpiry.Text = ex.Message;
+            }
+        }
+
+        private async void BtnRevokeMobileDevice_Click(object sender, RoutedEventArgs e)
+        {
+            var server = App.Current.MobileSyncServer;
+            if (server == null || sender is not FrameworkElement { Tag: string deviceId })
+                return;
+
+            var result = WpfMessageBox.Show(
+                LocalizationService.Instance.GetString("Settings_MobileRevokeConfirm"),
+                LocalizationService.Instance.GetString("Settings_Mobile"),
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            await server.Devices.RevokeAsync(deviceId);
+            await RefreshMobileStatusAsync();
+        }
+
+        private static string ExtractQuery(string query, string key)
+        {
+            foreach (var pair in query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var parts = pair.Split('=', 2);
+                if (parts.Length == 2 && string.Equals(parts[0], key, StringComparison.OrdinalIgnoreCase))
+                    return Uri.UnescapeDataString(parts[1]);
+            }
+
+            return string.Empty;
+        }
+
+        private static BitmapImage CreateQrImage(string payload)
+        {
+            using var generator = new QRCodeGenerator();
+            using var data = generator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
+            var png = new PngByteQRCode(data).GetGraphic(6);
+
+            using var stream = new MemoryStream(png);
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.StreamSource = stream;
+            image.EndInit();
+            image.Freeze();
+            return image;
         }
 
         #endregion

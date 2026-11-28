@@ -16,6 +16,14 @@
 # Mono auto generated files
 mono_crash.*
 
+# Android build artifacts and signing material
+*.apk
+*.aab
+*.keystore
+*.jks
+.idea/
+*.iml
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

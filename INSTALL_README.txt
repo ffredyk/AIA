@@ -11,7 +11,8 @@ proceeding with the installation.
 --------------------------------------------------------------------------------
 
   • Operating System: Windows 10 (Build 22000+) or Windows 11
-  • Runtime: .NET 10.0 Runtime (will be installed if not present)
+  • Runtime: .NET 10.0 Runtime and ASP.NET Core Runtime 10
+    (installed automatically, or included in a self-contained build)
   • Disk Space: Approximately 150 MB
   • Memory: 4 GB RAM minimum (8 GB recommended)
 
@@ -40,8 +41,8 @@ AIA will install the following components:
      - databanks/      : Data bank storage
      - screenshots/    : Saved screen captures
      - backups/        : Application backups
-     - settings/       : Application settings and templates
-     - userdata/       : Tasks, reminders, chats
+     - settings/       : Application settings, templates, mobile device tokens
+     - userdata/       : Tasks, reminders, calendar events, chats, sync journal
      - automations/    : Automation definitions and history
      - screenshots/    : Saved screen captures
 
@@ -51,6 +52,8 @@ AIA will install the following components:
 
   ✓ Task Management - Hierarchical tasks with priorities and due dates
   ✓ Smart Reminders - Desktop notifications with snooze functionality
+  ✓ Calendar - Agenda view and event management
+  ✓ Android Sync - Two-way tasks, reminders, and calendar over HTTPS
   ✓ Data Banks - Organize documents, images, and text content
   ✓ Screen Capture - Full screen and window capture with quick save
   ✓ AI Chat - Multi-provider AI integration (OpenAI, Azure, Gemini, Claude)

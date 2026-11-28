@@ -23,6 +23,7 @@ namespace AIA.Models
         private double _overlayOpacity = 1.0; // Default: fully opaque
         private MiniTaskOverlaySettings _miniTaskOverlay = new();
         private WindowsIntegrationSettings _windowsIntegration = new();
+        private MobileSyncSettings _mobileSync = new();
         
         // Clipboard history settings
         private bool _enableClipboardHistory = true;
@@ -168,6 +169,15 @@ namespace AIA.Models
         {
             get => _windowsIntegration;
             set { _windowsIntegration = value ?? new WindowsIntegrationSettings(); OnPropertyChanged(nameof(WindowsIntegration)); }
+        }
+
+        /// <summary>
+        /// Android/mobile sync API settings
+        /// </summary>
+        public MobileSyncSettings MobileSync
+        {
+            get => _mobileSync;
+            set { _mobileSync = value ?? new MobileSyncSettings(); OnPropertyChanged(nameof(MobileSync)); }
         }
 
         #region Clipboard History Settings

@@ -73,6 +73,17 @@
                         </TabItem.Header>
                         <views:RemindersTabView x:Name="RemindersTab"/>
                     </TabItem>
+
+                    <!-- Calendar Tab -->
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Margin="0,0,6,0" Symbol="Calendar20" />
+                                <TextBlock Text="{local:Localize Tab_Calendar}" />
+                            </StackPanel>
+                        </TabItem.Header>
+                        <views:CalendarTabView x:Name="CalendarTab"/>
+                    </TabItem>
                     
                     <!-- Data Banks Tab -->
                     <TabItem>

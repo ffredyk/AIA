@@ -8,6 +8,8 @@ using System.Reflection;
 using AIA.Models;
 using AIA.Plugins.Host;
 using AIA.Services;
+using AIA.Services.MobileSync;
+using AIA.Sync.Core;
 
 namespace AIA
 {
@@ -21,6 +23,7 @@ namespace AIA
         private HotkeyService? _hotkeyService;
         private AppSettings? _appSettings;
         private MiniTaskOverlayHost? _miniTaskOverlayHost;
+        private MobileSyncServer? _mobileSyncServer;
         private Mutex? _singleInstanceMutex;
         private bool _ownsSingleInstance;
 
@@ -38,6 +41,11 @@ namespace AIA
         /// Gets the compact task list overlay host
         /// </summary>
         public MiniTaskOverlayHost? MiniTaskOverlayHost => _miniTaskOverlayHost;
+
+        /// <summary>
+        /// Gets the embedded mobile sync server, if initialized.
+        /// </summary>
+        public MobileSyncServer? MobileSyncServer => _mobileSyncServer;
 
         /// <summary>
         /// Gets the current App instance
@@ -120,6 +128,75 @@ namespace AIA
 
             // Initialize plugin system
             await InitializePluginsAsync();
+
+            // Start the optional mobile sync API
+            await InitializeMobileSyncAsync();
+        }
+
+        /// <summary>
+        /// Starts, restarts, or stops the embedded mobile sync API from current settings.
+        /// </summary>
+        public async Task ApplyMobileSyncSettingsAsync()
+        {
+            await StopMobileSyncAsync();
+            await InitializeMobileSyncAsync();
+        }
+
+        private async Task InitializeMobileSyncAsync()
+        {
+            var settings = _appSettings?.MobileSync;
+            if (settings == null || !settings.Enabled)
+                return;
+
+            try
+            {
+                var backend = new DesktopSyncBackend(() => OverlayViewModel.Singleton);
+                var journalStore = new JsonSyncJournalStore(Path.Combine(AppPaths.UserDataFolder, "sync-journal.json"));
+                var coordinator = new SyncCoordinator(backend, journalStore);
+
+                _mobileSyncServer = new MobileSyncServer(settings, coordinator, AppPaths.SettingsFolder);
+                await _mobileSyncServer.StartAsync();
+
+                if (_mobileSyncServer.LastError != null)
+                {
+                    notifyIcon?.ShowBalloonTip(
+                        8000,
+                        "AIA mobile sync could not start",
+                        $"{_mobileSyncServer.LastError} Open Settings → Mobile to review the configuration.",
+                        ToolTipIcon.Warning);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Mobile sync listening on {_mobileSyncServer.LocalBaseUrl}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to initialize mobile sync: {ex}");
+                notifyIcon?.ShowBalloonTip(
+                    8000,
+                    "AIA mobile sync could not start",
+                    ex.Message,
+                    ToolTipIcon.Warning);
+            }
+        }
+
+        private async Task StopMobileSyncAsync()
+        {
+            var server = _mobileSyncServer;
+            _mobileSyncServer = null;
+
+            if (server == null)
+                return;
+
+            try
+            {
+                await server.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to stop mobile sync: {ex.Message}");
+            }
         }
 
         private async Task CheckForUpdatesInBackgroundAsync()
@@ -332,6 +409,20 @@ namespace AIA
 
             try
             {
+                if (_mobileSyncServer != null)
+                {
+                    try
+                    {
+                        Task.Run(() => _mobileSyncServer.DisposeAsync().AsTask()).Wait(TimeSpan.FromSeconds(3));
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Mobile sync shutdown failed: {ex.Message}");
+                    }
+
+                    _mobileSyncServer = null;
+                }
+
                 _miniTaskOverlayHost?.Dispose();
                 _hotkeyService?.Dispose();
 

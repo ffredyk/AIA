@@ -1039,4 +1039,52 @@
   <data name="MiniTaskOverlay_ActiveTaskSingular" xml:space="preserve"><value>{0} aktivní úkol</value></data>
   <data name="MiniTaskOverlay_ActiveTaskCount" xml:space="preserve"><value>{0} aktivních úkolů</value></data>
   <data name="MiniTaskOverlay_MoreTasks" xml:space="preserve"><value>+{0} dalších</value></data>
+  <data name="Tab_Calendar" xml:space="preserve"><value>Kalendář</value></data>
+  <data name="Calendar_NewEvent" xml:space="preserve"><value>Nová událost</value></data>
+  <data name="Calendar_EditEvent" xml:space="preserve"><value>Upravit událost</value></data>
+  <data name="Calendar_DeleteEvent" xml:space="preserve"><value>Smazat událost</value></data>
+  <data name="Calendar_EventTitle" xml:space="preserve"><value>Událost</value></data>
+  <data name="Calendar_EventDetails" xml:space="preserve"><value>Podrobnosti události</value></data>
+  <data name="Calendar_Title" xml:space="preserve"><value>Název</value></data>
+  <data name="Calendar_TitlePlaceholder" xml:space="preserve"><value>Zadejte název</value></data>
+  <data name="Calendar_Description" xml:space="preserve"><value>Popis</value></data>
+  <data name="Calendar_Location" xml:space="preserve"><value>Místo</value></data>
+  <data name="Calendar_LocationPlaceholder" xml:space="preserve"><value>Zadejte místo</value></data>
+  <data name="Calendar_AllDay" xml:space="preserve"><value>Celý den</value></data>
+  <data name="Calendar_Start" xml:space="preserve"><value>Začátek</value></data>
+  <data name="Calendar_StartTime" xml:space="preserve"><value>Čas začátku</value></data>
+  <data name="Calendar_End" xml:space="preserve"><value>Konec</value></data>
+  <data name="Calendar_EndTime" xml:space="preserve"><value>Čas konce</value></data>
+  <data name="Calendar_ReminderMinutes" xml:space="preserve"><value>Připomínka (minuty před)</value></data>
+  <data name="RecurrenceType_None" xml:space="preserve"><value>Žádné</value></data>
+  <data name="Tasks_RepeatEvery" xml:space="preserve"><value>Opakovat každých</value></data>
+  <data name="Settings_Mobile" xml:space="preserve"><value>Mobil</value></data>
+  <data name="Settings_MobileSync" xml:space="preserve"><value>Mobilní synchronizace</value></data>
+  <data name="Settings_MobileSyncDescription" xml:space="preserve"><value>Připojte aplikaci AIA pro Android přes LAN nebo veřejný HTTPS tunel.</value></data>
+  <data name="Settings_MobileEnable" xml:space="preserve"><value>Povolit mobilní synchronizaci</value></data>
+  <data name="Settings_MobileEnableDesc" xml:space="preserve"><value>Spustí vestavěné API po uložení nastavení.</value></data>
+  <data name="Settings_MobileStopped" xml:space="preserve"><value>Zastaveno</value></data>
+  <data name="Settings_MobileRunning" xml:space="preserve"><value>Běží</value></data>
+  <data name="Settings_MobileRefresh" xml:space="preserve"><value>Obnovit</value></data>
+  <data name="Settings_MobileBindAddress" xml:space="preserve"><value>Adresa bindování</value></data>
+  <data name="Settings_MobilePort" xml:space="preserve"><value>Port</value></data>
+  <data name="Settings_MobileAllowLan" xml:space="preserve"><value>Povolit přístup v LAN</value></data>
+  <data name="Settings_MobileAllowLanDesc" xml:space="preserve"><value>Když je vypnuto, server poslouchá jen na loopbacku pro tunel.</value></data>
+  <data name="Settings_MobilePublicUrl" xml:space="preserve"><value>Veřejná základní URL</value></data>
+  <data name="Settings_MobilePublicUrlDesc" xml:space="preserve"><value>HTTPS URL v párovacím QR kódu, například URL Cloudflare tunelu.</value></data>
+  <data name="Settings_MobileUseHttps" xml:space="preserve"><value>Použít HTTPS</value></data>
+  <data name="Settings_MobileHttpsDesc" xml:space="preserve"><value>Zapněte jen s PFX certifikátem. Veřejné nasazení má TLS ukončit na tunelu nebo reverse proxy.</value></data>
+  <data name="Settings_MobileCertificatePath" xml:space="preserve"><value>Cesta k certifikátu</value></data>
+  <data name="Settings_MobileCertificatePassword" xml:space="preserve"><value>Heslo certifikátu</value></data>
+  <data name="Settings_MobileMirrorDueReminders" xml:space="preserve"><value>Zrcadlit připomínky do kalendáře telefonu</value></data>
+  <data name="Settings_MobilePairing" xml:space="preserve"><value>Párování</value></data>
+  <data name="Settings_MobilePairingHint" xml:space="preserve"><value>Naskenujte QR kód v aplikaci pro Android nebo zadejte kód ručně. Kód vyprší za 5 minut.</value></data>
+  <data name="Settings_MobileGenerateCode" xml:space="preserve"><value>Vygenerovat kód</value></data>
+  <data name="Settings_MobileDevices" xml:space="preserve"><value>Připojená zařízení</value></data>
+  <data name="Settings_MobileRevoke" xml:space="preserve"><value>Odvolat</value></data>
+  <data name="Settings_MobileSecurity" xml:space="preserve"><value>Nikdy nevystavujte nešifrované HTTP do internetu. Použijte HTTPS na tunelu nebo reverse proxy.</value></data>
+  <data name="Settings_MobileNoPublicUrl" xml:space="preserve"><value>Veřejná URL není nastavena</value></data>
+  <data name="Settings_MobileStartFirst" xml:space="preserve"><value>Nejprve spusťte mobilní synchronizaci.</value></data>
+  <data name="Settings_MobileCodeExpires" xml:space="preserve"><value>Vyprší v {0}</value></data>
+  <data name="Settings_MobileRevokeConfirm" xml:space="preserve"><value>Odvolat toto zařízení?</value></data>
 </root>

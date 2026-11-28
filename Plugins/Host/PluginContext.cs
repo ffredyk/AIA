@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AIA.Plugins.SDK;
+using SdkHttpClientFactory = AIA.Plugins.SDK.IHttpClientFactory;
 
 namespace AIA.Plugins.Host
 {
@@ -22,7 +23,7 @@ namespace AIA.Plugins.Host
         public IChatService Chats { get; }
         public IPluginUIService UI { get; }
         public IPluginServiceRegistry Services => _serviceRegistry;
-        public IHttpClientFactory HttpClientFactory { get; }
+        public SdkHttpClientFactory HttpClientFactory { get; }
         public IPluginLogger Logger { get; }
         public IPluginSettingsStorage Settings => _settingsStorage;
         public PluginPermissions GrantedPermissions => _pluginInfo.GrantedPermissions;
@@ -62,7 +63,7 @@ namespace AIA.Plugins.Host
     /// <summary>
     /// HTTP client factory with permission guard
     /// </summary>
-    internal class GuardedHttpClientFactory : IHttpClientFactory
+    internal class GuardedHttpClientFactory : SdkHttpClientFactory
     {
         private readonly PluginContext _context;
         private static readonly HttpClient _sharedClient = new();
